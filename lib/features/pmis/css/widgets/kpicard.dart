@@ -61,8 +61,8 @@ class KpiCard extends StatelessWidget {
                   bottomRight: Radius.circular(8),
                 ),
                 gradient: LinearGradient(
-                         begin: Alignment(0.0, 0.0),
-                            end: Alignment(0.307, 0.907),
+                         begin: const Alignment(0.0, 0.0),
+                            end: const Alignment(0.307, 0.907),
                             colors: [
                     
                               Tcolors.grey.withOpacity(0.1),

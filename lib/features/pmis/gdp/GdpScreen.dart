@@ -19,7 +19,7 @@ class GdpScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _QuickActionsSection(),
+            const _QuickActionsSection(),
             const SizedBox(height: 16),
             _ActivityListSection(),
           ],
@@ -86,7 +86,7 @@ class GdpScreen extends StatelessWidget {
 }
 
 class _QuickActionsSection extends StatelessWidget {
-  const _QuickActionsSection({Key? key}) : super(key: key);
+  const _QuickActionsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -146,8 +146,8 @@ class _ActionButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

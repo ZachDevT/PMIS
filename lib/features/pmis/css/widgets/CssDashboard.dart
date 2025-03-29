@@ -1,4 +1,3 @@
-// Reusable Components Section
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:pmis/utils/constants/colors.dart';
@@ -19,22 +18,32 @@ class CssDashboardSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            child:MasonryGridView.count(
-            crossAxisCount: 2,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            itemCount: data.kpi.length,
-            shrinkWrap: true,
-            physics: const ScrollPhysics(),
-            itemBuilder: (context, index) {
-              final kpi = data.kpi[index];
-              return KpiCard(
-                icon: kpi.icone,
-                label: kpi.feature,
-                number: kpi.number,
-              );
-            },
-          ),
+            // color: Colors.amber,
+                decoration: BoxDecoration(
+              color: dark ? Tcolors.darkerGrey : Tcolors.grey.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color:
+                    dark ? Tcolors.darkerGrey : Tcolors.grey.withOpacity(0.8),
+              ),
+            ),
+            padding: const EdgeInsets.all(15),
+            child: MasonryGridView.count(
+              crossAxisCount: 2,
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              itemCount: data.kpi.length,
+              shrinkWrap: true,
+              physics: const ScrollPhysics(),
+              itemBuilder: (context, index) {
+                final kpi = data.kpi[index];
+                return KpiCard(
+                  icon: kpi.icone,
+                  label: kpi.feature,
+                  number: kpi.number,
+                );
+              },
+            ),
           ),
           const SizedBox(
             height: 15,
@@ -53,17 +62,17 @@ class CssDashboardSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Activities Overview",
+                  "Yearly Activities Overview",
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 15),
                 SizedBox(
-                  height: 170,
+                  height: 150,
                   child: BarChart(
                     BarChartData(
                       alignment: BarChartAlignment.spaceAround,
-                      maxY: 10, // Adjust based on your data range
-                      minY: 0,
+                      // maxY: 10, // Adjust based on your data range
+                      // minY: 0,
                       barTouchData: BarTouchData(enabled: true),
                       titlesData: FlTitlesData(
                         show: true,
@@ -107,15 +116,20 @@ class CssDashboardSection extends StatelessWidget {
                               const style = TextStyle(
                                 color: Colors.black54,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 10,
+                                fontSize: 15,
                               );
                               return SideTitleWidget(
                                 meta: meta,
-                                child: Text(value.toString(), style: style),
+                                child: Text(value.toInt().toString(),
+                                    style: style),
                               );
                             },
                           ),
                         ),
+                        rightTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false)),
+                        topTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false)),
                       ),
                       gridData: const FlGridData(show: false),
                       borderData: FlBorderData(show: false),
