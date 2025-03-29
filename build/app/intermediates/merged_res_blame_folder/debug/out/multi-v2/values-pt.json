@@ -4,7 +4,7 @@
             "outputFile": "ug.co.future.pmis.app-mergeDebugResources-28:/values-pt/values-pt.xml",
             "map": [
                 {
-                    "source": "/Users/Zachsoft/.gradle/caches/transforms-3/daa016f69f13885c7ebe1fbd9b243ba2/transformed/core-1.13.1/res/values-pt/values-pt.xml",
+                    "source": "C:\\Users\\Josh\\.gradle\\caches\\transforms-3\\68f9413cc64bc9e0b6e2f137f3b1f9ca\\transformed\\core-1.13.1\\res\\values-pt\\values-pt.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -21,7 +21,7 @@
                     }
                 },
                 {
-                    "source": "/Users/Zachsoft/.gradle/caches/transforms-3/936d15d53772c5809b72a837bb64a074/transformed/browser-1.8.0/res/values-pt/values-pt.xml",
+                    "source": "C:\\Users\\Josh\\.gradle\\caches\\transforms-3\\f30d013d7a46ec3c9a3fb9d343422c30\\transformed\\browser-1.8.0\\res\\values-pt\\values-pt.xml",
                     "from": {
                         "startLines": "2,3,4,5",
                         "startColumns": "4,4,4,4",

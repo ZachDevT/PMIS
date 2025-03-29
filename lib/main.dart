@@ -24,6 +24,5 @@ Future<void> main() async {
   FlutterNativeSplash.remove();
 
   // Run the app
-
-  runApp(ProviderScope(child: const MyApp()));
+  runApp(const ProviderScope(child: MyApp()));
 }

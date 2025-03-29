@@ -11,6 +11,8 @@ import 'package:pmis/utils/constants/colors.dart';
 class CssScreen extends StatelessWidget {
   final CssController controller = Get.put(CssController());
 
+  CssScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,7 +78,7 @@ class CssScreen extends StatelessWidget {
           top: 24,
         ),
         decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius:
                 const BorderRadius.vertical(top: Radius.circular(24))),
         child: CssForm(),
@@ -88,7 +90,7 @@ class CssScreen extends StatelessWidget {
 class _QuickActionsSection extends StatelessWidget {
   final BuildContext context;
 
-  _QuickActionsSection(this.context);
+  const _QuickActionsSection(this.context);
 
   @override
   Widget build(BuildContext context) {
@@ -192,9 +194,9 @@ class _SearchBarWidget extends StatelessWidget {
       child: TextField(
         decoration: InputDecoration(
           hintText: "Search activities...",
-          prefixIcon: Icon(Iconsax.search_normal, size: 20),
+          prefixIcon: const Icon(Iconsax.search_normal, size: 20),
           suffixIcon: IconButton(
-            icon: Icon(Iconsax.filter, size: 20),
+            icon: const Icon(Iconsax.filter, size: 20),
             onPressed: () {},
           ),
           filled: true,
@@ -236,7 +238,7 @@ class _UserProfileWidget extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Theme.of(context).colorScheme.surface,
               ),
-              child: Icon(HugeIcons.strokeRoundedUser, size: 30),
+              child: const Icon(HugeIcons.strokeRoundedUser, size: 30),
             ),
             Positioned(
               right: 0,

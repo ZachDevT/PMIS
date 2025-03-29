@@ -4,14 +4,14 @@
             "outputFile": "ug.co.future.pmis.app-mergeDebugResources-28:/values-night-v8/values-night-v8.xml",
             "map": [
                 {
-                    "source": "/Users/Zachsoft/PMIS/android/app/src/main/res/values-night/styles.xml",
+                    "source": "C:\\Users\\Josh\\Desktop\\Flutter\\PMIS\\android\\app\\src\\main\\res\\values-night\\styles.xml",
                     "from": {
                         "startLines": "3,18",
                         "startColumns": "4,4",
-                        "startOffsets": "172,1088",
+                        "startOffsets": "175,1106",
                         "endLines": "11,20",
                         "endColumns": "12,12",
-                        "endOffsets": "746,1252"
+                        "endOffsets": "757,1272"
                     },
                     "to": {
                         "startLines": "2,10",
