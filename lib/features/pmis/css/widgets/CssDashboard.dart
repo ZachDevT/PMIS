@@ -32,7 +32,7 @@ class CssDashboardSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                  Text(
-                  'Monthly overview',
+                  'Monthly Overview',
                   style: Theme.of(context).textTheme.titleMedium,
                   
                 ),
@@ -75,7 +75,7 @@ class CssDashboardSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Yearly Activities Overview",
+                  "Yearly Overview",
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 15),
