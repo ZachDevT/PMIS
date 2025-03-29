@@ -19,7 +19,7 @@ class CssDashboardSection extends StatelessWidget {
         children: [
           Container(
             // color: Colors.amber,
-                decoration: BoxDecoration(
+            decoration: BoxDecoration(
               color: dark ? Tcolors.darkerGrey : Tcolors.grey.withOpacity(0.2),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
@@ -27,22 +27,33 @@ class CssDashboardSection extends StatelessWidget {
                     dark ? Tcolors.darkerGrey : Tcolors.grey.withOpacity(0.8),
               ),
             ),
-            padding: const EdgeInsets.all(15),
-            child: MasonryGridView.count(
-              crossAxisCount: 2,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              itemCount: data.kpi.length,
-              shrinkWrap: true,
-              physics: const ScrollPhysics(),
-              itemBuilder: (context, index) {
-                final kpi = data.kpi[index];
-                return KpiCard(
-                  icon: kpi.icone,
-                  label: kpi.feature,
-                  number: kpi.number,
-                );
-              },
+            padding: const EdgeInsets.only(left:15,right:15,bottom: 15,top: 5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                 Text(
+                  'Monthly overview',
+                  style: Theme.of(context).textTheme.titleMedium,
+                  
+                ),
+                SizedBox(height: 5),
+                MasonryGridView.count(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  itemCount: data.kpi.length,
+                  shrinkWrap: true,
+                  physics: const ScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    final kpi = data.kpi[index];
+                    return KpiCard(
+                      icon: kpi.icone,
+                      label: kpi.feature,
+                      number: kpi.number,
+                    );
+                  },
+                ),
+              ],
             ),
           ),
           const SizedBox(
@@ -57,7 +68,9 @@ class CssDashboardSection extends StatelessWidget {
                     dark ? Tcolors.darkerGrey : Tcolors.grey.withOpacity(0.8),
               ),
             ),
-            padding: const EdgeInsets.all(20),
+            // padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.only(left:15,right:15,bottom: 15,top: 5),
+
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
