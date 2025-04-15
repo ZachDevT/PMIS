@@ -236,7 +236,7 @@ class _UserProfileWidget extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Theme.of(context).colorScheme.surface,
               ),
-              child: Icon(HugeIcons.strokeRoundedUser, size: 30),
+              child:const Icon(HugeIcons.strokeRoundedUser, size: 30),
             ),
             Positioned(
               right: 0,
