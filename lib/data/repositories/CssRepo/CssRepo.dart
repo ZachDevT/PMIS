@@ -14,8 +14,8 @@ class CssRepository {
       return [
         CssActivity(
           id: '1',
-          inspectionDate: DateTime.now().subtract(Duration(days: 1)),
-          inspectionTime: DateTime.now().subtract(Duration(hours: 1)),
+          inspectionDate: DateTime.now().subtract(const Duration(days: 1)),
+          inspectionTime: DateTime.now().subtract(const Duration(hours: 1)),
           inspectorName: 'Segawa Innocent',
           gpsLocation: 'Lat: 0.0, Lon: 0.0',
           region: 'Nakawa',

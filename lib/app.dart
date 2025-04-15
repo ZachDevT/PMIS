@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       initialBinding: GeneralBindings(),
       // getPages: AppRoutes.pages,
-      home: LoginSliderScreen(),
+      home: const LoginSliderScreen(),
     );
   }
 }

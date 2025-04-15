@@ -13,8 +13,8 @@ class GppRepository {
       return [
         GppActivity(
           id: '1',
-          inspectionDate: DateTime.now().subtract(Duration(days: 1)),
-          inspectionTime: DateTime.now().subtract(Duration(hours: 1)),
+          inspectionDate: DateTime.now().subtract(const Duration(days: 1)),
+          inspectionTime: DateTime.now().subtract(const Duration(hours: 1)),
           inspectorName: 'Segawa Innocent',
           gpsLocation: 'Lat: 0.0, Lon: 0.0',
           region: 'Nakawa',
@@ -34,8 +34,8 @@ class GppRepository {
         ),
         GppActivity(
           id: '2',
-          inspectionDate: DateTime.now().subtract(Duration(days: 1)),
-          inspectionTime: DateTime.now().subtract(Duration(hours: 1)),
+          inspectionDate: DateTime.now().subtract(const Duration(days: 1)),
+          inspectionTime: DateTime.now().subtract(const Duration(hours: 1)),
           inspectorName: 'Segawa Innocent',
           gpsLocation: 'Lat: 0.0, Lon: 0.0',
           region: 'Kampala',
@@ -55,8 +55,8 @@ class GppRepository {
         ),
         GppActivity(
           id: '3',
-          inspectionDate: DateTime.now().subtract(Duration(days: 1)),
-          inspectionTime: DateTime.now().subtract(Duration(hours: 1)),
+          inspectionDate: DateTime.now().subtract(const Duration(days: 1)),
+          inspectionTime: DateTime.now().subtract(const Duration(hours: 1)),
           inspectorName: 'Segawa Innocent',
           gpsLocation: 'Lat: 0.0, Lon: 0.0',
           region: 'Gulu',
@@ -76,8 +76,8 @@ class GppRepository {
         ),
         GppActivity(
           id: '4',
-          inspectionDate: DateTime.now().subtract(Duration(days: 1)),
-          inspectionTime: DateTime.now().subtract(Duration(hours: 1)),
+          inspectionDate: DateTime.now().subtract(const Duration(days: 1)),
+          inspectionTime: DateTime.now().subtract(const Duration(hours: 1)),
           inspectorName: 'Bazeketta Datsun',
           gpsLocation: 'Lat: 0.0, Lon: 0.0',
           region: 'Gulu',
@@ -97,8 +97,8 @@ class GppRepository {
         ),
         GppActivity(
           id: '5',
-          inspectionDate: DateTime.now().subtract(Duration(days: 1)),
-          inspectionTime: DateTime.now().subtract(Duration(hours: 1)),
+          inspectionDate: DateTime.now().subtract(const Duration(days: 1)),
+          inspectionTime: DateTime.now().subtract(const Duration(hours: 1)),
           inspectorName: 'Eric Kasozi',
           gpsLocation: 'Lat: 0.0, Lon: 0.0',
           region: 'Gulu',

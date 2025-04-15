@@ -29,15 +29,15 @@ class NavigationMenu extends StatelessWidget {
           onDestinationSelected: (index) =>
               controller.selectedIndex.value = index,
           destinations: const [
-            const NavigationDestination(
+            NavigationDestination(
                 icon: Icon(HugeIcons.strokeRoundedMedicineBottle02),
                 label: "CSS"),
-            const NavigationDestination(
+            NavigationDestination(
                 icon: Icon(HugeIcons.strokeRoundedMedicine02), label: "GPP"),
-            const NavigationDestination(
+            NavigationDestination(
                 icon: Icon(HugeIcons.strokeRoundedDeliveryTracking01),
                 label: "GDP"),
-            const NavigationDestination(
+            NavigationDestination(
                 icon: Icon(Iconsax.activity), label: "PMSA"),
           ],
         ),
@@ -51,17 +51,13 @@ class NavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
   final Rx<int> unreadMessagesCount = 0.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-  }
 
   List<Widget> get screens {
     List<Widget> baseScreens = [
    CssScreen(),
       GppScreen(),
-      const GdpScreen(),
-      const PmsaScreen(),
+       GdpScreen(),
+       PmsaScreen(),
     ];
 
     return baseScreens;

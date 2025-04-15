@@ -11,7 +11,7 @@ import 'package:pmis/utils/constants/sizes.dart';
 
 
 class LoginSliderScreen extends ConsumerWidget {
-  const LoginSliderScreen({Key? key}) : super(key: key);
+  const LoginSliderScreen({super.key});
   static const String routeName = "LoginSliderScreenLogin";
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -58,7 +58,7 @@ class LoginSliderScreen extends ConsumerWidget {
                                   ],
                                 ),
                               ),
-                              padding: EdgeInsets.all(Tsizes.defaultSpace),
+                              padding: const EdgeInsets.all(Tsizes.defaultSpace),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -74,7 +74,7 @@ class LoginSliderScreen extends ConsumerWidget {
                                         ),
                                     textAlign: TextAlign.center,
                                   ),
-                                  SizedBox(height: Tsizes.sm),
+                                  const SizedBox(height: Tsizes.sm),
                                   Text(
                                     loginController.slides[index].subtitle,
                                     style: Theme.of(context)
@@ -109,7 +109,7 @@ class LoginSliderScreen extends ConsumerWidget {
                   ),
                   Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      child: const loginForm()),
+                      child: LoginForm()),
                 ]),
               ),
             ],

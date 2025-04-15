@@ -65,29 +65,37 @@ class CssController extends GetxController {
       List<String> emptyFields = [];
       if (selectedRegion.value.isEmpty) emptyFields.add("Region");
       if (selectedDistrict.value.isEmpty) emptyFields.add("District");
-      if (selectedFacilityStatus.value.isEmpty)
+      if (selectedFacilityStatus.value.isEmpty) {
         emptyFields.add("Facility Status");
+      }
       if (selectedFacilityStatus.value != "Closed") {
         if (selectedPersonFound.value.isEmpty) emptyFields.add("Person Found");
         if (nameController.text.isEmpty) emptyFields.add("Name");
         if (contactController.text.isEmpty) emptyFields.add("Contact");
-        if (qualificationsController.text.isEmpty)
+        if (qualificationsController.text.isEmpty) {
           emptyFields.add("Qualifications");
+        }
       }
       if (facilityNameController.text.isEmpty) emptyFields.add("Facility Name");
-      if (selectedCategoryOfFacility.value.isEmpty)
+      if (selectedCategoryOfFacility.value.isEmpty) {
         emptyFields.add("Category of Facility");
-      if (selectedLicensedStatus.value.isEmpty)
+      }
+      if (selectedLicensedStatus.value.isEmpty) {
         emptyFields.add("Licensed Status");
-      if (selectedCategoryOfDrugs.value.isEmpty)
+      }
+      if (selectedCategoryOfDrugs.value.isEmpty) {
         emptyFields.add("Category of Drugs");
+      }
       if (selectedClassOfDrugs.value.isEmpty) emptyFields.add("Class of Drugs");
-      if (selectedUnregisteredDrugs.value.isEmpty)
+      if (selectedUnregisteredDrugs.value.isEmpty) {
         emptyFields.add("Unregistered Drugs");
-      if (selectedConditionOfPremises.value.isEmpty)
+      }
+      if (selectedConditionOfPremises.value.isEmpty) {
         emptyFields.add("Condition of Premises");
-      if (selectedRecordKeeping.value.isEmpty)
+      }
+      if (selectedRecordKeeping.value.isEmpty) {
         emptyFields.add("Record Keeping");
+      }
       if (selectedActionTaken.value.isEmpty) emptyFields.add("Action Taken");
 
       if (emptyFields.isNotEmpty) {

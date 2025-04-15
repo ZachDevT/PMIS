@@ -7,7 +7,7 @@ import 'package:pmis/utils/constants/colors.dart';
 class GppActivityCard extends StatelessWidget {
   final GppActivity activity;
 
-  GppActivityCard({required this.activity});
+  GppActivityCard({super.key, required this.activity});
 
   final RxBool isExpanded = false.obs;
 
@@ -59,7 +59,7 @@ class GppActivityCard extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     activity.facilityName,
@@ -77,7 +77,7 @@ class GppActivityCard extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Wrap(
               spacing: 2,
               runSpacing: 2,
@@ -89,7 +89,7 @@ class GppActivityCard extends StatelessWidget {
               ],
             ),
             if (isExpanded.value) ...[
-              Divider(height: 20, thickness: 1),
+              const Divider(height: 20, thickness: 1),
               _DetailItem(
                   Iconsax.building_3, "Facility Type", activity.facilityType),
               _DetailItem(Iconsax.profile_2user, "Contact", activity.contact),
@@ -107,13 +107,13 @@ class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  _InfoChip(this.icon, this.label);
+  const _InfoChip(this.icon, this.label);
 
   @override
   Widget build(BuildContext context) {
     return Chip(
       avatar: Icon(icon, size: 14, color: Theme.of(context).primaryColor),
-      label: Text(label, style: TextStyle(fontSize: 11)),
+      label: Text(label, style: const TextStyle(fontSize: 11)),
       backgroundColor: Colors.grey.shade200,
     );
   }
@@ -133,15 +133,15 @@ class _DetailItem extends StatelessWidget {
       child: Row(
         children: [
           Icon(icon, size: 20, color: Theme.of(context).primaryColor),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                 Text(value,
                     style:
-                        TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+                        const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
               ],
             ),
           ),

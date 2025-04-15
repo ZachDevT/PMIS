@@ -272,6 +272,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "flutter_staggered_grid_view",
+      "rootUri": "file:///Users/Zachsoft/.pub-cache/hosted/pub.dev/flutter_staggered_grid_view-0.7.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_test",
       "rootUri": "file:///usr/local/flutter/packages/flutter_test",
       "packageUri": "lib/",
@@ -426,6 +432,12 @@
       "rootUri": "file:///Users/Zachsoft/.pub-cache/hosted/pub.dev/lottie-3.3.1",
       "packageUri": "lib/",
       "languageVersion": "3.6"
+    },
+    {
+      "name": "lucide_icons",
+      "rootUri": "file:///Users/Zachsoft/.pub-cache/hosted/pub.dev/lucide_icons-0.257.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "matcher",
@@ -794,7 +806,7 @@
       "languageVersion": "3.6"
     }
   ],
-  "generated": "2025-04-13T09:15:02.909745Z",
+  "generated": "2025-04-15T10:26:03.228884Z",
   "generator": "pub",
   "generatorVersion": "3.6.1",
   "flutterRoot": "file:///usr/local/flutter",

@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pmis/data/repositories/GppRepo/GppRepo.dart';
-import 'package:pmis/features/pmis/css/models/CssModel.dart';
 import 'package:pmis/features/pmis/gpp/models/GppModel.dart';
 import 'package:pmis/utils/helpers/networkmanager.dart';
 import 'package:pmis/utils/popups/loaders.dart';
@@ -78,20 +77,26 @@ class GppController extends GetxController {
       }
       List<String> emptyFields = [];
 
-      if (selectedFacilityStatus.value.isEmpty)
+      if (selectedFacilityStatus.value.isEmpty) {
         emptyFields.add("Facility Status");
-      if (selectedCategoryOfFacility.value.isEmpty)
+      }
+      if (selectedCategoryOfFacility.value.isEmpty) {
         emptyFields.add("Category of Facility");
+      }
       if (personFoundController.value.isEmpty) emptyFields.add("Person Found");
-      if (selectedLicensedStatus.value.isEmpty)
+      if (selectedLicensedStatus.value.isEmpty) {
         emptyFields.add("Licensed Status");
-      if (selectedCategoryOfDrugs.value.isEmpty)
+      }
+      if (selectedCategoryOfDrugs.value.isEmpty) {
         emptyFields.add("Category of Drugs");
+      }
       if (selectedFacilityType.value.isEmpty) emptyFields.add("Facility Type");
-      if (selectedCertificationStatus.value.isEmpty)
+      if (selectedCertificationStatus.value.isEmpty) {
         emptyFields.add("Certification Status");
-      if (recommendedForGpp.value.isEmpty)
+      }
+      if (recommendedForGpp.value.isEmpty) {
         emptyFields.add("Recommended for GPP");
+      }
 
       if (selectedFacilityStatus.value != "Closed" && emptyFields.isNotEmpty) {
         Loaders.errorSnackbar(

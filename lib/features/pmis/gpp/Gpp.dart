@@ -4,13 +4,14 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pmis/commons/widgets/cards/GppActivityCard.dart';
-import 'package:pmis/features/pmis/css/controllers/CssController.dart';
 import 'package:pmis/features/pmis/gpp/Widgets/GppForm.dart';
 import 'package:pmis/features/pmis/gpp/controllers/GppController.dart';
 import 'package:pmis/utils/constants/colors.dart';
 
 class GppScreen extends StatelessWidget {
   final GppController controller = Get.put(GppController());
+
+  GppScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +78,7 @@ class GppScreen extends StatelessWidget {
           top: 24,
         ),
         decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius:
                 const BorderRadius.vertical(top: Radius.circular(24))),
         child: GppForm(),
@@ -161,7 +162,7 @@ class _DashboardSection extends StatelessWidget {
 class _QuickActionsSection extends StatelessWidget {
   final BuildContext context;
 
-  _QuickActionsSection(this.context);
+  const _QuickActionsSection(this.context);
 
   @override
   Widget build(BuildContext context) {
@@ -265,9 +266,9 @@ class _SearchBarWidget extends StatelessWidget {
       child: TextField(
         decoration: InputDecoration(
           hintText: "Search activities...",
-          prefixIcon: Icon(Iconsax.search_normal, size: 20),
+          prefixIcon: const Icon(Iconsax.search_normal, size: 20),
           suffixIcon: IconButton(
-            icon: Icon(Iconsax.filter, size: 20),
+            icon: const Icon(Iconsax.filter, size: 20),
             onPressed: () {},
           ),
           filled: true,
@@ -309,7 +310,7 @@ class _UserProfileWidget extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Theme.of(context).colorScheme.surface,
               ),
-              child: Icon(HugeIcons.strokeRoundedUser, size: 30),
+              child: const Icon(HugeIcons.strokeRoundedUser, size: 30),
             ),
             Positioned(
               right: 0,

@@ -9,6 +9,8 @@ import 'package:pmis/utils/constants/colors.dart';
 class GppForm extends StatelessWidget {
   final GppController controller = Get.put(GppController());
 
+  GppForm({super.key});
+
   // Reusable drop down component with icon and label.
   Widget buildDropdown({
     required String label,
@@ -28,7 +30,7 @@ class GppForm extends StatelessWidget {
         ),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String>(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
             value: selectedItem.value.isEmpty ? null : selectedItem.value,
             hint: Text(
               "Select $label",
@@ -96,7 +98,7 @@ class GppForm extends StatelessWidget {
               ),
             ],
           ),
-          Divider(),
+          const Divider(),
           Form(
             key: controller.formKey,
             child: Obx(
