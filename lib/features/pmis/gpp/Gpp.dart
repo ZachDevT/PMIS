@@ -6,6 +6,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:pmis/commons/widgets/cards/GppActivityCard.dart';
 import 'package:pmis/features/pmis/gpp/Widgets/GppForm.dart';
 import 'package:pmis/features/pmis/gpp/controllers/GppController.dart';
+import 'package:pmis/features/pmis/gpp/models/GppModel.dart';
 import 'package:pmis/utils/constants/colors.dart';
 
 class GppScreen extends StatelessWidget {
@@ -92,6 +93,8 @@ class _DashboardSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final GppController gppController = Get.find<GppController>();
+
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -107,55 +110,98 @@ class _DashboardSection extends StatelessWidget {
           Text("Activities Overview",
               style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 15),
-          SizedBox(
-            height: 170,
-            child: LineChart(
-              LineChartData(
-                gridData: const FlGridData(show: false),
-                titlesData: const FlTitlesData(
-                    // bottomTitles: AxisTitles(
-                    //   sideTitles: SideTitles(
-                    //     showTitles: true,
-                    //     getTitlesWidget: (value, meta) => Text(
-                    //       ['Q1', 'Q2', 'Q3', 'Q4'][value.toInt()],
-                    //       style: Theme.of(context).textTheme.bodySmall,
-                    //     ),
-                    //   ),
-                    // ),
-                    // leftTitles: const AxisTitles(
-                    //   sideTitles: SideTitles(showTitles: false),
-                    // ),
+          Obx(() {
+            final activities = gppController.activities;
+            final chartData = _generateChartData(activities);
+
+            return SizedBox(
+              height: 170,
+              child: LineChart(
+                LineChartData(
+                  gridData: const FlGridData(show: false),
+                  titlesData: FlTitlesData(
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) => Text(
+                          [
+                            'Jan',
+                            'Feb',
+                            'Mar',
+                            'Apr',
+                            'May',
+                            'Jun'
+                          ][value.toInt()],
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
                     ),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: const [
-                      FlSpot(0, 2),
-                      FlSpot(1, 4),
-                      FlSpot(2, 3),
-                      FlSpot(3, 6)
-                    ],
-                    isCurved: true,
-                    gradient: const LinearGradient(
-                      colors: [Tcolors.primary, Tcolors.primaryDark],
-                    ),
-                    barWidth: 2,
-                    belowBarData: BarAreaData(
-                      show: true,
-                      gradient: LinearGradient(
-                        colors: [
-                          Tcolors.primary.withOpacity(0.3),
-                          Colors.transparent
-                        ],
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) => Text(
+                          value.toInt().toString(),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
                       ),
                     ),
                   ),
-                ],
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: chartData,
+                      isCurved: true,
+                      gradient: const LinearGradient(
+                        colors: [Tcolors.primary, Tcolors.primaryDark],
+                      ),
+                      barWidth: 2,
+                      belowBarData: BarAreaData(
+                        show: true,
+                        gradient: LinearGradient(
+                          colors: [
+                            Tcolors.primary.withOpacity(0.3),
+                            Colors.transparent
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
+  }
+
+  List<FlSpot> _generateChartData(List<GppActivity> activities) {
+    if (activities.isEmpty) {
+      return [
+        const FlSpot(0, 0),
+        const FlSpot(1, 0),
+        const FlSpot(2, 0),
+        const FlSpot(3, 0),
+        const FlSpot(4, 0),
+        const FlSpot(5, 0),
+      ];
+    }
+
+    // Group activities by month
+    Map<int, int> monthlyCount = {};
+    for (var activity in activities) {
+      final month = activity.inspectionDate.month;
+      monthlyCount[month] = (monthlyCount[month] ?? 0) + 1;
+    }
+
+    // Generate chart data for last 6 months
+    List<FlSpot> spots = [];
+    for (int i = 0; i < 6; i++) {
+      final month = DateTime.now().month - 5 + i;
+      final count = monthlyCount[month] ?? 0;
+      spots.add(FlSpot(i.toDouble(), count.toDouble()));
+    }
+
+    return spots;
   }
 }
 

@@ -1,27 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:pmis/features/pmis/pmsa/models/PmsaModel.dart';
+import 'package:pmis/features/pmis/pmsa/models/PmsModel.dart';
 import 'package:pmis/utils/constants/colors.dart';
 
 class PmsaActivityCard extends StatelessWidget {
-  final PmsaActivity activity;
+  final PmsActivity activity;
 
   PmsaActivityCard({super.key, required this.activity});
 
   final RxBool isExpanded = false.obs;
 
   // Determine a color based on the licensed status.
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'licensed':
+  Color _getStatusColor(int status) {
+    switch (status) {
+      case 1: // Licensed
         return Colors.green;
-      case 'un-licensed':
+      case 2: // Un-Licensed
         return Colors.red;
-      case 'not-applicable':
+      case 3: // Not-Applicable
         return Colors.grey;
       default:
         return Colors.orange;
+    }
+  }
+
+  String _getRegionName(String guid) {
+    switch (guid) {
+      case "deaf2c98-3dbb-489f-bdea-9e5fd49eec78":
+        return "Central Region";
+      case "57a2afce-98b8-48b2-984e-cc04e3d84264":
+        return "Eastern Region";
+      case "12345678-1234-1234-1234-123456789012":
+        return "Northern Region";
+      case "87654321-4321-4321-4321-210987654321":
+        return "Western Region";
+      default:
+        return "Central Region";
+    }
+  }
+
+  String _getFacilityStatusText(int status) {
+    switch (status) {
+      case 1: return 'Open';
+      case 0: return 'Closed';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getLicenseStatusText(int status) {
+    switch (status) {
+      case 1: return 'Licensed';
+      case 2: return 'Un-Licensed';
+      case 3: return 'Not-Applicable';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getCategoryStatusText(int status) {
+    switch (status) {
+      case 1: return 'Medical Device';
+      case 2: return 'Veterinary drugs';
+      case 3: return 'Human drugs';
+      case 4: return 'Public Healthcare products';
+      case 5: return 'Herbal drugs';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getCategoryOfPremisesText(int category) {
+    switch (category) {
+      case 1: return 'Retail Pharmacy';
+      case 2: return 'Drug Shop';
+      case 3: return 'Hospital';
+      case 4: return 'HCIV';
+      case 5: return 'HCIII';
+      case 6: return 'Clinic';
+      default: return 'Unknown';
     }
   }
 
@@ -50,7 +105,7 @@ class PmsaActivityCard extends StatelessWidget {
                   width: 12,
                   height: 12,
                   decoration: BoxDecoration(
-                    color: _getStatusColor(activity.licensedStatus),
+                    color: _getStatusColor(activity.licenseStatus),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -78,18 +133,18 @@ class PmsaActivityCard extends StatelessWidget {
               spacing: 2,
               runSpacing: 2,
               children: [
-                _InfoChip(Iconsax.location, "${activity.region}, ${activity.district}"),
-                _InfoChip(Iconsax.status, activity.facilityStatus),
-                _InfoChip(Iconsax.building, activity.pmsaActivityCarriesOut),
+                _InfoChip(Iconsax.location, "${_getRegionName(activity.intRegion)}, District ${activity.districtId}"),
+                _InfoChip(Iconsax.status, _getFacilityStatusText(activity.facilityStatus)),
+                _InfoChip(Iconsax.building, _getLicenseStatusText(activity.licenseStatus)),
               ],
             ),
             // Expanded details when the card is tapped.
             if (isExpanded.value) ...[
               const Divider(height: 20, thickness: 1),
-              _DetailItem(Iconsax.category, "Facility Category", activity.categoryOfFacility),
-              _DetailItem(Iconsax.profile_2user, "Contact", activity.name),
-              _DetailItem(Iconsax.document_text, "Samples Collected", "${activity.numberOfSamplesCollected}"),
-              _DetailItem(Iconsax.note, "Follow-up", activity.commentOnOverallFollowUp),
+              _DetailItem(Iconsax.category, "Facility Category", _getCategoryOfPremisesText(activity.categoryOfpremises)),
+              _DetailItem(Iconsax.profile_2user, "Person Name", activity.personName ?? 'Not provided'),
+              _DetailItem(Iconsax.call, "Contact", activity.contact ?? 'Not provided'),
+              _DetailItem(Iconsax.book, "Qualifications", activity.qualifications ?? 'Not provided'),
             ],
           ],
         ),

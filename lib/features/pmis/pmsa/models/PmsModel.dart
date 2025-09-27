@@ -1,4 +1,4 @@
-class CssActivity {
+class PmsActivity {
   final int id;
   final DateTime inspectionDate;
   final String? inspectorName;
@@ -14,19 +14,11 @@ class CssActivity {
   final String? contact;
   final String? qualifications;
   final int categoryOfpremises;
-  final String? other_CategoryPremise;
   final int licenseStatus;
   final String? licenseNo;
-  final int? unlicensed;
   final int categoryStatus;
-  final int premisesCondition;
-  final int? recordKeeping;
-  final int? classofDrugs;
-  final int? unRegisteredDrug;
-  final String? unRegDrugQty;
-  final int? action;
 
-  CssActivity({
+  PmsActivity({
     required this.id,
     required this.inspectionDate,
     this.inspectorName,
@@ -42,20 +34,12 @@ class CssActivity {
     this.contact,
     this.qualifications,
     required this.categoryOfpremises,
-    this.other_CategoryPremise,
     required this.licenseStatus,
     this.licenseNo,
-    this.unlicensed,
     required this.categoryStatus,
-    required this.premisesCondition,
-    this.recordKeeping,
-    this.classofDrugs,
-    this.unRegisteredDrug,
-    this.unRegDrugQty,
-    this.action,
   });
 
-  factory CssActivity.fromJson(Map<String, dynamic> json) => CssActivity(
+  factory PmsActivity.fromJson(Map<String, dynamic> json) => PmsActivity(
         id: json['id'],
         inspectionDate: DateTime.parse(json['inspectionDate']),
         inspectorName: json['inspectorName'],
@@ -71,17 +55,9 @@ class CssActivity {
         contact: json['contact'],
         qualifications: json['qualifications'],
         categoryOfpremises: json['categoryOfpremises'],
-        other_CategoryPremise: json['other_CategoryPremise'],
         licenseStatus: json['licenseStatus'],
         licenseNo: json['licenseNo'],
-        unlicensed: json['unlicensed'],
         categoryStatus: json['categoryStatus'],
-        premisesCondition: json['premisesCondition'],
-        recordKeeping: json['recordKeeping'],
-        classofDrugs: json['classofDrugs'],
-        unRegisteredDrug: json['unRegisteredDrug'],
-        unRegDrugQty: json['unRegDrugQty'],
-        action: json['action'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -100,16 +76,8 @@ class CssActivity {
         'contact': contact,
         'qualifications': qualifications,
         'categoryOfpremises': categoryOfpremises,
-        'other_CategoryPremise': other_CategoryPremise,
         'licenseStatus': licenseStatus,
         'licenseNo': licenseNo,
-        'unlicensed': unlicensed,
         'categoryStatus': categoryStatus,
-        'premisesCondition': premisesCondition,
-        'recordKeeping': recordKeeping,
-        'classofDrugs': classofDrugs,
-        'unRegisteredDrug': unRegisteredDrug,
-        'unRegDrugQty': unRegDrugQty,
-        'action': action,
       };
 }

@@ -1,14 +1,14 @@
 // controllers/CssController.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pmis/data/repositories/CssRepo/CssRepo.dart';
+import 'package:pmis/data/repositories/CssRepository/CssRepository.dart';
 import 'package:pmis/features/pmis/css/models/CssModel.dart';
 import 'package:pmis/utils/helpers/networkmanager.dart';
 import 'package:pmis/utils/popups/loaders.dart';
 
 class CssController extends GetxController {
   var activities = <CssActivity>[].obs;
-  final repository = CssRepository();
+  final repository = Get.find<CssRepository>();
 
   // Form Controllers
   final formKey = GlobalKey<FormState>();
@@ -52,10 +52,11 @@ class CssController extends GetxController {
 
   Future<void> loadActivities() async {
     try {
-      var data = await repository.fetchActivities();
-      activities.assignAll(data);
+      var data = await repository.getCssData();
+      var cssActivities = data.map((item) => CssActivity.fromJson(item)).toList();
+      activities.assignAll(cssActivities);
     } catch (e) {
-      print('Error loading activities: $e');
+      Loaders.errorSnackbar(title: "Error", message: "Failed to load CSS data: ${e.toString()}");
     }
   }
 
@@ -108,46 +109,55 @@ class CssController extends GetxController {
       }
 
       var newActivity = CssActivity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: 0, // Will be set by API
         inspectionDate: DateTime.parse(inspectionDateController.text),
-        inspectionTime: DateTime.now(),
         inspectorName: inspectorNameController.text,
-        gpsLocation: gpsLocationController.text,
-        region: selectedRegion.value,
-        district: selectedDistrict.value,
+        inspectorId: null,
+        latitude: 0.0,
+        longitude: 0.0,
+        intRegion: _getRegionGuid(selectedRegion.value),
+        districtId: _getDistrictId(selectedDistrict.value),
         facilityName: facilityNameController.text,
-        personFound: selectedPersonFound.value,
-        name: nameController.text,
-        contactQualifications: qualificationsController.text,
-        facilityStatus: selectedFacilityStatus.value,
+        facilityStatus: _getFacilityStatus(selectedFacilityStatus.value),
+        facilityPersonType: _getPersonType(selectedPersonFound.value),
+        personName: nameController.text,
         contact: contactController.text,
-        categoryOfFacility: selectedCategoryOfFacility.value,
-        licensedStatus: selectedLicensedStatus.value,
-        categoryOfDrugs: selectedCategoryOfDrugs.value,
-        classOfDrugs: selectedClassOfDrugs.value,
-        unregisteredDrugs: selectedUnregisteredDrugs.value,
-        conditionOfPremises: selectedConditionOfPremises.value,
-        recordKeeping: selectedRecordKeeping.value,
-        actionTaken: selectedActionTaken.value,
+        qualifications: qualificationsController.text,
+        categoryOfpremises: _getCategoryOfPremises(selectedCategoryOfFacility.value),
+        other_CategoryPremise: null,
+        licenseStatus: _getLicenseStatus(selectedLicensedStatus.value),
+        licenseNo: null,
+        unlicensed: _getUnlicensedStatus(selectedLicensedStatus.value),
+        categoryStatus: _getCategoryStatus(selectedCategoryOfDrugs.value),
+        premisesCondition: _getPremisesCondition(selectedConditionOfPremises.value),
+        recordKeeping: _getRecordKeeping(selectedRecordKeeping.value),
+        classofDrugs: _getClassOfDrugs(selectedClassOfDrugs.value),
+        unRegisteredDrug: _getUnregisteredDrugs(selectedUnregisteredDrugs.value),
+        unRegDrugQty: null,
+        action: _getActionTaken(selectedActionTaken.value),
       );
 
       bool online = await NetworkManager.instance.isconnected();
       if (online) {
-        // Mimic API call to create new activity.
+        // Convert CssActivity to Map for API
+        var activityData = newActivity.toJson();
+        print('Sending CSS data: $activityData'); // Debug log
+        await repository.postCssData(activityData);
         activities.add(newActivity);
-        await repository.addActivity(newActivity);
         Loaders.successSnackbar(
-            title: "Success", message: "Activity added successfully...");
+            title: "Success", message: "CSS activity added successfully...");
       } else {
-        await repository.saveActivityLocally(newActivity);
+        // For offline mode
         activities.add(newActivity);
         Loaders.successSnackbar(
             title: "Offline",
-            message: "Activity saved locally. Will sync when online.");
+            message: "CSS activity saved locally. Will sync when online.");
       }
       // Clear the form fields after submission.
       clearForm();
-      Navigator.pop(context);
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
     } catch (e) {
       Loaders.errorSnackbar(title: "Error", message: e.toString());
       // Handle error and maybe load from local storage if offline.
@@ -175,5 +185,133 @@ class CssController extends GetxController {
     selectedConditionOfPremises.value = '';
     selectedRecordKeeping.value = '';
     selectedActionTaken.value = '';
+  }
+
+  // Helper methods to map form values to API values
+  String _getRegionGuid(String region) {
+    switch (region) {
+      case "Central Region":
+      case "Kampala":
+        return "deaf2c98-3dbb-489f-bdea-9e5fd49eec78";
+      case "Eastern Region":
+        return "57a2afce-98b8-48b2-984e-cc04e3d84264";
+      case "Northern Region":
+        return "12345678-1234-1234-1234-123456789012";
+      case "Western Region":
+        return "87654321-4321-4321-4321-210987654321";
+      default:
+        return "deaf2c98-3dbb-489f-bdea-9e5fd49eec78";
+    }
+  }
+
+  int _getDistrictId(String district) {
+    switch (district) {
+      case "District A": return 1;
+      case "District B": return 2;
+      case "District C": return 3;
+      case "District D": return 4;
+      default: return 1;
+    }
+  }
+
+  int _getFacilityStatus(String status) {
+    switch (status) {
+      case "Open": return 1;
+      case "Closed": return 0;
+      default: return 1;
+    }
+  }
+
+  int _getPersonType(String personType) {
+    switch (personType) {
+      case "In-charge": return 1;
+      case "(Attendant/Operator)": return 2;
+      default: return 1;
+    }
+  }
+
+  int _getCategoryOfPremises(String category) {
+    switch (category) {
+      case "Retail Pharmacy": return 1;
+      case "Drug Shop": return 2;
+      case "Hospital": return 3;
+      case "HCIV": return 4;
+      case "HCIII": return 5;
+      case "Clinic": return 6;
+      default: return 1;
+    }
+  }
+
+  int _getLicenseStatus(String status) {
+    switch (status) {
+      case "Licensed": return 1;
+      case "Un-Licensed": return 2;
+      case "Not-Applicable": return 3;
+      default: return 1;
+    }
+  }
+
+  int? _getUnlicensedStatus(String status) {
+    switch (status) {
+      case "Licensed": return 0;
+      case "Un-Licensed": return 1;
+      case "Not-Applicable": return null;
+      default: return 0;
+    }
+  }
+
+  int _getCategoryStatus(String category) {
+    switch (category) {
+      case "Medical Device": return 1;
+      case "Veterinary drugs": return 2;
+      case "Human drugs": return 3;
+      case "Public Healthcare products": return 4;
+      case "Herbal drugs": return 5;
+      default: return 1;
+    }
+  }
+
+  int _getPremisesCondition(String condition) {
+    switch (condition) {
+      case "Good": return 1;
+      case "Fair": return 2;
+      case "Poor": return 3;
+      default: return 1;
+    }
+  }
+
+  int? _getRecordKeeping(String keeping) {
+    switch (keeping) {
+      case "Good": return 1;
+      case "Fair": return 2;
+      case "Poor": return 3;
+      default: return null;
+    }
+  }
+
+  int? _getClassOfDrugs(String drugs) {
+    switch (drugs) {
+      case "Class A": return 1;
+      case "Class B": return 2;
+      case "Class C": return 3;
+      default: return null;
+    }
+  }
+
+  int? _getUnregisteredDrugs(String drugs) {
+    switch (drugs) {
+      case "Yes": return 1;
+      case "No": return 0;
+      default: return null;
+    }
+  }
+
+  int? _getActionTaken(String action) {
+    switch (action) {
+      case "Warning": return 1;
+      case "Fine": return 2;
+      case "Closure": return 3;
+      default: return null;
+    }
   }
 }

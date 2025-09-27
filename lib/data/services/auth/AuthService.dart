@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
 
 class AuthService {
-  static const _baseUrl = 'https://pmis.nda.or.ug/api'; // Changed to HTTPS
+  static const _baseUrl = 'http://192.168.180.115/api';
   static const Duration _timeoutDuration = Duration(seconds: 30);
 
   /// Login with username and password
@@ -19,7 +19,7 @@ class AuthService {
         throw const ValidationException('Password cannot be empty');
       }
 
-      final uri = Uri.parse('$_baseUrl/Login/login').replace(
+      final uri = Uri.parse('$_baseUrl/login/login').replace(
         queryParameters: {
           'Username': username.trim(),
           'Password': password.trim(),
@@ -36,7 +36,8 @@ class AuthService {
 
       return _handleResponse(response);
     } on SocketException {
-      throw const NetworkException('No internet connection. Please check your network.');
+      throw const NetworkException(
+          'No internet connection. Please check your network.');
     } on HttpException {
       throw const NetworkException('Network error occurred. Please try again.');
     } on FormatException {
@@ -52,13 +53,14 @@ class AuthService {
     switch (response.statusCode) {
       case 200:
         try {
-          final Map<String, dynamic> data = jsonDecode(response.body) as Map<String, dynamic>;
-          
+          final Map<String, dynamic> data =
+              jsonDecode(response.body) as Map<String, dynamic>;
+
           // Validate response structure
           if (data.isEmpty) {
             throw const ServerException('Empty response from server');
           }
-          
+
           return data;
         } catch (e) {
           if (e is FormatException) {
@@ -66,31 +68,35 @@ class AuthService {
           }
           rethrow;
         }
-      
+
       case 400:
         final errorMessage = _extractErrorMessage(response.body);
         throw ValidationException(errorMessage);
-      
+
       case 401:
         throw const AuthException('Invalid username or password');
-      
+
       case 403:
-        throw const AuthException('Access denied. Please contact administrator');
-      
+        throw const AuthException(
+            'Access denied. Please contact administrator');
+
       case 404:
-        throw const NetworkException('Service not found. Please try again later');
-      
+        throw const NetworkException(
+            'Service not found. Please try again later');
+
       case 408:
         throw const TimeoutException('Request timeout. Please try again');
-      
+
       case 500:
-        throw const ServerException('Internal server error. Please try again later');
-      
+        throw const ServerException(
+            'Internal server error. Please try again later');
+
       case 502:
       case 503:
       case 504:
-        throw const ServerException('Service temporarily unavailable. Please try again later');
-      
+        throw const ServerException(
+            'Service temporarily unavailable. Please try again later');
+
       default:
         final errorMessage = _extractErrorMessage(response.body);
         throw NetworkException(errorMessage, response.statusCode);
@@ -100,7 +106,8 @@ class AuthService {
   /// Extract error message from response body
   String _extractErrorMessage(String responseBody) {
     try {
-      final Map<String, dynamic> decoded = jsonDecode(responseBody) as Map<String, dynamic>;
+      final Map<String, dynamic> decoded =
+          jsonDecode(responseBody) as Map<String, dynamic>;
       return decoded['message'] ?? decoded['error'] ?? 'An error occurred';
     } catch (e) {
       return 'An error occurred while processing the response';

@@ -13,18 +13,100 @@ class CssActivityCard extends StatelessWidget {
 
   final RxBool isExpanded = false.obs;
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'open':
+  Color _getStatusColor(int status) {
+    switch (status) {
+      case 1: // Open/Licensed
         return Colors.green;
-      case 'closed':
+      case 0: // Closed
         return Colors.red;
-      case 'licensed':
-        return Colors.green;
-      case 'unlicensed':
-        return Colors.red;
+      case 2: // Unlicensed
+        return Colors.orange;
       default:
         return Colors.grey;
+    }
+  }
+
+  String _getRegionName(String guid) {
+    switch (guid) {
+      case "deaf2c98-3dbb-489f-bdea-9e5fd49eec78":
+        return "Central Region";
+      case "57a2afce-98b8-48b2-984e-cc04e3d84264":
+        return "Eastern Region";
+      case "12345678-1234-1234-1234-123456789012":
+        return "Northern Region";
+      case "87654321-4321-4321-4321-210987654321":
+        return "Western Region";
+      default:
+        return "Central Region";
+    }
+  }
+
+  String _getFacilityStatusText(int status) {
+    switch (status) {
+      case 1: return 'Open';
+      case 0: return 'Closed';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getLicenseStatusText(int status) {
+    switch (status) {
+      case 1: return 'Licensed';
+      case 2: return 'Un-Licensed';
+      case 3: return 'Not-Applicable';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getCategoryStatusText(int status) {
+    switch (status) {
+      case 1: return 'Medical Device';
+      case 2: return 'Veterinary drugs';
+      case 3: return 'Human drugs';
+      case 4: return 'Public Healthcare products';
+      case 5: return 'Herbal drugs';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getCategoryOfPremisesText(int category) {
+    switch (category) {
+      case 1: return 'Retail Pharmacy';
+      case 2: return 'Drug Shop';
+      case 3: return 'Hospital';
+      case 4: return 'HCIV';
+      case 5: return 'HCIII';
+      case 6: return 'Clinic';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getPremisesConditionText(int condition) {
+    switch (condition) {
+      case 1: return 'Good';
+      case 2: return 'Fair';
+      case 3: return 'Poor';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getRecordKeepingText(int? keeping) {
+    if (keeping == null) return 'Not specified';
+    switch (keeping) {
+      case 1: return 'Good';
+      case 2: return 'Fair';
+      case 3: return 'Poor';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getActionText(int? action) {
+    if (action == null) return 'Not specified';
+    switch (action) {
+      case 1: return 'Warning';
+      case 2: return 'Fine';
+      case 3: return 'Closure';
+      default: return 'Unknown';
     }
   }
 
@@ -80,22 +162,22 @@ class CssActivityCard extends StatelessWidget {
               runSpacing: 2,
               children: [
                 _InfoChip(Iconsax.location,
-                    "${activity.region}, ${activity.district}"),
-                _InfoChip(Iconsax.status, activity.facilityStatus),
-                _InfoChip(Iconsax.document, activity.licensedStatus),
-                _InfoChip(HugeIcons.strokeRoundedMedicine02, activity.categoryOfDrugs),
+                    "${_getRegionName(activity.intRegion)}, District ${activity.districtId}"),
+                _InfoChip(Iconsax.status, _getFacilityStatusText(activity.facilityStatus)),
+                _InfoChip(Iconsax.document, _getLicenseStatusText(activity.licenseStatus)),
+                _InfoChip(HugeIcons.strokeRoundedMedicine02, _getCategoryStatusText(activity.categoryStatus)),
               ],
             ),
             if (isExpanded.value) ...[
               const Divider(height: 20, thickness: 1),
               _DetailItem(Iconsax.building_3, "Facility Type",
-                  activity.categoryOfFacility),
-              _DetailItem(Iconsax.profile_2user, "Contact", activity.contact),
+                  _getCategoryOfPremisesText(activity.categoryOfpremises)),
+              _DetailItem(Iconsax.profile_2user, "Contact", activity.contact ?? 'Not provided'),
               _DetailItem(Iconsax.note, "Condition of Premises",
-                  activity.conditionOfPremises),
+                  _getPremisesConditionText(activity.premisesCondition)),
               _DetailItem(
-                  Iconsax.note, "Record Keeping", activity.recordKeeping),
-              _DetailItem(Iconsax.note, "Action Taken", activity.actionTaken),
+                  Iconsax.note, "Record Keeping", _getRecordKeepingText(activity.recordKeeping)),
+              _DetailItem(Iconsax.note, "Action Taken", _getActionText(activity.action)),
             ],
           ],
         ),

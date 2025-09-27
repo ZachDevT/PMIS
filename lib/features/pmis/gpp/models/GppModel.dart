@@ -1,87 +1,99 @@
 class GppActivity {
-  final String id;
+  final int id;
   final DateTime inspectionDate;
-  final DateTime inspectionTime;
   final String inspectorName;
-  final String gpsLocation; // system-determined
-  final String region;
-  final String district;
+  final String? gps;
+  final String intRegion; // This is actually a GUID string from the API
+  final int districtId;
   final String facilityName;
-  final String personFound;  // In-charge/Attendant/Operator
-  final String name ;
-  final String contactQualifications;
-  final String facilityStatus; // Open/Closed
+  final int facilityStatus;
+  final int facilityPersonType;
+  final String personName;
   final String contact;
-  final String categoryOfFacility; // e.g. Retail Pharmacy, Hospital, etc.
-  final String licensedStatus; // Licensed/Unlicensed/Not-Applicable
-  final String categoryOfDrugs; // Medical Device, Human drugs, etc.
-  final String facilityType; // Public Facility / Private Facility
-  final String certificationStatus; // Certified or not
-  final String recommendedForGpp;
+  final String qualifications;
+  final int categoryOfpremises;
+  final int licenseStatus;
+  final int categoryStatus;
+  final int facilityType;
+  final int certStatus;
+  final int recommendedforGPP;
+  final String? inspectorId;
+  final double latitude;
+  final double longitude;
+  final String? licenseNo;
 
-  GppActivity( {
+  GppActivity({
     required this.id,
     required this.inspectionDate,
-    required this.inspectionTime,
     required this.inspectorName,
-    required this.gpsLocation,
-    required this.region,
-    required this.district,
+    this.gps,
+    required this.intRegion,
+    required this.districtId,
     required this.facilityName,
-    required this.personFound,
-    required this.name,
-    required this.contactQualifications,
     required this.facilityStatus,
+    required this.facilityPersonType,
+    required this.personName,
     required this.contact,
-    required this.categoryOfFacility,
-    required this.licensedStatus,
-    required this.categoryOfDrugs,
+    required this.qualifications,
+    required this.categoryOfpremises,
+    required this.licenseStatus,
+    required this.categoryStatus,
     required this.facilityType,
-    required this.certificationStatus,
-    required this.recommendedForGpp,
+    required this.certStatus,
+    required this.recommendedforGPP,
+    this.inspectorId,
+    required this.latitude,
+    required this.longitude,
+    this.licenseNo,
   });
 
   factory GppActivity.fromJson(Map<String, dynamic> json) => GppActivity(
         id: json['id'],
         inspectionDate: DateTime.parse(json['inspectionDate']),
-        inspectionTime: DateTime.parse(json['inspectionTime']),
         inspectorName: json['inspectorName'],
-        gpsLocation: json['gpsLocation'],
-        region: json['region'],
-        district: json['district'],
+        gps: json['gps'],
+        intRegion: json['intRegion'],
+        districtId: json['districtId'],
         facilityName: json['facilityName'],
-        personFound: json['personFound'],
-        contactQualifications: json['contactQualifications'],
         facilityStatus: json['facilityStatus'],
+        facilityPersonType: json['facilityPersonType'],
+        personName: json['personName'],
         contact: json['contact'],
-        categoryOfFacility: json['categoryOfFacility'],
-        licensedStatus: json['licensedStatus'],
-        categoryOfDrugs: json['categoryOfDrugs'],
+        qualifications: json['qualifications'],
+        categoryOfpremises: json['categoryOfpremises'],
+        licenseStatus: json['licenseStatus'],
+        categoryStatus: json['categoryStatus'],
         facilityType: json['facilityType'],
-        certificationStatus: json['certificationStatus'],
-        name: json['name'],
-        recommendedForGpp: json['recommendedForGpp'],
+        certStatus: json['certStatus'],
+        recommendedforGPP: json['recommendedforGPP'],
+        inspectorId: json['inspectorId'],
+        latitude: (json['latitude'] ?? 0.0).toDouble(),
+        longitude: (json['longitude'] ?? 0.0).toDouble(),
+        licenseNo: json['licenseNo'],
       );
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'inspectionDate': inspectionDate.toIso8601String(),
-        'inspectionTime': inspectionTime.toIso8601String(),
         'inspectorName': inspectorName,
-        'gpsLocation': gpsLocation,
-        'region': region,
-        'district': district,
+        'gps': gps,
+        'intRegion': intRegion,
+        'districtId': districtId,
         'facilityName': facilityName,
-        'personFound': personFound,
-        'contactQualifications': contactQualifications,
         'facilityStatus': facilityStatus,
+        'facilityPersonType': facilityPersonType,
+        'personName': personName,
         'contact': contact,
-        'categoryOfFacility': categoryOfFacility,
-        'licensedStatus': licensedStatus,
-        'categoryOfDrugs': categoryOfDrugs,
+        'qualifications': qualifications,
+        'categoryOfpremises': categoryOfpremises,
+        'licenseStatus': licenseStatus,
+        'categoryStatus': categoryStatus,
         'facilityType': facilityType,
-        'name': name,
-        'certificationStatus': certificationStatus,
-        'recommendedForGpp': recommendedForGpp,
+        'certStatus': certStatus,
+        'recommendedforGPP': recommendedforGPP,
+        'inspectorId': inspectorId,
+        'latitude': latitude,
+        'longitude': longitude,
+        'licenseNo': licenseNo,
       };
 }
