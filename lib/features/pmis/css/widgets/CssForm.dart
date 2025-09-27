@@ -6,7 +6,7 @@ import 'package:pmis/features/pmis/css/controllers/CssController.dart';
 import 'package:pmis/utils/constants/colors.dart';
 
 class CssForm extends StatelessWidget {
-  final CssController controller = Get.put(CssController());
+  final CssController controller = Get.find<CssController>();
 
   CssForm({super.key});
 

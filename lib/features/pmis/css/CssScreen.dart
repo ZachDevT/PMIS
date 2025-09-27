@@ -9,7 +9,7 @@ import 'package:pmis/features/pmis/css/widgets/CssDashboard.dart';
 import 'package:pmis/utils/constants/colors.dart';
 
 class CssScreen extends StatelessWidget {
-  final CssController controller = Get.put(CssController());
+  final CssController controller = Get.find<CssController>();
 
   CssScreen({super.key});
 
@@ -125,7 +125,7 @@ class _QuickActionsSection extends StatelessWidget {
 class _ActivityListSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final CssController cssController = Get.put(CssController());
+    final CssController cssController = Get.find<CssController>();
     return Obx(() => ListView.builder(
           shrinkWrap: true,
           reverse: true,

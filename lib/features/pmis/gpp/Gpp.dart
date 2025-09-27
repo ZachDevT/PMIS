@@ -9,7 +9,7 @@ import 'package:pmis/features/pmis/gpp/controllers/GppController.dart';
 import 'package:pmis/utils/constants/colors.dart';
 
 class GppScreen extends StatelessWidget {
-  final GppController controller = Get.put(GppController());
+  final GppController controller = Get.find<GppController>();
 
   GppScreen({super.key});
 
@@ -197,7 +197,7 @@ class _QuickActionsSection extends StatelessWidget {
 class _ActivityListSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final GppController gppController = Get.put(GppController());
+    final GppController gppController = Get.find<GppController>();
     return Obx(() => ListView.builder(
           shrinkWrap: true,
           reverse: true,

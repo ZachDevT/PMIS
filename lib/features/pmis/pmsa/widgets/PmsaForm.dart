@@ -6,7 +6,7 @@ import 'package:pmis/features/pmis/pmsa/controllers/PmsaController.dart';
 import 'package:pmis/utils/constants/colors.dart';
 
 class PmsaForm extends StatelessWidget {
-  final PmsaController controller = Get.put(PmsaController());
+  final PmsaController controller = Get.find<PmsaController>();
 
   PmsaForm({super.key});
 

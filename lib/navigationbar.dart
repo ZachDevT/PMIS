@@ -14,7 +14,7 @@ class NavigationMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    NavigationController controller = Get.put(NavigationController());
+    NavigationController controller = Get.find<NavigationController>();
     final darkmode = THelperFunctions.isDarkMode(context);
     return Scaffold(
       backgroundColor: darkmode ? Tcolors.dark : null,

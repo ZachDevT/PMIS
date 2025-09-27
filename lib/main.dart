@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_storage/get_storage.dart';
 import 'app.dart';
 
@@ -24,5 +23,5 @@ Future<void> main() async {
   FlutterNativeSplash.remove();
 
   // Run the app
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(const MyApp());
 }

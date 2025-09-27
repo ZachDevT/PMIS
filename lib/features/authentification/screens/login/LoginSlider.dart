@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:pmis/commons/widgets/customs_shapes/curved/Curved_edges_widget.dart';
 import 'package:pmis/commons/widgets/texts/Section_heading.dart';
 import 'package:pmis/features/authentification/controllers/login/LoginSliderController.dart';
@@ -8,15 +8,14 @@ import 'package:pmis/utils/constants/Size.dart';
 import 'package:pmis/utils/constants/colors.dart';
 import 'package:pmis/utils/constants/sizes.dart';
 
-
-
-class LoginSliderScreen extends ConsumerWidget {
+class LoginSliderScreen extends StatelessWidget {
   const LoginSliderScreen({super.key});
   static const String routeName = "LoginSliderScreenLogin";
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final loginController = ref.watch(loginControllerProvider.notifier);
-    final currentIndex = ref.watch(loginControllerProvider);
+  Widget build(BuildContext context) {
+    final LoginSliderController loginController =
+        Get.find<LoginSliderController>();
     final dark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -39,8 +38,8 @@ class LoginSliderScreen extends ConsumerWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           image: DecorationImage(
-                            image: AssetImage(
-                                loginController.slides[index].image),
+                            image:
+                                AssetImage(loginController.slides[index].image),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -58,7 +57,8 @@ class LoginSliderScreen extends ConsumerWidget {
                                   ],
                                 ),
                               ),
-                              padding: const EdgeInsets.all(Tsizes.defaultSpace),
+                              padding:
+                                  const EdgeInsets.all(Tsizes.defaultSpace),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -86,7 +86,6 @@ class LoginSliderScreen extends ConsumerWidget {
                                     textAlign: TextAlign.center,
                                   ),
                                   SizedBox(height: 10.h),
-                                  
                                 ],
                               ),
                             ),
@@ -100,7 +99,7 @@ class LoginSliderScreen extends ConsumerWidget {
               SliverList(
                 delegate: SliverChildListDelegate([
                   SizedBox(height: 30.h),
-                  _buildIndicatorDots(loginController, ref),
+                  _buildIndicatorDots(loginController),
                   SizedBox(height: 10.h),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20.w)
@@ -119,27 +118,26 @@ class LoginSliderScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildIndicatorDots(LoginController loginController, WidgetRef ref) {
-    return
-        //Obx(
-        //   () =>
-        Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(
-        loginController.slides.length,
-        (index) => Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: ref.watch(loginControllerProvider) == index
-                ? Tcolors.primary
-                : Tcolors.grey,
+  Widget _buildIndicatorDots(LoginSliderController loginController) {
+    return Obx(() => Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            loginController.slides.length,
+            (index) => GestureDetector(
+              onTap: () => loginController.goToPage(index),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: loginController.currentIndex.value == index
+                      ? Tcolors.primary
+                      : Tcolors.grey,
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
-    );
-    // );
+        ));
   }
 }

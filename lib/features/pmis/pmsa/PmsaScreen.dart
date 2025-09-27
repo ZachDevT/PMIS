@@ -8,7 +8,7 @@ import 'package:pmis/features/pmis/pmsa/controllers/PmsaController.dart';
 import 'package:pmis/utils/constants/colors.dart';
 
 class PmsaScreen extends StatelessWidget {
-  final PmsaController controller = Get.put(PmsaController());
+  final PmsaController controller = Get.find<PmsaController>();
 
   PmsaScreen({super.key});
 
@@ -120,7 +120,7 @@ class _QuickActionsSection extends StatelessWidget {
 class _ActivityListSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final PmsaController pmsaController = Get.put(PmsaController());
+    final PmsaController pmsaController = Get.find<PmsaController>();
     return Obx(() => ListView.builder(
           shrinkWrap: true,
           reverse: true,

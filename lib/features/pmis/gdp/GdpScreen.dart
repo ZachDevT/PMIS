@@ -8,7 +8,7 @@ import 'package:pmis/features/pmis/gdp/controllers/GdpController.dart';
 import 'package:pmis/utils/constants/colors.dart';
 
 class GdpScreen extends StatelessWidget {
-  final GdpController controller = Get.put(GdpController());
+  final GdpController controller = Get.find<GdpController>();
 
   GdpScreen({super.key});
 
@@ -121,7 +121,7 @@ class _QuickActionsSection extends StatelessWidget {
 class _ActivityListSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final GdpController gdpController = Get.put(GdpController());
+    final GdpController gdpController = Get.find<GdpController>();
     return Obx(() => ListView.builder(
           shrinkWrap: true,
           reverse: true,

@@ -7,7 +7,7 @@ import 'package:pmis/features/pmis/gpp/controllers/GppController.dart';
 import 'package:pmis/utils/constants/colors.dart';
 
 class GppForm extends StatelessWidget {
-  final GppController controller = Get.put(GppController());
+  final GppController controller = Get.find<GppController>();
 
   GppForm({super.key});
 

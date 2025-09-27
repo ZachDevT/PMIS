@@ -6,7 +6,7 @@ import 'package:pmis/features/pmis/gdp/controllers/GdpController.dart';
 import 'package:pmis/utils/constants/colors.dart';
 
 class GdpForm extends StatelessWidget {
-  final GdpController controller = Get.put(GdpController());
+  final GdpController controller = Get.find<GdpController>();
 
   GdpForm({super.key});
 
