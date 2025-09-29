@@ -1,17 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 
 class Tcolors {
   Tcolors._();
 
   //App basic colors
+  static const Color _defaultPrimaryColor = Color(0xFF28d67c);
 
-  static const Color primaryColor = Color(0xFF28d67c);
-  static const Color primary = primaryColor;
+  // Get primary color from storage or use default
+  static Color get primary {
+    try {
+      final storage = GetStorage();
+      final primaryColorValue = storage.read('primaryColor');
+      return primaryColorValue != null
+          ? Color(primaryColorValue)
+          : _defaultPrimaryColor;
+    } catch (e) {
+      return _defaultPrimaryColor;
+    }
+  }
+
+  static const Color primaryColor = _defaultPrimaryColor;
   static const Color secondary = Color(0xFF5dfd95);
   static const Color secondarySecond = Color.fromARGB(255, 72, 203, 118);
   static const Color accent = Color(0xFFb0c7ff);
   static const Color primarygreen = Color.fromARGB(255, 197, 231, 3);
-    static const Color primaryDark = Color.fromARGB(255, 10, 29, 22);
+  static const Color primaryDark = Color.fromARGB(255, 10, 29, 22);
 
 // Text Colors
   static const Color textPrimary = Color(0xFF333333);

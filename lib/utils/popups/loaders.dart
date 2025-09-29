@@ -58,7 +58,7 @@ class Loaders {
       isDismissible: true,
       shouldIconPulse: true,
       colorText: Tcolors.white,
-      backgroundColor: Tcolors.primary,
+      backgroundColor: Tcolors.warning,
       snackStyle: SnackStyle.FLOATING,
       snackPosition: SnackPosition.TOP,
       duration: Duration(seconds: duration),

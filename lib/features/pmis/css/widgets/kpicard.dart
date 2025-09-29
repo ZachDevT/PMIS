@@ -13,22 +13,18 @@ class KpiCard extends StatelessWidget {
       required this.icon,
       required this.number,
       required this.label,
-      this.color = Tcolors.primary});
+      this.color = Colors.blue});
 
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     return IntrinsicHeight(
-      
-      
       child: Row(
-         
         children: [
           // Left border with primary color and rounded left corners.
           Container(
-            
             width: 8,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Tcolors.primary,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(8),
@@ -40,38 +36,34 @@ class KpiCard extends StatelessWidget {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                // color:
-                //     dark ? Tcolors.darkerGrey : Tcolors.grey.withOpacity(0.2),
-                border: Border(
-                  top: BorderSide(
-                      color: dark
-                          ? Tcolors.darkerGrey
-                          : Tcolors.grey.withOpacity(0.8)),
-                  right: BorderSide(
-                      color: dark
-                          ? Tcolors.darkerGrey
-                          : Tcolors.grey.withOpacity(0.8)),
-                  bottom: BorderSide(
-                      color: dark
-                          ? Tcolors.darkerGrey
-                          : Tcolors.grey.withOpacity(0.8)),
-                ),
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(8),
-                  bottomRight: Radius.circular(8),
-                ),
-                gradient: LinearGradient(
-                         begin: const Alignment(0.0, 0.0),
-                            end: const Alignment(0.307, 0.907),
-                            colors: [
-                    
-                              Tcolors.grey.withOpacity(0.1),
-                              const Color.fromARGB(255, 1, 205, 100).withOpacity(0.1),
-                        
-                        ],
-
-                )
-              ),
+                  // color:
+                  //     dark ? Tcolors.darkerGrey : Tcolors.grey.withOpacity(0.2),
+                  border: Border(
+                    top: BorderSide(
+                        color: dark
+                            ? Tcolors.darkerGrey
+                            : Tcolors.grey.withOpacity(0.8)),
+                    right: BorderSide(
+                        color: dark
+                            ? Tcolors.darkerGrey
+                            : Tcolors.grey.withOpacity(0.8)),
+                    bottom: BorderSide(
+                        color: dark
+                            ? Tcolors.darkerGrey
+                            : Tcolors.grey.withOpacity(0.8)),
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(8),
+                    bottomRight: Radius.circular(8),
+                  ),
+                  gradient: LinearGradient(
+                    begin: const Alignment(0.0, 0.0),
+                    end: const Alignment(0.307, 0.907),
+                    colors: [
+                      Tcolors.grey.withOpacity(0.1),
+                      const Color.fromARGB(255, 1, 205, 100).withOpacity(0.1),
+                    ],
+                  )),
               child: Stack(
                 children: [
                   // Card content.
@@ -84,12 +76,11 @@ class KpiCard extends StatelessWidget {
                         // Row with icon and label.
                         Row(
                           children: [
-                               Icon(
-                                icon,
-                                color: Tcolors.primary,
-                                size: 23,
-                              ),
-                      
+                            Icon(
+                              icon,
+                              color: Tcolors.primary,
+                              size: 23,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -97,22 +88,24 @@ class KpiCard extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.w500,
-                                  color:
-                                      dark ? Tcolors.darkerGrey : Tcolors.darkerGrey,
+                                  color: dark
+                                      ? Tcolors.darkerGrey
+                                      : Tcolors.darkerGrey,
                                 ),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
-                       
+
                         Text(
                           number.toString(),
                           style: TextStyle(
                             fontSize: 26,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w500,
-                            color:  dark ? Tcolors.darkerGrey : Tcolors.darkerGrey,
+                            color:
+                                dark ? Tcolors.darkerGrey : Tcolors.darkerGrey,
                           ),
                         ),
                       ],

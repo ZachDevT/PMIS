@@ -34,6 +34,13 @@ class AuthController extends GetxController {
     _setupValidation();
   }
 
+  @override
+  void onReady() {
+    super.onReady();
+    // Ensure user state is properly initialized
+    _loadStoredUser();
+  }
+
   /// Load stored user data if available
   void _loadStoredUser() {
     final storedUser = _storage.readData<Map<String, dynamic>>('user_data');
@@ -159,6 +166,17 @@ class AuthController extends GetxController {
 
   /// Check if user is logged in
   bool get isLoggedIn => user.value != null;
+
+  /// Check authentication status from storage
+  bool checkAuthStatus() {
+    final storedUser = _storage.readData<Map<String, dynamic>>('user_data');
+    if (storedUser != null) {
+      user.value = storedUser;
+      loginState.value = AppState.success(storedUser);
+      return true;
+    }
+    return false;
+  }
 
   /// Get user display name
   String get userDisplayName {

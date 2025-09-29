@@ -5,10 +5,20 @@ import 'package:pmis/data/repositories/GppRepository/GppRepository.dart';
 import 'package:pmis/features/pmis/gpp/models/GppModel.dart';
 import 'package:pmis/utils/helpers/networkmanager.dart';
 import 'package:pmis/utils/popups/loaders.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class GppController extends GetxController {
   var activities = <GppActivity>[].obs;
+  var filteredActivities = <GppActivity>[].obs;
   final repository = Get.find<GppRepository>();
+
+  // Search and filter variables
+  var searchQuery = ''.obs;
+  var filterRegion = ''.obs;
+  var filterFacilityStatus = ''.obs;
+  var filterLicenseStatus = ''.obs;
+  var filterCategoryOfDrugs = ''.obs;
 
   // ------------------ Form Controllers ------------------
   final formKey = GlobalKey<FormState>();
@@ -49,27 +59,100 @@ class GppController extends GetxController {
   var selectedCertificationStatus = ''.obs;
   var recommendedForGpp = ''.obs;
 
+  // Location variables
+  var currentLatitude = 0.0.obs;
+  var currentLongitude = 0.0.obs;
+  var isGettingLocation = false.obs;
+
   @override
   void onInit() {
     super.onInit();
     loadActivities();
-    // Mimic auto-filling GPS and current date/time (replace with real implementations)
-    gpsLocationController.text = "Lat: 12.34, Lon: 56.78";
+    getCurrentLocation(); // Get current location on init
+    // Set current date/time
     inspectionDateController.text =
         DateTime.now().toLocal().toString().split(' ')[0];
     inspectionTimeController.text = TimeOfDay.now().format(Get.context!);
+
+    // Initialize filtered activities
+    ever(activities, (_) => filterActivities());
+    ever(searchQuery, (_) => filterActivities());
+    ever(filterRegion, (_) => filterActivities());
+    ever(filterFacilityStatus, (_) => filterActivities());
+    ever(filterLicenseStatus, (_) => filterActivities());
+    ever(filterCategoryOfDrugs, (_) => filterActivities());
   }
 
   Future<void> loadActivities() async {
     try {
       var data = await repository.getGppData();
       // Convert API data to GppActivity models
-      var gppActivities = data.map((item) => GppActivity.fromJson(item)).toList();
+      var gppActivities =
+          data.map((item) => GppActivity.fromJson(item)).toList();
       activities.assignAll(gppActivities);
     } catch (e) {
       // Handle error and maybe load from local storage if offline.
-      Loaders.errorSnackbar(title: "Error", message: "Failed to load GPP data: ${e.toString()}");
+      Loaders.errorSnackbar(
+          title: "Error", message: "Failed to load GPP data: ${e.toString()}");
     }
+  }
+
+  /// Filter activities based on search query and selected filters
+  void filterActivities() {
+    var filtered = activities.where((activity) {
+      // Search query filter
+      bool matchesSearch = searchQuery.value.isEmpty ||
+          activity.facilityName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          activity.personName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          _getRegionName(activity.intRegion)
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase());
+
+      // Region filter
+      bool matchesRegion = filterRegion.value.isEmpty ||
+          _getRegionName(activity.intRegion) == filterRegion.value;
+
+      // Facility status filter
+      bool matchesFacilityStatus = filterFacilityStatus.value.isEmpty ||
+          _getFacilityStatusText(activity.facilityStatus) ==
+              filterFacilityStatus.value;
+
+      // License status filter
+      bool matchesLicenseStatus = filterLicenseStatus.value.isEmpty ||
+          _getLicenseStatusText(activity.licenseStatus) ==
+              filterLicenseStatus.value;
+
+      // Category of drugs filter
+      bool matchesCategoryOfDrugs = filterCategoryOfDrugs.value.isEmpty ||
+          _getCategoryStatusText(activity.categoryStatus) ==
+              filterCategoryOfDrugs.value;
+
+      return matchesSearch &&
+          matchesRegion &&
+          matchesFacilityStatus &&
+          matchesLicenseStatus &&
+          matchesCategoryOfDrugs;
+    }).toList();
+
+    filteredActivities.assignAll(filtered);
+  }
+
+  /// Update search query
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+  }
+
+  /// Clear all filters
+  void clearFilters() {
+    searchQuery.value = '';
+    filterRegion.value = '';
+    filterFacilityStatus.value = '';
+    filterLicenseStatus.value = '';
+    filterCategoryOfDrugs.value = '';
   }
 
   /// Validate and create a new activity.
@@ -83,25 +166,29 @@ class GppController extends GetxController {
       if (selectedFacilityStatus.value.isEmpty) {
         emptyFields.add("Facility Status");
       }
-      if (selectedCategoryOfFacility.value.isEmpty) {
-        emptyFields.add("Category of Facility");
-      }
-      if (personFoundController.value.isEmpty) emptyFields.add("Person Found");
-      if (selectedLicensedStatus.value.isEmpty) {
-        emptyFields.add("Licensed Status");
-      }
-      if (selectedCategoryOfDrugs.value.isEmpty) {
-        emptyFields.add("Category of Drugs");
-      }
-      if (selectedFacilityType.value.isEmpty) emptyFields.add("Facility Type");
-      if (selectedCertificationStatus.value.isEmpty) {
-        emptyFields.add("Certification Status");
-      }
-      if (recommendedForGpp.value.isEmpty) {
-        emptyFields.add("Recommended for GPP");
+      
+      // Only require these fields if facility is not closed
+      if (selectedFacilityStatus.value != "Closed") {
+        if (selectedCategoryOfFacility.value.isEmpty) {
+          emptyFields.add("Category of Facility");
+        }
+        if (personFoundController.value.isEmpty) emptyFields.add("Person Found");
+        if (selectedLicensedStatus.value.isEmpty) {
+          emptyFields.add("Licensed Status");
+        }
+        if (selectedCategoryOfDrugs.value.isEmpty) {
+          emptyFields.add("Category of Drugs");
+        }
+        if (selectedFacilityType.value.isEmpty) emptyFields.add("Facility Type");
+        if (selectedCertificationStatus.value.isEmpty) {
+          emptyFields.add("Certification Status");
+        }
+        if (recommendedForGpp.value.isEmpty) {
+          emptyFields.add("Recommended for GPP");
+        }
       }
 
-      if (selectedFacilityStatus.value != "Closed" && emptyFields.isNotEmpty) {
+      if (emptyFields.isNotEmpty) {
         Loaders.errorSnackbar(
           title: "Error",
           message:
@@ -123,30 +210,44 @@ class GppController extends GetxController {
         personName: nameController.text,
         contact: contactController.text,
         qualifications: QualificationsController.text,
-        categoryOfpremises: _getCategoryOfPremises(selectedCategoryOfFacility.value),
+        categoryOfpremises:
+            _getCategoryOfPremises(selectedCategoryOfFacility.value),
         licenseStatus: _getLicenseStatus(selectedLicensedStatus.value),
         categoryStatus: _getCategoryStatus(selectedCategoryOfDrugs.value),
         facilityType: _getFacilityType(selectedFacilityType.value),
         certStatus: _getCertStatus(selectedCertificationStatus.value),
         recommendedforGPP: _getRecommendedForGpp(recommendedForGpp.value),
         inspectorId: null,
-        latitude: 0.0,
-        longitude: 0.0,
+        latitude: currentLatitude.value,
+        longitude: currentLongitude.value,
         licenseNo: null,
       );
 
       // Here, check for connectivity (this is a dummy flag).
       bool online = await NetworkManager.instance.isconnected();
+      
       if (online) {
         // Convert GppActivity to Map for API
         var activityData = newActivity.toJson();
-        print('Sending GPP data: $activityData'); // Debug log
-        await repository.postGppData(activityData);
-        activities.add(newActivity);
-        Loaders.successSnackbar(
-            title: "Success", message: "Activity added successfully...");
+        try {
+          print('Sending GPP data: $activityData'); // Debug log
+          await repository.postGppData(activityData);
+          activities.add(newActivity);
+          Loaders.successSnackbar(
+              title: "Success", message: "Activity added successfully...");
+        } catch (e) {
+
+          // If online submission fails, save locally as fallback
+          await repository.saveActivityLocally(activityData);
+          activities.add(newActivity);
+          Loaders.errorSnackbar(
+              title: "Network Error", 
+              message: "Failed to send online. Saved locally for sync.");
+        }
       } else {
-        // For offline mode, you might want to implement local storage
+        // For offline mode - save locally
+        var activityData = newActivity.toJson();
+        await repository.saveActivityLocally(activityData);
         activities.add(newActivity);
         Loaders.successSnackbar(
             title: "Offline",
@@ -227,83 +328,201 @@ class GppController extends GetxController {
 
   int _getDistrictId(String district) {
     switch (district) {
-      case "District A": return 1;
-      case "District B": return 2;
-      case "District C": return 3;
-      case "District D": return 4;
-      default: return 1;
+      case "District A":
+        return 1;
+      case "District B":
+        return 2;
+      case "District C":
+        return 3;
+      case "District D":
+        return 4;
+      default:
+        return 1;
     }
   }
 
   int _getFacilityStatus(String status) {
     switch (status) {
-      case "Open": return 1;
-      case "Closed": return 0;
-      default: return 1;
+      case "Open":
+        return 1;
+      case "Closed":
+        return 0;
+      default:
+        return 1;
     }
   }
 
   int _getPersonType(String personType) {
     switch (personType) {
-      case "In-charge": return 1;
-      case "(Attendant/Operator)": return 2;
-      default: return 1;
+      case "In-charge":
+        return 1;
+      case "(Attendant/Operator)":
+        return 2;
+      default:
+        return 1;
     }
   }
 
   int _getCategoryOfPremises(String category) {
     switch (category) {
-      case "Retail Pharmacy": return 1;
-      case "Drug Shop": return 2;
-      case "Hospital": return 3;
-      case "HCIV": return 4;
-      case "HCIII": return 5;
-      case "Clinic": return 6;
-      default: return 1;
+      case "Retail Pharmacy":
+        return 1;
+      case "Drug Shop":
+        return 2;
+      case "Hospital":
+        return 3;
+      case "HCIV":
+        return 4;
+      case "HCIII":
+        return 5;
+      case "Clinic":
+        return 6;
+      default:
+        return 1;
     }
   }
 
   int _getLicenseStatus(String status) {
     switch (status) {
-      case "Licensed": return 1;
-      case "Un-Licensed": return 2;
-      case "Not-Applicable": return 3;
-      default: return 1;
+      case "Licensed":
+        return 1;
+      case "Un-Licensed":
+        return 2;
+      case "Not-Applicable":
+        return 3;
+      default:
+        return 1;
     }
   }
 
   int _getCategoryStatus(String category) {
     switch (category) {
-      case "Medical Device": return 1;
-      case "Veterinary drugs": return 2;
-      case "Human drugs": return 3;
-      case "Public Healthcare products": return 4;
-      case "Herbal drugs": return 5;
-      default: return 1;
+      case "Medical Device":
+        return 1;
+      case "Veterinary drugs":
+        return 2;
+      case "Human drugs":
+        return 3;
+      case "Public Healthcare products":
+        return 4;
+      case "Herbal drugs":
+        return 5;
+      default:
+        return 1;
     }
   }
 
   int _getFacilityType(String type) {
     switch (type) {
-      case "Public Facility": return 1;
-      case "Private Facility": return 2;
-      default: return 1;
+      case "Public Facility":
+        return 1;
+      case "Private Facility":
+        return 2;
+      default:
+        return 1;
     }
   }
 
   int _getCertStatus(String status) {
     switch (status) {
-      case "Certified": return 1;
-      case "Not certified": return 2;
-      default: return 1;
+      case "Certified":
+        return 1;
+      case "Not certified":
+        return 2;
+      default:
+        return 1;
     }
   }
 
   int _getRecommendedForGpp(String recommendation) {
     switch (recommendation) {
-      case "GPP certification": return 1;
-      case "Not recommended for GPP certification": return 0;
-      default: return 1;
+      case "GPP certification":
+        return 1;
+      case "Not recommended for GPP certification":
+        return 0;
+      default:
+        return 1;
+    }
+  }
+
+  // Helper methods for filter text conversion
+  String _getFacilityStatusText(int status) {
+    switch (status) {
+      case 1:
+        return "Open";
+      case 0:
+        return "Closed";
+      default:
+        return "Open";
+    }
+  }
+
+  String _getLicenseStatusText(int status) {
+    switch (status) {
+      case 1:
+        return "Licensed";
+      case 2:
+        return "Un-Licensed";
+      case 3:
+        return "Not-Applicable";
+      default:
+        return "Licensed";
+    }
+  }
+
+  String _getCategoryStatusText(int status) {
+    switch (status) {
+      case 1:
+        return "Medical Device";
+      case 2:
+        return "Veterinary drugs";
+      case 3:
+        return "Human drugs";
+      case 4:
+        return "Public Healthcare products";
+      case 5:
+        return "Herbal drugs";
+      default:
+        return "Medical Device";
+    }
+  }
+
+  /// Get current location
+  Future<void> getCurrentLocation() async {
+    try {
+      isGettingLocation.value = true;
+      
+      // Check location permission
+      PermissionStatus status = await Permission.location.status;
+      if (!status.isGranted) {
+        status = await Permission.location.request();
+      }
+      
+      if (status.isGranted) {
+        // Get current position
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+        
+        currentLatitude.value = position.latitude;
+        currentLongitude.value = position.longitude;
+        
+        // Update GPS location controller
+        gpsLocationController.text = 
+            "Lat: ${position.latitude.toStringAsFixed(6)}, Lon: ${position.longitude.toStringAsFixed(6)}";
+      } else {
+        // Permission denied, use default values
+        currentLatitude.value = 0.0;
+        currentLongitude.value = 0.0;
+        gpsLocationController.text = "Location permission denied";
+      }
+    } catch (e) {
+      // Error getting location, use default values
+      currentLatitude.value = 0.0;
+      currentLongitude.value = 0.0;
+      gpsLocationController.text = "Unable to get location";
+    } finally {
+      isGettingLocation.value = false;
     }
   }
 }

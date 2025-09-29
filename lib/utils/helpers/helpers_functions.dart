@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+
 class THelperFunctions {
   static void showSnackBar(String message) {
     ScaffoldMessenger.of(Get.context!).showSnackBar(
@@ -112,9 +113,6 @@ class THelperFunctions {
 
   // Method to send confirmationOrder to Admin
 
-
-   
-
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   static OverlayState? overlayState = navigatorKey.currentState?.overlay;
   static void showOverlayNotification(String title, String body) {
@@ -140,7 +138,7 @@ class THelperFunctions {
                   ]),
               child: Row(
                 children: [
-                  const Icon(Iconsax.notification, color: Tcolors.primary),
+                  Icon(Iconsax.notification, color: Tcolors.primary),
                   const SizedBox(width: 10.0),
                   SizedBox(
                     width: TDeviceUtils.getScreenWidth(context) / 2,
@@ -195,6 +193,4 @@ class THelperFunctions {
       return '${difference.inSeconds}Seconds';
     }
   }
-
-  
 }

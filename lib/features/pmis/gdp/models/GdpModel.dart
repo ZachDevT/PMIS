@@ -1,61 +1,76 @@
-class GdpActivity {
-  final String id;
+class GdpModel {
+  final int id;
   final DateTime inspectionDate;
-  final DateTime inspectionTime;
   final String inspectorName;
-  final String gpsLocation;
-  final String region;
-  final String district;
+  final String gps;
+  final String intRegion;
+  final int districtId;
   final String facilityName;
-  final String facilityStatus;
-  final String name;
-  final String contactQualifications;
+  final int facilityStatus;
+  final int facilityPersonType;
+  final String personName;
+  final String contact;
   final String qualifications;
-  final String categoryOfFacility;
-  final String facilityType;
-  final String categoryOfDrugs;
-  final String certificationStatus;
-  final String recommendedForGpp;
+  final int categoryOfpremises;
+  final int licenseStatus;
+  final int categoryStatus;
+  final int facilityType;
+  final int certStatus;
+  final int recommendedforGDP;
+  final String inspectorId;
+  final double latitude;
+  final double longitude;
+  final String licenseNo;
 
-  GdpActivity({
+  GdpModel({
     required this.id,
     required this.inspectionDate,
-    required this.inspectionTime,
     required this.inspectorName,
-    required this.gpsLocation,
-    required this.region,
-    required this.district,
+    required this.gps,
+    required this.intRegion,
+    required this.districtId,
     required this.facilityName,
     required this.facilityStatus,
-    required this.name,
-    required this.contactQualifications,
+    required this.facilityPersonType,
+    required this.personName,
+    required this.contact,
     required this.qualifications,
-    required this.categoryOfFacility,
+    required this.categoryOfpremises,
+    required this.licenseStatus,
+    required this.categoryStatus,
     required this.facilityType,
-    required this.categoryOfDrugs,
-    required this.certificationStatus,
-    required this.recommendedForGpp,
+    required this.certStatus,
+    required this.recommendedforGDP,
+    required this.inspectorId,
+    required this.latitude,
+    required this.longitude,
+    required this.licenseNo,
   });
 
-  factory GdpActivity.fromJson(Map<String, dynamic> json) {
-    return GdpActivity(
-      id: json['id'],
-      inspectionDate: DateTime.parse(json['inspectionDate']),
-      inspectionTime: DateTime.parse(json['inspectionTime']),
-      inspectorName: json['inspectorName'],
-      gpsLocation: json['gpsLocation'],
-      region: json['region'],
-      district: json['district'],
-      facilityName: json['facilityName'],
-      facilityStatus: json['facilityStatus'],
-      name: json['name'],
-      contactQualifications: json['contactQualifications'],
-      qualifications: json['qualifications'],
-      categoryOfFacility: json['categoryOfFacility'],
-      facilityType: json['facilityType'],
-      categoryOfDrugs: json['categoryOfDrugs'],
-      certificationStatus: json['certificationStatus'],
-      recommendedForGpp: json['recommendedForGpp'],
+  factory GdpModel.fromJson(Map<String, dynamic> json) {
+    return GdpModel(
+      id: json['id'] ?? 0,
+      inspectionDate: DateTime.parse(json['inspectionDate'] ?? DateTime.now().toIso8601String()),
+      inspectorName: json['inspectorName'] ?? '',
+      gps: json['gps'] ?? '',
+      intRegion: json['intRegion'] ?? '',
+      districtId: json['districtId'] ?? 0,
+      facilityName: json['facilityName'] ?? '',
+      facilityStatus: json['facilityStatus'] ?? 0,
+      facilityPersonType: json['facilityPersonType'] ?? 0,
+      personName: json['personName'] ?? '',
+      contact: json['contact'] ?? '',
+      qualifications: json['qualifications'] ?? '',
+      categoryOfpremises: json['categoryOfpremises'] ?? 0,
+      licenseStatus: json['licenseStatus'] ?? 0,
+      categoryStatus: json['categoryStatus'] ?? 0,
+      facilityType: json['facilityType'] ?? 0,
+      certStatus: json['certStatus'] ?? 0,
+      recommendedforGDP: json['recommendedforGDP'] ?? 0,
+      inspectorId: json['inspectorId'] ?? '',
+      latitude: (json['latitude'] ?? 0).toDouble(),
+      longitude: (json['longitude'] ?? 0).toDouble(),
+      licenseNo: json['licenseNo'] ?? '',
     );
   }
 
@@ -63,21 +78,76 @@ class GdpActivity {
     return {
       'id': id,
       'inspectionDate': inspectionDate.toIso8601String(),
-      'inspectionTime': inspectionTime.toIso8601String(),
       'inspectorName': inspectorName,
-      'gpsLocation': gpsLocation,
-      'region': region,
-      'district': district,
+      'gps': gps,
+      'intRegion': intRegion,
+      'districtId': districtId,
       'facilityName': facilityName,
       'facilityStatus': facilityStatus,
-      'name': name,
-      'contactQualifications': contactQualifications,
+      'facilityPersonType': facilityPersonType,
+      'personName': personName,
+      'contact': contact,
       'qualifications': qualifications,
-      'categoryOfFacility': categoryOfFacility,
+      'categoryOfpremises': categoryOfpremises,
+      'licenseStatus': licenseStatus,
+      'categoryStatus': categoryStatus,
       'facilityType': facilityType,
-      'categoryOfDrugs': categoryOfDrugs,
-      'certificationStatus': certificationStatus,
-      'recommendedForGpp': recommendedForGpp,
+      'certStatus': certStatus,
+      'recommendedforGDP': recommendedforGDP,
+      'inspectorId': inspectorId,
+      'latitude': latitude,
+      'longitude': longitude,
+      'licenseNo': licenseNo,
     };
+  }
+
+  GdpModel copyWith({
+    int? id,
+    DateTime? inspectionDate,
+    String? inspectorName,
+    String? gps,
+    String? intRegion,
+    int? districtId,
+    String? facilityName,
+    int? facilityStatus,
+    int? facilityPersonType,
+    String? personName,
+    String? contact,
+    String? qualifications,
+    int? categoryOfpremises,
+    int? licenseStatus,
+    int? categoryStatus,
+    int? facilityType,
+    int? certStatus,
+    int? recommendedforGDP,
+    String? inspectorId,
+    double? latitude,
+    double? longitude,
+    String? licenseNo,
+  }) {
+    return GdpModel(
+      id: id ?? this.id,
+      inspectionDate: inspectionDate ?? this.inspectionDate,
+      inspectorName: inspectorName ?? this.inspectorName,
+      gps: gps ?? this.gps,
+      intRegion: intRegion ?? this.intRegion,
+      districtId: districtId ?? this.districtId,
+      facilityName: facilityName ?? this.facilityName,
+      facilityStatus: facilityStatus ?? this.facilityStatus,
+      facilityPersonType: facilityPersonType ?? this.facilityPersonType,
+      personName: personName ?? this.personName,
+      contact: contact ?? this.contact,
+      qualifications: qualifications ?? this.qualifications,
+      categoryOfpremises: categoryOfpremises ?? this.categoryOfpremises,
+      licenseStatus: licenseStatus ?? this.licenseStatus,
+      categoryStatus: categoryStatus ?? this.categoryStatus,
+      facilityType: facilityType ?? this.facilityType,
+      certStatus: certStatus ?? this.certStatus,
+      recommendedforGDP: recommendedforGDP ?? this.recommendedforGDP,
+      inspectorId: inspectorId ?? this.inspectorId,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      licenseNo: licenseNo ?? this.licenseNo,
+    );
   }
 }

@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pmis/data/repositories/PmsRepository/PmsRepository.dart';
+import 'package:pmis/data/repositories/PmsaRepo/PmsaRepo.dart';
 import 'package:pmis/features/pmis/pmsa/models/PmsModel.dart';
 import 'package:pmis/utils/helpers/networkmanager.dart';
 import 'package:pmis/utils/popups/loaders.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class PmsaController extends GetxController {
   // List of PMS activities.
-  var activities = <PmsActivity>[].obs;
-  final repository = Get.find<PmsRepository>();
+  var activities = <PmsModel>[].obs;
+  var filteredActivities = <PmsModel>[].obs;
+  final repository = Get.find<PmsaRepository>();
+
+  // Search and filter variables
+  var searchQuery = ''.obs;
+  var filterRegion = ''.obs;
+  var filterFacilityStatus = ''.obs;
+  var filterLicenseStatus = ''.obs;
+  var filterPmsActivity = ''.obs;
 
   // ------------------ Form Controllers ------------------
   final formKey = GlobalKey<FormState>();
@@ -54,27 +64,89 @@ class PmsaController extends GetxController {
   final productComplaintInvestigatedController = TextEditingController();
   final specifyActivityController = TextEditingController();
 
+  // Location variables
+  var currentLatitude = 0.0.obs;
+  var currentLongitude = 0.0.obs;
+  var isGettingLocation = false.obs;
+
   @override
   void onInit() {
     super.onInit();
     loadActivities();
-    // Mimic auto-filling GPS, current date and time (replace with real implementations)
-    gpsLocationController.text = "Lat: 12.34, Lon: 56.78";
+    getCurrentLocation(); // Get current location on init
+    // Set current date/time
     inspectionDateController.text =
         DateTime.now().toLocal().toString().split(' ')[0];
     inspectionTimeController.text = TimeOfDay.now().format(Get.context!);
+    
+    // Initialize filtered activities
+    ever(activities, (_) => filterActivities());
+    ever(searchQuery, (_) => filterActivities());
+    ever(filterRegion, (_) => filterActivities());
+    ever(filterFacilityStatus, (_) => filterActivities());
+    ever(filterLicenseStatus, (_) => filterActivities());
+    ever(filterPmsActivity, (_) => filterActivities());
   }
 
   Future<void> loadActivities() async {
     try {
       var data = await repository.getPmsData();
       var pmsActivities =
-          data.map((item) => PmsActivity.fromJson(item)).toList();
+          data.map((item) => PmsModel.fromJson(item)).toList();
       activities.assignAll(pmsActivities);
     } catch (e) {
       Loaders.errorSnackbar(
           title: "Error", message: "Failed to load PMS data: ${e.toString()}");
     }
+  }
+
+  /// Filter activities based on search query and selected filters
+  void filterActivities() {
+    var filtered = activities.where((activity) {
+      // Search query filter
+      bool matchesSearch = searchQuery.value.isEmpty ||
+          activity.facilityName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          activity.personName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          _getRegionName(activity.intRegion).toLowerCase().contains(searchQuery.value.toLowerCase());
+
+      // Region filter
+      bool matchesRegion = filterRegion.value.isEmpty ||
+          _getRegionName(activity.intRegion) == filterRegion.value;
+
+      // Facility status filter
+      bool matchesFacilityStatus = filterFacilityStatus.value.isEmpty ||
+          _getFacilityStatusText(activity.facilityStatus) == filterFacilityStatus.value;
+
+      // License status filter
+      bool matchesLicenseStatus = filterLicenseStatus.value.isEmpty ||
+          _getLicenseStatusText(activity.licenseStatus) == filterLicenseStatus.value;
+
+      // PMS activity filter
+      bool matchesPmsActivity = filterPmsActivity.value.isEmpty ||
+          _getPmsActivityText(activity.pmsActivity) == filterPmsActivity.value;
+
+      return matchesSearch &&
+          matchesRegion &&
+          matchesFacilityStatus &&
+          matchesLicenseStatus &&
+          matchesPmsActivity;
+    }).toList();
+
+    filteredActivities.assignAll(filtered);
+  }
+
+  /// Update search query
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+  }
+
+  /// Clear all filters
+  void clearFilters() {
+    searchQuery.value = '';
+    filterRegion.value = '';
+    filterFacilityStatus.value = '';
+    filterLicenseStatus.value = '';
+    filterPmsActivity.value = '';
   }
 
   /// Validate and create a new PMSA activity.
@@ -89,20 +161,24 @@ class PmsaController extends GetxController {
       if (selectedFacilityStatus.value.isEmpty) {
         emptyFields.add("Facility Status");
       }
-      if (selectedCategoryOfFacility.value.isEmpty) {
-        emptyFields.add("Category of Facility");
-      }
-      if (licensedStatus.value.isEmpty) {
-        emptyFields.add("Licensed Status");
-      }
-      if (pmsaActivityCarriesOut.value.isEmpty) {
-        emptyFields.add("PMSA Activity");
-      }
-      if (selectedCategoryOfDrugs.value.isEmpty) {
-        emptyFields.add("Category of Drugs");
-      }
-      if (selectedCategoryOfProductSamples.value.isEmpty) {
-        emptyFields.add("Category of Product Samples");
+      
+      // Only require these fields if facility is not closed
+      if (selectedFacilityStatus.value != "Closed") {
+        if (selectedCategoryOfFacility.value.isEmpty) {
+          emptyFields.add("Category of Facility");
+        }
+        if (licensedStatus.value.isEmpty) {
+          emptyFields.add("Licensed Status");
+        }
+        if (pmsaActivityCarriesOut.value.isEmpty) {
+          emptyFields.add("PMSA Activity");
+        }
+        if (selectedCategoryOfDrugs.value.isEmpty) {
+          emptyFields.add("Category of Drugs");
+        }
+        if (selectedCategoryOfProductSamples.value.isEmpty) {
+          emptyFields.add("Category of Product Samples");
+        }
       }
       // If facility is not closed, require additional details.
       if (selectedFacilityStatus.value != "Closed") {
@@ -119,18 +195,20 @@ class PmsaController extends GetxController {
           emptyFields.add("Qualifications");
         }
       }
-      // Follow-up & complaint details are required.
-      if (productBeingFollowedUpController.text.isEmpty) {
-        emptyFields.add("Product Being Followed Up");
-      }
-      if (commentOnOverallFollowUpController.text.isEmpty) {
-        emptyFields.add("Comment on Overall Follow Up");
-      }
-      if (productComplaintInvestigatedController.text.isEmpty) {
-        emptyFields.add("Product Complaint Investigated");
-      }
-      if (specifyActivityController.text.isEmpty) {
-        emptyFields.add("Specify Activity");
+      // Follow-up & complaint details are only required if facility is Open
+      if (selectedFacilityStatus.value != "Closed") {
+        if (productBeingFollowedUpController.text.isEmpty) {
+          emptyFields.add("Product Being Followed Up");
+        }
+        if (commentOnOverallFollowUpController.text.isEmpty) {
+          emptyFields.add("Comment on Overall Follow Up");
+        }
+        if (productComplaintInvestigatedController.text.isEmpty) {
+          emptyFields.add("Product Complaint Investigated");
+        }
+        if (specifyActivityController.text.isEmpty) {
+          emptyFields.add("Specify Activity");
+        }
       }
 
       if (emptyFields.isNotEmpty) {
@@ -143,13 +221,13 @@ class PmsaController extends GetxController {
       }
 
       // Create a new PMS activity from the form inputs.
-      var newActivity = PmsActivity(
+      var newActivity = PmsModel(
         id: 0, // Will be set by API
         inspectionDate: DateTime.parse(inspectionDateController.text),
         inspectorName: inspectorNameController.text,
-        inspectorId: null,
-        latitude: 0.0,
-        longitude: 0.0,
+        inspectorId: "INSP001", // Default inspector ID
+        latitude: currentLatitude.value,
+        longitude: currentLongitude.value,
         intRegion: _getRegionGuid(selectedRegion.value),
         districtId: _getDistrictId(selectedDistrict.value),
         facilityName: facilityNameController.text,
@@ -160,23 +238,41 @@ class PmsaController extends GetxController {
         qualifications: qualificationsController.text,
         categoryOfpremises:
             _getCategoryOfPremises(selectedCategoryOfFacility.value),
+        otherCategoryPremise: selectedCategoryOfFacility.value == "Other" ? "Other category" : "",
         licenseStatus: _getLicenseStatus(licensedStatus.value),
-        licenseNo: null,
-        categoryStatus: _getCategoryStatus(selectedCategoryOfDrugs.value),
+        licenseNo: "",
+        unlicensed: licensedStatus.value == "Un-Licensed" ? 1 : 0,
+        pmsActivity: _getPmsActivity(pmsaActivityCarriesOut.value),
+        sampleProductName: productSampledNameController.text,
+        sampleNo: int.tryParse(numberOfSamplesCollectedController.text) ?? 0,
+        sampleBatch: batchNumberOfSampleController.text,
+        followupComment: commentOnOverallFollowUpController.text,
+        complaintProduct: productComplaintInvestigatedController.text,
+        otherActivity: specifyActivityController.text,
       );
 
       // Check connectivity status.
       bool online = await NetworkManager.instance.isconnected();
+      var activityData = newActivity.toJson();
+      
       if (online) {
-        // Convert PmsActivity to Map for API
-        var activityData = newActivity.toJson();
-        print('Sending PMS data: $activityData'); // Debug log
-        await repository.postPmsData(activityData);
-        activities.add(newActivity);
-        Loaders.successSnackbar(
-            title: "Success", message: "PMS activity added successfully...");
+        try {
+          print('Sending PMS data: $activityData'); // Debug log
+          await repository.postPmsData(activityData);
+          activities.add(newActivity);
+          Loaders.successSnackbar(
+              title: "Success", message: "PMS activity added successfully...");
+        } catch (e) {
+          // If online submission fails, save locally as fallback
+          await repository.saveActivityLocally(activityData);
+          activities.add(newActivity);
+          Loaders.errorSnackbar(
+              title: "Network Error", 
+              message: "Failed to send online. Saved locally for sync.");
+        }
       } else {
-        // For offline mode
+        // For offline mode - save locally
+        await repository.saveActivityLocally(activityData);
         activities.add(newActivity);
         Loaders.successSnackbar(
             title: "Offline",
@@ -319,6 +415,104 @@ class PmsaController extends GetxController {
         return 5;
       default:
         return 1;
+    }
+  }
+
+  int _getPmsActivity(String activity) {
+    switch (activity) {
+      case "Product Sampling":
+        return 1;
+      case "Follow-up":
+        return 2;
+      case "Complaint Investigation":
+        return 3;
+      case "Other":
+        return 4;
+      default:
+        return 1;
+    }
+  }
+
+  // Helper methods for filter text conversion
+  String _getFacilityStatusText(int status) {
+    switch (status) {
+      case 1: return "Open";
+      case 0: return "Closed";
+      default: return "Open";
+    }
+  }
+
+  String _getLicenseStatusText(int status) {
+    switch (status) {
+      case 1: return "Licensed";
+      case 2: return "Un-Licensed";
+      case 3: return "Not-Applicable";
+      default: return "Licensed";
+    }
+  }
+
+  String _getPmsActivityText(int activity) {
+    switch (activity) {
+      case 1: return "Product Sampling";
+      case 2: return "Follow-up";
+      case 3: return "Complaint Investigation";
+      case 4: return "Other";
+      default: return "Product Sampling";
+    }
+  }
+
+  String _getRegionName(String guid) {
+    // Map GUIDs back to region names for display
+    switch (guid) {
+      case "deaf2c98-3dbb-489f-bdea-9e5fd49eec78":
+        return "Central Region";
+      case "57a2afce-98b8-48b2-984e-cc04e3d84264":
+        return "Eastern Region";
+      case "12345678-1234-1234-1234-123456789012":
+        return "Northern Region";
+      case "87654321-4321-4321-4321-210987654321":
+        return "Western Region";
+      default:
+        return "Central Region";
+    }
+  }
+
+  /// Get current location
+  Future<void> getCurrentLocation() async {
+    try {
+      isGettingLocation.value = true;
+      
+      // Check location permission
+      PermissionStatus status = await Permission.location.status;
+      if (!status.isGranted) {
+        status = await Permission.location.request();
+      }
+      
+      if (status.isGranted) {
+        // Get current position
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+        
+        currentLatitude.value = position.latitude;
+        currentLongitude.value = position.longitude;
+        
+        // Update GPS location controller
+        gpsLocationController.text = 
+            "Lat: ${position.latitude.toStringAsFixed(6)}, Lon: ${position.longitude.toStringAsFixed(6)}";
+      } else {
+        // Permission denied, use default values
+        currentLatitude.value = 0.0;
+        currentLongitude.value = 0.0;
+        gpsLocationController.text = "Location permission denied";
+      }
+    } catch (e) {
+      // Error getting location, use default values
+      currentLatitude.value = 0.0;
+      currentLongitude.value = 0.0;
+      gpsLocationController.text = "Unable to get location";
+    } finally {
+      isGettingLocation.value = false;
     }
   }
 }

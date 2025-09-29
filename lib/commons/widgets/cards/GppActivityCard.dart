@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pmis/features/pmis/gpp/models/GppModel.dart';
 import 'package:pmis/utils/constants/colors.dart';
+import 'package:pmis/commons/widgets/map/MapViewWidget.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class GppActivityCard extends StatelessWidget {
   final GppActivity activity;
@@ -364,6 +366,7 @@ class GppActivityCard extends StatelessWidget {
                             'Longitude',
                             activity.longitude.toString(),
                             Iconsax.location_add),
+                        _buildMapViewRow(),
                       ],
                     ),
                     const SizedBox(height: 40),
@@ -697,6 +700,156 @@ class GppActivityCard extends StatelessWidget {
       default:
         return "Central Region";
     }
+  }
+
+  Widget _buildMapViewRow() {
+    return Builder(
+      builder: (context) => Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF1C1C1E).withOpacity(0.5)
+              : const Color(0xFFF2F2F7),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white.withOpacity(0.1)
+                : Colors.black.withOpacity(0.05),
+            width: 1,
+          ),
+        ),
+        child: GestureDetector(
+          onTap: () => _openMapView(context),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Tcolors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Iconsax.map,
+                  color: Tcolors.primary,
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'View on Map',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 0.5,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Tap to view facility location',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Tcolors.primary,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Iconsax.arrow_right_3,
+                color: Tcolors.primary,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openMapView(BuildContext context) async {
+    // Check location permission before opening map
+    PermissionStatus status = await Permission.location.status;
+    
+    if (status.isGranted) {
+      // Permission already granted, open map
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MapViewWidget(
+            latitude: activity.latitude,
+            longitude: activity.longitude,
+            facilityName: activity.facilityName,
+            address: '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
+          ),
+        ),
+      );
+    } else {
+      // Request permission first
+      PermissionStatus newStatus = await Permission.location.request();
+      
+      if (newStatus.isGranted) {
+        // Permission granted, open map
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MapViewWidget(
+              latitude: activity.latitude,
+              longitude: activity.longitude,
+              facilityName: activity.facilityName,
+              address: '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
+            ),
+          ),
+        );
+      } else if (newStatus.isPermanentlyDenied) {
+        // Show settings dialog
+        _showPermissionDialog(context);
+      } else {
+        // Permission denied, show message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Location permission is required to view the map'),
+            backgroundColor: Colors.orange,
+            action: SnackBarAction(
+              label: 'Settings',
+              textColor: Colors.white,
+              onPressed: () => openAppSettings(),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showPermissionDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Location Permission Required'),
+          content: const Text(
+            'This app needs location permission to show your current location on the map. Please enable location permission in app settings.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                openAppSettings();
+              },
+              child: const Text('Open Settings'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 

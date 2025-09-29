@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
 
 class AuthService {
-  static const _baseUrl = 'http://192.168.180.115/api';
+  static const _baseUrl = 'http://103.180.163.38/api';
   static const Duration _timeoutDuration = Duration(seconds: 30);
 
   /// Login with username and password

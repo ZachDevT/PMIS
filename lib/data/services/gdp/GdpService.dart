@@ -3,15 +3,15 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
 
-class GppService {
+class GdpService {
   static const _baseUrl = 'http://103.180.163.38/api';
   static const Duration _timeoutDuration = Duration(seconds: 30);
 
-  /// Fetch GPP data from the API
-  /// Returns list of GPP records on success, throws appropriate exception on failure
-  Future<List<Map<String, dynamic>>> getGppData() async {
+  /// Fetch GDP data from the API
+  /// Returns list of GDP records on success, throws appropriate exception on failure
+  Future<List<Map<String, dynamic>>> getGdpData() async {
     try {
-      final uri = Uri.parse('$_baseUrl/gpp');
+      final uri = Uri.parse('$_baseUrl/gdp');
 
       final response = await http.get(
         uri,
@@ -44,10 +44,10 @@ class GppService {
               jsonDecode(response.body) as List<dynamic>;
 
           // Convert to List<Map<String, dynamic>>
-          final List<Map<String, dynamic>> gppData =
+          final List<Map<String, dynamic>> gdpData =
               dataList.map((item) => item as Map<String, dynamic>).toList();
 
-          return gppData;
+          return gdpData;
         } catch (e) {
           if (e is FormatException) {
             throw const ServerException('Invalid JSON response from server');
@@ -68,7 +68,7 @@ class GppService {
 
       case 404:
         throw const NetworkException(
-            'GPP service not found. Please try again later');
+            'GDP service not found. Please try again later');
 
       case 408:
         throw const TimeoutException('Request timeout. Please try again');
@@ -157,8 +157,8 @@ class GppService {
         case 'certStatus':
           pascalKey = 'CertStatus';
           break;
-        case 'recommendedforGPP':
-          pascalKey = 'RecommendedforGPP';
+        case 'recommendedforGDP':
+          pascalKey = 'RecommendedforGDP';
           break;
         case 'inspectorId':
           pascalKey = 'InspectorId';
@@ -175,9 +175,6 @@ class GppService {
         case 'gps':
           pascalKey = 'Gps';
           break;
-        case 'recommendedforGDP':
-          pascalKey = 'RecommendedforGDP';
-          break;
         default:
           // Keep original key if no conversion needed
           pascalKey = entry.key;
@@ -189,15 +186,15 @@ class GppService {
     return converted;
   }
 
-  /// Post GPP data to the API
+  /// Post GDP data to the API
   /// Returns success response on success, throws appropriate exception on failure
-  Future<Map<String, dynamic>> postGppData(Map<String, dynamic> gppData) async {
+  Future<Map<String, dynamic>> postGdpData(Map<String, dynamic> gdpData) async {
     try {
-      final uri = Uri.parse('$_baseUrl/gpp');
+      final uri = Uri.parse('$_baseUrl/gdp');
 
       // Convert camelCase to PascalCase for API
-      final Map<String, dynamic> apiData = _convertToPascalCase(gppData);
-      print('Converted API data: $apiData'); // Debug log
+      final Map<String, dynamic> apiData = _convertToPascalCase(gdpData);
+      print('Converted GDP API data: $apiData'); // Debug log
 
       final response = await http
           .post(
@@ -231,7 +228,7 @@ class GppService {
       case 201:
         try {
           if (response.body.isEmpty) {
-            return {'success': true, 'message': 'Data saved successfully'};
+            return {'success': true, 'message': 'GDP data saved successfully'};
           }
 
           final Map<String, dynamic> data =
@@ -257,7 +254,7 @@ class GppService {
 
       case 404:
         throw const NetworkException(
-            'GPP service not found. Please try again later');
+            'GDP service not found. Please try again later');
 
       case 408:
         throw const TimeoutException('Request timeout. Please try again');
@@ -278,3 +275,4 @@ class GppService {
     }
   }
 }
+

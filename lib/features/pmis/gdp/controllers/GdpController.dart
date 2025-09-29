@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pmis/data/repositories/GdpRepo/GdpRepo.dart';
+import 'package:pmis/data/repositories/GdpRepository/GdpRepository.dart';
 import 'package:pmis/features/pmis/gdp/models/GdpModel.dart';
 import 'package:pmis/utils/helpers/networkmanager.dart';
 import 'package:pmis/utils/popups/loaders.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class GdpController extends GetxController {
   // List of GDP inspection activities.
-  var activities = <GdpActivity>[].obs;
+  var activities = <GdpModel>[].obs;
+  var filteredActivities = <GdpModel>[].obs;
   final repository = GdpRepository();
+
+  // Search and filter variables
+  var searchQuery = ''.obs;
+  var filterRegion = ''.obs;
+  var filterFacilityStatus = ''.obs;
+  var filterCertificationStatus = ''.obs;
+  var filterCategoryOfDrugs = ''.obs;
 
   // ------------------ Form Controllers ------------------
   final formKey = GlobalKey<FormState>();
@@ -17,7 +27,8 @@ class GdpController extends GetxController {
   final inspectionDateController = TextEditingController();
   final inspectionTimeController = TextEditingController();
   final inspectorNameController = TextEditingController();
-  final gpsLocationController = TextEditingController(); // auto-load current location
+  final gpsLocationController =
+      TextEditingController(); // auto-load current location
 
   // Section: Region Details
   var selectedRegion = ''.obs;
@@ -47,23 +58,98 @@ class GdpController extends GetxController {
   var selectedFacilityType = ''.obs;
   var recommendedForGpp = ''.obs;
 
+  // Location variables
+  var currentLatitude = 0.0.obs;
+  var currentLongitude = 0.0.obs;
+  var isGettingLocation = false.obs;
+
   @override
   void onInit() {
     super.onInit();
     loadActivities();
-    // Mimic auto-filling GPS and current date/time (replace with real implementations)
-    gpsLocationController.text = "Lat: 12.34, Lon: 56.78";
-    inspectionDateController.text = DateTime.now().toLocal().toString().split(' ')[0];
+    getCurrentLocation(); // Get current location on init
+    // Set current date/time
+    inspectionDateController.text =
+        DateTime.now().toLocal().toString().split(' ')[0];
     inspectionTimeController.text = TimeOfDay.now().format(Get.context!);
+
+    // Initialize filtered activities
+    ever(activities, (_) => filterActivities());
+    ever(searchQuery, (_) => filterActivities());
+    ever(filterRegion, (_) => filterActivities());
+    ever(filterFacilityStatus, (_) => filterActivities());
+    ever(filterCertificationStatus, (_) => filterActivities());
+    ever(filterCategoryOfDrugs, (_) => filterActivities());
   }
 
   Future<void> loadActivities() async {
     try {
       var data = await repository.fetchActivities();
-      activities.assignAll(data);
+      var gdpActivities = data.map((item) => GdpModel.fromJson(item)).toList();
+      activities.assignAll(gdpActivities);
     } catch (e) {
-      // Handle errors or load from local storage if needed.
+      Loaders.errorSnackbar(
+          title: "Error", message: "Failed to load GDP data: ${e.toString()}");
     }
+  }
+
+  /// Filter activities based on search query and selected filters
+  void filterActivities() {
+    var filtered = activities.where((activity) {
+      // Search query filter
+      bool matchesSearch = searchQuery.value.isEmpty ||
+          activity.facilityName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          activity.personName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          _getRegionName(activity.intRegion)
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase());
+
+      // Region filter
+      bool matchesRegion = filterRegion.value.isEmpty ||
+          _getRegionName(activity.intRegion) == filterRegion.value;
+
+      // Facility status filter
+      bool matchesFacilityStatus = filterFacilityStatus.value.isEmpty ||
+          _getFacilityStatusText(activity.facilityStatus) ==
+              filterFacilityStatus.value;
+
+      // Certification status filter
+      bool matchesCertificationStatus =
+          filterCertificationStatus.value.isEmpty ||
+              _getCertStatusText(activity.certStatus) ==
+                  filterCertificationStatus.value;
+
+      // Category of drugs filter
+      bool matchesCategoryOfDrugs = filterCategoryOfDrugs.value.isEmpty ||
+          _getCategoryStatusText(activity.categoryStatus) ==
+              filterCategoryOfDrugs.value;
+
+      return matchesSearch &&
+          matchesRegion &&
+          matchesFacilityStatus &&
+          matchesCertificationStatus &&
+          matchesCategoryOfDrugs;
+    }).toList();
+
+    filteredActivities.assignAll(filtered);
+  }
+
+  /// Update search query
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+  }
+
+  /// Clear all filters
+  void clearFilters() {
+    searchQuery.value = '';
+    filterRegion.value = '';
+    filterFacilityStatus.value = '';
+    filterCertificationStatus.value = '';
+    filterCategoryOfDrugs.value = '';
   }
 
   /// Validate and create a new GDP activity.
@@ -77,66 +163,90 @@ class GdpController extends GetxController {
       if (selectedFacilityStatus.value.isEmpty) {
         emptyFields.add("Facility Status");
       }
-      if (selectedCategoryOfFacility.value.isEmpty) {
-        emptyFields.add("Category of Facility");
-      }
-      if (selectedCertificationStatus.value.isEmpty) {
-        emptyFields.add("Certification Status");
-      }
-      if (selectedCategoryOfDrugs.value.isEmpty) {
-        emptyFields.add("Category of Drugs");
-      }
-      if (selectedFacilityType.value.isEmpty) {
-        emptyFields.add("Facility Type");
-      }
-      if (recommendedForGpp.value.isEmpty) {
-        emptyFields.add("Recommended for GPP");
+
+      // Only require these fields if facility is not closed
+      if (selectedFacilityStatus.value != "Closed") {
+        if (selectedCategoryOfFacility.value.isEmpty) {
+          emptyFields.add("Category of Facility");
+        }
+        if (selectedCertificationStatus.value.isEmpty) {
+          emptyFields.add("Certification Status");
+        }
+        if (selectedCategoryOfDrugs.value.isEmpty) {
+          emptyFields.add("Category of Drugs");
+        }
+        if (selectedFacilityType.value.isEmpty) {
+          emptyFields.add("Facility Type");
+        }
+        if (recommendedForGpp.value.isEmpty) {
+          emptyFields.add("Recommended for GPP");
+        }
       }
 
-      if (selectedFacilityStatus.value != "Closed" && emptyFields.isNotEmpty) {
+      if (emptyFields.isNotEmpty) {
         Loaders.errorSnackbar(
           title: "Error",
-          message: "Please input all the values and select all the dropdown values: ${emptyFields.join(', ')}.",
+          message:
+              "Please input all the values and select all the dropdown values: ${emptyFields.join(', ')}.",
         );
         return;
       }
 
-      // Create a new GdpActivity from the form inputs.
-      var newActivity = GdpActivity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+      // Create a new GdpModel from the form inputs.
+      var newActivity = GdpModel(
+        id: DateTime.now().millisecondsSinceEpoch,
         inspectionDate: DateTime.parse(inspectionDateController.text),
-        inspectionTime: DateTime.now(), // Alternatively, parse from inspectionTimeController if needed.
         inspectorName: inspectorNameController.text,
-        gpsLocation: gpsLocationController.text,
-        region: selectedRegion.value,
-        district: selectedDistrict.value,
+        gps: gpsLocationController.text,
+        intRegion: _getRegionGuid(selectedRegion.value),
+        districtId: _getDistrictId(selectedDistrict.value),
         facilityName: facilityNameController.text,
-        facilityStatus: selectedFacilityStatus.value,
-        name: nameController.text,
-        contactQualifications: contactQualificationsController.text,
+        facilityStatus: _getFacilityStatus(selectedFacilityStatus.value),
+        facilityPersonType: _getPersonType("In-charge"),
+        personName: nameController.text,
+        contact: contactQualificationsController.text,
         qualifications: qualificationsController.text,
-        categoryOfFacility: selectedCategoryOfFacility.value,
-        facilityType: selectedFacilityType.value,
-        categoryOfDrugs: selectedCategoryOfDrugs.value,
-        certificationStatus: selectedCertificationStatus.value,
-        recommendedForGpp: recommendedForGpp.value,
+        categoryOfpremises:
+            _getCategoryOfPremises(selectedCategoryOfFacility.value),
+        licenseStatus: _getLicenseStatus("Licensed"),
+        categoryStatus: _getCategoryStatus(selectedCategoryOfDrugs.value),
+        facilityType: _getFacilityType(selectedFacilityType.value),
+        certStatus: _getCertStatus(selectedCertificationStatus.value),
+        recommendedforGDP: _getRecommendedForGdp(recommendedForGpp.value),
+        inspectorId: "INSP001",
+        latitude: currentLatitude.value,
+        longitude: currentLongitude.value,
+        licenseNo: "",
       );
 
       // Check connectivity status.
       bool online = await NetworkManager.instance.isconnected();
+      var activityData = newActivity.toJson();
+
       if (online) {
-        activities.add(newActivity);
-        await repository.addActivity(newActivity);
-        Loaders.successSnackbar(
-          title: "Success",
-          message: "Activity added successfully...",
-        );
+        try {
+          print('Sending GDP data: $activityData'); // Debug log
+          await repository.addActivity(activityData);
+          activities.add(newActivity);
+          Loaders.successSnackbar(
+            title: "Success",
+            message: "GDP activity added successfully...",
+          );
+        } catch (e) {
+          // If online submission fails, save locally as fallback
+          await repository.saveActivityLocally(activityData);
+          activities.add(newActivity);
+          Loaders.errorSnackbar(
+              title: "Network Error",
+              message: "Failed to send online. Saved locally for sync.");
+        }
       } else {
-        await repository.saveActivityLocally(newActivity);
+        // For offline mode - save locally
+        await repository.saveActivityLocally(activityData);
         activities.add(newActivity);
         Loaders.successSnackbar(
           title: "Offline",
-          message: "Activity saved locally. Will sync when online.",
+          message: "GDP activity saved locally. Will sync when online.",
         );
       }
       // Clear form fields after submission.
@@ -164,5 +274,236 @@ class GdpController extends GetxController {
     selectedFacilityType.value = '';
     recommendedForGpp.value = '';
     nameController.clear();
+  }
+
+  // Helper methods to map form values to API values
+  String _getRegionGuid(String region) {
+    switch (region) {
+      case "Central Region":
+      case "Kampala":
+        return "deaf2c98-3dbb-489f-bdea-9e5fd49eec78";
+      case "Eastern Region":
+        return "57a2afce-98b8-48b2-984e-cc04e3d84264";
+      case "Northern Region":
+        return "12345678-1234-1234-1234-123456789012";
+      case "Western Region":
+        return "87654321-4321-4321-4321-210987654321";
+      default:
+        return "deaf2c98-3dbb-489f-bdea-9e5fd49eec78";
+    }
+  }
+
+  int _getDistrictId(String district) {
+    switch (district) {
+      case "District A":
+        return 1;
+      case "District B":
+        return 2;
+      case "District C":
+        return 3;
+      case "District D":
+        return 4;
+      default:
+        return 1;
+    }
+  }
+
+  int _getFacilityStatus(String status) {
+    switch (status) {
+      case "Open":
+        return 1;
+      case "Closed":
+        return 0;
+      default:
+        return 1;
+    }
+  }
+
+  int _getPersonType(String personType) {
+    switch (personType) {
+      case "In-charge":
+        return 1;
+      case "(Attendant/Operator)":
+        return 2;
+      default:
+        return 1;
+    }
+  }
+
+  int _getCategoryOfPremises(String category) {
+    switch (category) {
+      case "Retail Pharmacy":
+        return 1;
+      case "Drug Shop":
+        return 2;
+      case "Hospital":
+        return 3;
+      case "HCIV":
+        return 4;
+      case "HCIII":
+        return 5;
+      case "Clinic":
+        return 6;
+      default:
+        return 1;
+    }
+  }
+
+  int _getLicenseStatus(String status) {
+    switch (status) {
+      case "Licensed":
+        return 1;
+      case "Un-Licensed":
+        return 2;
+      case "Not-Applicable":
+        return 3;
+      default:
+        return 1;
+    }
+  }
+
+  int _getCategoryStatus(String category) {
+    switch (category) {
+      case "Medical Device":
+        return 1;
+      case "Veterinary drugs":
+        return 2;
+      case "Human drugs":
+        return 3;
+      case "Public Healthcare products":
+        return 4;
+      case "Herbal drugs":
+        return 5;
+      default:
+        return 1;
+    }
+  }
+
+  int _getFacilityType(String type) {
+    switch (type) {
+      case "Public Facility":
+        return 1;
+      case "Private Facility":
+        return 2;
+      default:
+        return 1;
+    }
+  }
+
+  int _getCertStatus(String status) {
+    switch (status) {
+      case "Certified":
+        return 1;
+      case "Not certified":
+        return 2;
+      default:
+        return 1;
+    }
+  }
+
+  int _getRecommendedForGdp(String recommendation) {
+    switch (recommendation) {
+      case "GDP certification":
+        return 1;
+      case "Not recommended for GDP certification":
+        return 0;
+      default:
+        return 1;
+    }
+  }
+
+  // Helper methods for filter text conversion
+  String _getFacilityStatusText(int status) {
+    switch (status) {
+      case 1:
+        return "Open";
+      case 0:
+        return "Closed";
+      default:
+        return "Open";
+    }
+  }
+
+  String _getCertStatusText(int status) {
+    switch (status) {
+      case 1:
+        return "Certified";
+      case 2:
+        return "Not certified";
+      default:
+        return "Certified";
+    }
+  }
+
+  String _getCategoryStatusText(int status) {
+    switch (status) {
+      case 1:
+        return "Medical Device";
+      case 2:
+        return "Veterinary drugs";
+      case 3:
+        return "Human drugs";
+      case 4:
+        return "Public Healthcare products";
+      case 5:
+        return "Herbal drugs";
+      default:
+        return "Medical Device";
+    }
+  }
+
+  String _getRegionName(String guid) {
+    // Map GUIDs back to region names for display
+    switch (guid) {
+      case "deaf2c98-3dbb-489f-bdea-9e5fd49eec78":
+        return "Central Region";
+      case "57a2afce-98b8-48b2-984e-cc04e3d84264":
+        return "Eastern Region";
+      case "12345678-1234-1234-1234-123456789012":
+        return "Northern Region";
+      case "87654321-4321-4321-4321-210987654321":
+        return "Western Region";
+      default:
+        return "Central Region";
+    }
+  }
+
+  /// Get current location
+  Future<void> getCurrentLocation() async {
+    try {
+      isGettingLocation.value = true;
+
+      // Check location permission
+      PermissionStatus status = await Permission.location.status;
+      if (!status.isGranted) {
+        status = await Permission.location.request();
+      }
+
+      if (status.isGranted) {
+        // Get current position
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+
+        currentLatitude.value = position.latitude;
+        currentLongitude.value = position.longitude;
+
+        // Update GPS location controller
+        gpsLocationController.text =
+            "Lat: ${position.latitude.toStringAsFixed(6)}, Lon: ${position.longitude.toStringAsFixed(6)}";
+      } else {
+        // Permission denied, use default values
+        currentLatitude.value = 0.0;
+        currentLongitude.value = 0.0;
+        gpsLocationController.text = "Location permission denied";
+      }
+    } catch (e) {
+      // Error getting location, use default values
+      currentLatitude.value = 0.0;
+      currentLongitude.value = 0.0;
+      gpsLocationController.text = "Unable to get location";
+    } finally {
+      isGettingLocation.value = false;
+    }
   }
 }
