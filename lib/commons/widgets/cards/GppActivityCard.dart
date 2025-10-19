@@ -83,7 +83,7 @@ class GppActivityCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${_getRegionName(activity.intRegion)} • District ${activity.districtId}',
+                        '${_getRegionName(activity.intRegion)} • ${_getDistrictName(activity.districtId)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.grey.shade600,
                               fontWeight: FontWeight.w400,
@@ -702,6 +702,22 @@ class GppActivityCard extends StatelessWidget {
     }
   }
 
+  String _getDistrictName(int? districtId) {
+    if (districtId == null) return 'Unknown';
+    switch (districtId) {
+      case 1:
+        return 'Kampala';
+      case 2:
+        return 'Masaka';
+      case 3:
+        return 'Kabale';
+      case 4:
+        return 'Fortportal';
+      default:
+        return 'Unknown';
+    }
+  }
+
   Widget _buildMapViewRow() {
     return Builder(
       builder: (context) => Container(
@@ -774,7 +790,7 @@ class GppActivityCard extends StatelessWidget {
   Future<void> _openMapView(BuildContext context) async {
     // Check location permission before opening map
     PermissionStatus status = await Permission.location.status;
-    
+
     if (status.isGranted) {
       // Permission already granted, open map
       Navigator.push(
@@ -784,14 +800,15 @@ class GppActivityCard extends StatelessWidget {
             latitude: activity.latitude,
             longitude: activity.longitude,
             facilityName: activity.facilityName,
-            address: '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
+            address:
+                '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
           ),
         ),
       );
     } else {
       // Request permission first
       PermissionStatus newStatus = await Permission.location.request();
-      
+
       if (newStatus.isGranted) {
         // Permission granted, open map
         Navigator.push(
@@ -801,7 +818,8 @@ class GppActivityCard extends StatelessWidget {
               latitude: activity.latitude,
               longitude: activity.longitude,
               facilityName: activity.facilityName,
-              address: '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
+              address:
+                  '${_getRegionName(activity.intRegion)}, ${_getDistrictName(activity.districtId)}',
             ),
           ),
         );
@@ -812,7 +830,8 @@ class GppActivityCard extends StatelessWidget {
         // Permission denied, show message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Location permission is required to view the map'),
+            content:
+                const Text('Location permission is required to view the map'),
             backgroundColor: Colors.orange,
             action: SnackBarAction(
               label: 'Settings',

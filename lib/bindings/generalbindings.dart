@@ -12,6 +12,12 @@ import 'package:pmis/data/repositories/PmsRepository/PmsRepository.dart';
 import 'package:pmis/data/services/gdp/GdpService.dart';
 import 'package:pmis/data/repositories/GdpRepository/GdpRepository.dart';
 import 'package:pmis/data/repositories/PmsaRepo/PmsaRepo.dart';
+import 'package:pmis/data/services/rts/RtsService.dart';
+import 'package:pmis/data/repositories/RtsRepository/RtsRepository.dart';
+import 'package:pmis/data/services/shiftmarket/ShiftMarketService.dart';
+import 'package:pmis/data/repositories/ShiftMarketRepository/ShiftMarketRepository.dart';
+import 'package:pmis/data/services/enforcement/EnforcementService.dart';
+import 'package:pmis/data/repositories/EnforcementRepository/EnforcementRepository.dart';
 import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 import 'package:pmis/features/authentification/controllers/login/LoginSliderController.dart';
 import 'package:pmis/navigationbar.dart';
@@ -19,6 +25,9 @@ import 'package:pmis/features/pmis/css/controllers/CssController.dart';
 import 'package:pmis/features/pmis/gdp/controllers/GdpController.dart';
 import 'package:pmis/features/pmis/gpp/controllers/GppController.dart';
 import 'package:pmis/features/pmis/pmsa/controllers/PmsaController.dart';
+import 'package:pmis/features/pmis/rts/controllers/RtsController.dart';
+import 'package:pmis/features/pmis/shiftmarket/controllers/ShiftMarketController.dart';
+import 'package:pmis/features/pmis/enforcement/controllers/EnforcementController.dart';
 import 'package:pmis/features/personalisation/controllers/theme_controller.dart';
 import 'package:get/get.dart';
 
@@ -31,7 +40,7 @@ class GeneralBindings extends Bindings {
     // Auth services
     Get.lazyPut<AuthService>(() => AuthService());
     Get.lazyPut<AuthRepository>(() => AuthRepository());
-    
+
     // GPP services
     Get.lazyPut<GppService>(() => GppService());
     Get.lazyPut<GppRepository>(() => GppRepository());
@@ -51,6 +60,18 @@ class GeneralBindings extends Bindings {
     // PMS-A services
     Get.lazyPut<PmsaRepository>(() => PmsaRepository());
 
+    // RTS services
+    Get.lazyPut<RtsService>(() => RtsService());
+    Get.lazyPut<RtsRepository>(() => RtsRepository());
+
+    // Shift Market services
+    Get.lazyPut<ShiftMarketService>(() => ShiftMarketService());
+    Get.lazyPut<ShiftMarketRepository>(() => ShiftMarketRepository());
+
+    // Enforcement services
+    Get.lazyPut<EnforcementService>(() => EnforcementService());
+    Get.lazyPut<EnforcementRepository>(() => EnforcementRepository());
+
     // Sync Manager
     Get.lazyPut<SyncManager>(() => SyncManager());
 
@@ -68,5 +89,8 @@ class GeneralBindings extends Bindings {
     Get.lazyPut<GdpController>(() => GdpController());
     Get.lazyPut<GppController>(() => GppController());
     Get.lazyPut<PmsaController>(() => PmsaController());
+    Get.lazyPut<RtsController>(() => RtsController());
+    Get.lazyPut<ShiftMarketController>(() => ShiftMarketController());
+    Get.lazyPut<EnforcementController>(() => EnforcementController());
   }
 }

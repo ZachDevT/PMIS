@@ -117,6 +117,105 @@ class CssModel {
     };
   }
 
+  // Helper methods to convert numeric values to text
+  String _getFacilityStatusText(int status) {
+    switch (status) {
+      case 1: return 'Open';
+      case 0: return 'Closed';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getPersonTypeText(int type) {
+    switch (type) {
+      case 1: return 'In-charge';
+      case 2: return 'Attendant/Operator';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getCategoryOfPremisesText(int category) {
+    switch (category) {
+      case 1: return 'Retail Pharmacy';
+      case 2: return 'Drug Shop';
+      case 3: return 'Hospital';
+      case 4: return 'HCIV';
+      case 5: return 'HCIII';
+      case 6: return 'Clinic';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getLicenseStatusText(int status) {
+    switch (status) {
+      case 1: return 'Licensed';
+      case 2: return 'Un-Licensed';
+      case 3: return 'Not-Applicable';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getCategoryStatusText(int status) {
+    switch (status) {
+      case 1: return 'Medical Device';
+      case 2: return 'Veterinary drugs';
+      case 3: return 'Human drugs';
+      case 4: return 'Public Healthcare products';
+      case 5: return 'Herbal drugs';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getPremisesConditionText(int condition) {
+    switch (condition) {
+      case 1: return 'Good';
+      case 2: return 'Fair';
+      case 3: return 'Poor';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getRecordKeepingText(int? keeping) {
+    if (keeping == null) return 'Not specified';
+    switch (keeping) {
+      case 1: return 'Good';
+      case 2: return 'Fair';
+      case 3: return 'Poor';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getClassOfDrugsText(int? drugs) {
+    if (drugs == null) return 'Not specified';
+    switch (drugs) {
+      case 1: return 'Class A';
+      case 2: return 'Class B';
+      case 3: return 'Class C';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getUnregisteredDrugsText(int? drugs) {
+    if (drugs == null) return 'Not specified';
+    switch (drugs) {
+      case 1: return 'Present';
+      case 0: return 'Not Present';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getActionText(int? action) {
+    if (action == null) return 'Not specified';
+    switch (action) {
+      case 1: return 'Closed';
+      case 2: return 'Outlet abandoned by owner';
+      case 3: return 'Impounded';
+      case 4: return 'Suspect arrested';
+      case 5: return 'No action taken';
+      default: return 'Unknown';
+    }
+  }
+
   CssModel copyWith({
     int? id,
     DateTime? inspectionDate,

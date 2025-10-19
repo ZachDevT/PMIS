@@ -117,6 +117,54 @@ class PmsModel {
     };
   }
 
+  // Helper methods to convert numeric values to text
+  String _getFacilityStatusText(int status) {
+    switch (status) {
+      case 1: return 'Open';
+      case 0: return 'Closed';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getPersonTypeText(int type) {
+    switch (type) {
+      case 1: return 'In-charge';
+      case 2: return 'Attendant/Operator';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getCategoryOfPremisesText(int category) {
+    switch (category) {
+      case 1: return 'Retail Pharmacy';
+      case 2: return 'Drug Shop';
+      case 3: return 'Hospital';
+      case 4: return 'HCIV';
+      case 5: return 'HCIII';
+      case 6: return 'Clinic';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getLicenseStatusText(int status) {
+    switch (status) {
+      case 1: return 'Licensed';
+      case 2: return 'Un-Licensed';
+      case 3: return 'Not-Applicable';
+      default: return 'Unknown';
+    }
+  }
+
+  String _getPmsActivityText(int activity) {
+    switch (activity) {
+      case 1: return 'Product Sampling';
+      case 2: return 'Follow-up';
+      case 3: return 'Complaint Investigation';
+      case 4: return 'Other';
+      default: return 'Unknown';
+    }
+  }
+
   PmsModel copyWith({
     int? id,
     DateTime? inspectionDate,

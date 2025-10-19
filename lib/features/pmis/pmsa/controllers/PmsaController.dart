@@ -4,6 +4,7 @@ import 'package:pmis/data/repositories/PmsaRepo/PmsaRepo.dart';
 import 'package:pmis/features/pmis/pmsa/models/PmsModel.dart';
 import 'package:pmis/utils/helpers/networkmanager.dart';
 import 'package:pmis/utils/popups/loaders.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -47,6 +48,7 @@ class PmsaController extends GetxController {
   // Section: Facility Category & Licensing
   var selectedCategoryOfFacility = ''.obs;
   var licensedStatus = ''.obs;
+  final licenseNoController = TextEditingController();
 
   // Section: PMSA Activity
   var pmsaActivityCarriesOut = ''.obs;
@@ -131,6 +133,9 @@ class PmsaController extends GetxController {
           matchesLicenseStatus &&
           matchesPmsActivity;
     }).toList();
+
+    // Sort by inspection date (latest first)
+    filtered.sort((a, b) => b.inspectionDate.compareTo(a.inspectionDate));
 
     filteredActivities.assignAll(filtered);
   }
@@ -240,7 +245,7 @@ class PmsaController extends GetxController {
             _getCategoryOfPremises(selectedCategoryOfFacility.value),
         otherCategoryPremise: selectedCategoryOfFacility.value == "Other" ? "Other category" : "",
         licenseStatus: _getLicenseStatus(licensedStatus.value),
-        licenseNo: "",
+        licenseNo: licensedStatus.value == "Licensed" ? licenseNoController.text : "",
         unlicensed: licensedStatus.value == "Un-Licensed" ? 1 : 0,
         pmsActivity: _getPmsActivity(pmsaActivityCarriesOut.value),
         sampleProductName: productSampledNameController.text,
@@ -292,6 +297,7 @@ class PmsaController extends GetxController {
     inspectionDateController.clear();
     inspectionTimeController.clear();
     inspectorNameController.clear();
+    licenseNoController.clear();
     // gpsLocationController remains auto-filled.
     facilityNameController.clear();
     personFoundAtFacility.value = '';
@@ -317,34 +323,11 @@ class PmsaController extends GetxController {
 
   // Helper methods to map form values to API values
   String _getRegionGuid(String region) {
-    switch (region) {
-      case "Central Region":
-      case "Kampala":
-        return "deaf2c98-3dbb-489f-bdea-9e5fd49eec78";
-      case "Eastern Region":
-        return "57a2afce-98b8-48b2-984e-cc04e3d84264";
-      case "Northern Region":
-        return "12345678-1234-1234-1234-123456789012";
-      case "Western Region":
-        return "87654321-4321-4321-4321-210987654321";
-      default:
-        return "deaf2c98-3dbb-489f-bdea-9e5fd49eec78";
-    }
+    return RegionDistrictConstants.getRegionGuid(region);
   }
 
   int _getDistrictId(String district) {
-    switch (district) {
-      case "District A":
-        return 1;
-      case "District B":
-        return 2;
-      case "District C":
-        return 3;
-      case "District D":
-        return 4;
-      default:
-        return 1;
-    }
+    return RegionDistrictConstants.getDistrictId(district);
   }
 
   int _getFacilityStatus(String status) {

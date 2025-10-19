@@ -4,6 +4,7 @@ import 'package:pmis/data/repositories/GdpRepository/GdpRepository.dart';
 import 'package:pmis/features/pmis/gdp/models/GdpModel.dart';
 import 'package:pmis/utils/helpers/networkmanager.dart';
 import 'package:pmis/utils/popups/loaders.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -135,6 +136,9 @@ class GdpController extends GetxController {
           matchesCategoryOfDrugs;
     }).toList();
 
+    // Sort by inspection date (latest first)
+    filtered.sort((a, b) => b.inspectionDate.compareTo(a.inspectionDate));
+
     filteredActivities.assignAll(filtered);
   }
 
@@ -202,17 +206,16 @@ class GdpController extends GetxController {
         districtId: _getDistrictId(selectedDistrict.value),
         facilityName: facilityNameController.text,
         facilityStatus: _getFacilityStatus(selectedFacilityStatus.value),
-        facilityPersonType: _getPersonType("In-charge"),
-        personName: nameController.text,
-        contact: contactQualificationsController.text,
-        qualifications: qualificationsController.text,
-        categoryOfpremises:
-            _getCategoryOfPremises(selectedCategoryOfFacility.value),
-        licenseStatus: _getLicenseStatus("Licensed"),
-        categoryStatus: _getCategoryStatus(selectedCategoryOfDrugs.value),
-        facilityType: _getFacilityType(selectedFacilityType.value),
-        certStatus: _getCertStatus(selectedCertificationStatus.value),
-        recommendedforGDP: _getRecommendedForGdp(recommendedForGpp.value),
+        facilityPersonType: selectedFacilityStatus.value == "Closed" ? 0 : _getPersonType("In-charge"),
+        personName: selectedFacilityStatus.value == "Closed" ? "" : nameController.text,
+        contact: selectedFacilityStatus.value == "Closed" ? "" : contactQualificationsController.text,
+        qualifications: selectedFacilityStatus.value == "Closed" ? "" : qualificationsController.text,
+        categoryOfpremises: selectedFacilityStatus.value == "Closed" ? 0 : _getCategoryOfPremises(selectedCategoryOfFacility.value),
+        licenseStatus: selectedFacilityStatus.value == "Closed" ? 0 : _getLicenseStatus("Licensed"),
+        categoryStatus: selectedFacilityStatus.value == "Closed" ? 0 : _getCategoryStatus(selectedCategoryOfDrugs.value),
+        facilityType: selectedFacilityStatus.value == "Closed" ? 0 : _getFacilityType(selectedFacilityType.value),
+        certStatus: selectedFacilityStatus.value == "Closed" ? 0 : _getCertStatus(selectedCertificationStatus.value),
+        recommendedforGDP: selectedFacilityStatus.value == "Closed" ? 0 : _getRecommendedForGdp(recommendedForGpp.value),
         inspectorId: "INSP001",
         latitude: currentLatitude.value,
         longitude: currentLongitude.value,
@@ -278,34 +281,11 @@ class GdpController extends GetxController {
 
   // Helper methods to map form values to API values
   String _getRegionGuid(String region) {
-    switch (region) {
-      case "Central Region":
-      case "Kampala":
-        return "deaf2c98-3dbb-489f-bdea-9e5fd49eec78";
-      case "Eastern Region":
-        return "57a2afce-98b8-48b2-984e-cc04e3d84264";
-      case "Northern Region":
-        return "12345678-1234-1234-1234-123456789012";
-      case "Western Region":
-        return "87654321-4321-4321-4321-210987654321";
-      default:
-        return "deaf2c98-3dbb-489f-bdea-9e5fd49eec78";
-    }
+    return RegionDistrictConstants.getRegionGuid(region);
   }
 
   int _getDistrictId(String district) {
-    switch (district) {
-      case "District A":
-        return 1;
-      case "District B":
-        return 2;
-      case "District C":
-        return 3;
-      case "District D":
-        return 4;
-      default:
-        return 1;
-    }
+    return RegionDistrictConstants.getDistrictId(district);
   }
 
   int _getFacilityStatus(String status) {

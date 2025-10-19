@@ -39,6 +39,17 @@ class PmsaActivityCard extends StatelessWidget {
     }
   }
 
+  String _getDistrictName(int? districtId) {
+    if (districtId == null) return 'Unknown';
+    switch (districtId) {
+      case 1: return 'Kampala';
+      case 2: return 'Masaka';
+      case 3: return 'Kabale';
+      case 4: return 'Fortportal';
+      default: return 'Unknown';
+    }
+  }
+
   String _getFacilityStatusText(int status) {
     switch (status) {
       case 1: return 'Open';
@@ -143,7 +154,7 @@ class PmsaActivityCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${_getRegionName(activity.intRegion)} • District ${activity.districtId}',
+                        '${_getRegionName(activity.intRegion)} • ${_getDistrictName(activity.districtId)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.grey.shade600,
                               fontWeight: FontWeight.w400,

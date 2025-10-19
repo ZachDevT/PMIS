@@ -5,6 +5,7 @@ import 'package:pmis/data/repositories/CssRepository/CssRepository.dart';
 import 'package:pmis/features/pmis/css/models/CssModel.dart';
 import 'package:pmis/utils/helpers/networkmanager.dart';
 import 'package:pmis/utils/popups/loaders.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -30,6 +31,9 @@ class CssController extends GetxController {
   final nameController = TextEditingController();
   final contactController = TextEditingController();
   final qualificationsController = TextEditingController();
+  final otherCategoryPremiseController = TextEditingController();
+  final licenseNoController = TextEditingController();
+  final unRegDrugQtyController = TextEditingController();
 
   // Dropdown Values
   var selectedRegion = ''.obs;
@@ -44,6 +48,7 @@ class CssController extends GetxController {
   var selectedConditionOfPremises = ''.obs;
   var selectedRecordKeeping = ''.obs;
   var selectedActionTaken = ''.obs;
+  var selectedPreviouslyLicensed = ''.obs;
 
   // Location variables
   var currentLatitude = 0.0.obs;
@@ -114,6 +119,9 @@ class CssController extends GetxController {
           matchesLicenseStatus &&
           matchesCategoryOfDrugs;
     }).toList();
+
+    // Sort by inspection date (latest first)
+    filtered.sort((a, b) => b.inspectionDate.compareTo(a.inspectionDate));
 
     filteredActivities.assignAll(filtered);
   }
@@ -200,16 +208,16 @@ class CssController extends GetxController {
         contact: contactController.text,
         qualifications: qualificationsController.text,
         categoryOfpremises: _getCategoryOfPremises(selectedCategoryOfFacility.value),
-        otherCategoryPremise: selectedCategoryOfFacility.value == "Other" ? "Other category" : "",
+        otherCategoryPremise: selectedCategoryOfFacility.value == "Other" ? otherCategoryPremiseController.text : "",
         licenseStatus: _getLicenseStatus(selectedLicensedStatus.value),
-        licenseNo: "",
+        licenseNo: selectedLicensedStatus.value == "Licensed" ? licenseNoController.text : "",
         unlicensed: _getUnlicensedStatus(selectedLicensedStatus.value) ?? 0,
         categoryStatus: _getCategoryStatus(selectedCategoryOfDrugs.value),
         premisesCondition: _getPremisesCondition(selectedConditionOfPremises.value),
         recordKeeping: _getRecordKeeping(selectedRecordKeeping.value) ?? 0,
         classofDrugs: _getClassOfDrugs(selectedClassOfDrugs.value) ?? 0,
         unRegisteredDrug: _getUnregisteredDrugs(selectedUnregisteredDrugs.value) ?? 0,
-        unRegDrugQty: "",
+        unRegDrugQty: selectedUnregisteredDrugs.value == "Present" ? unRegDrugQtyController.text : "",
         action: _getActionTaken(selectedActionTaken.value) ?? 0,
       );
 
@@ -259,6 +267,9 @@ class CssController extends GetxController {
     nameController.clear();
     contactController.clear();
     qualificationsController.clear();
+    otherCategoryPremiseController.clear();
+    licenseNoController.clear();
+    unRegDrugQtyController.clear();
     selectedRegion.value = '';
     selectedDistrict.value = '';
     selectedFacilityStatus.value = '';
@@ -271,33 +282,16 @@ class CssController extends GetxController {
     selectedConditionOfPremises.value = '';
     selectedRecordKeeping.value = '';
     selectedActionTaken.value = '';
+    selectedPreviouslyLicensed.value = '';
   }
 
   // Helper methods to map form values to API values
   String _getRegionGuid(String region) {
-    switch (region) {
-      case "Central Region":
-      case "Kampala":
-        return "deaf2c98-3dbb-489f-bdea-9e5fd49eec78";
-      case "Eastern Region":
-        return "57a2afce-98b8-48b2-984e-cc04e3d84264";
-      case "Northern Region":
-        return "12345678-1234-1234-1234-123456789012";
-      case "Western Region":
-        return "87654321-4321-4321-4321-210987654321";
-      default:
-        return "deaf2c98-3dbb-489f-bdea-9e5fd49eec78";
-    }
+    return RegionDistrictConstants.getRegionGuid(region);
   }
 
   int _getDistrictId(String district) {
-    switch (district) {
-      case "District A": return 1;
-      case "District B": return 2;
-      case "District C": return 3;
-      case "District D": return 4;
-      default: return 1;
-    }
+    return RegionDistrictConstants.getDistrictId(district);
   }
 
   int _getFacilityStatus(String status) {
@@ -394,9 +388,11 @@ class CssController extends GetxController {
 
   int? _getActionTaken(String action) {
     switch (action) {
-      case "Warning": return 1;
-      case "Fine": return 2;
-      case "Closure": return 3;
+      case "Closed": return 1;
+      case "Outlet abandoned by owner": return 2;
+      case "Impounded": return 3;
+      case "Suspect arrested": return 4;
+      case "No action taken": return 5;
       default: return null;
     }
   }

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
 
 class CssService {
-  static const _baseUrl = 'http://103.180.163.38/api';
+  static const _baseUrl = 'http://pmis.nda.or.ug/api';
   static const Duration _timeoutDuration = Duration(seconds: 30);
 
   /// Fetch CSS data from the API

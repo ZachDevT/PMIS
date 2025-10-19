@@ -4,6 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:pmis/commons/widgets/icons/circular_icon.dart';
 import 'package:pmis/features/pmis/pmsa/controllers/PmsaController.dart';
 import 'package:pmis/utils/constants/colors.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 
 class PmsaForm extends StatelessWidget {
   final PmsaController controller = Get.find<PmsaController>();
@@ -164,13 +165,13 @@ class PmsaForm extends StatelessWidget {
                           TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                   buildDropdown(
                     label: "Region",
-                    items: ["Region 1", "Region 2", "Region 3"],
+                    items: RegionDistrictConstants.regions,
                     selectedItem: controller.selectedRegion,
                     prefixIcon: Icons.map,
                   ),
                   buildDropdown(
                     label: "District",
-                    items: ["District A", "District B", "District C"],
+                    items: RegionDistrictConstants.districts,
                     selectedItem: controller.selectedDistrict,
                     prefixIcon: Icons.location_city,
                   ),
@@ -256,6 +257,14 @@ class PmsaForm extends StatelessWidget {
                           selectedItem: controller.licensedStatus,
                           prefixIcon: Icons.verified_user,
                         ),
+                        if (controller.licensedStatus.value == "Licensed") ...[
+                          buildTextField(
+                            controller: controller.licenseNoController,
+                            label: "License No.",
+                            prefixIcon: Icons.badge,
+                            validator: (value) => value!.isEmpty ? "Required" : null,
+                          ),
+                        ],
                         // SECTION: PMSA Activity Carried Out
                         const Text("PMSA Activity Carried Out",
                             style: TextStyle(

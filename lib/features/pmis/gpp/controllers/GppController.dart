@@ -5,6 +5,7 @@ import 'package:pmis/data/repositories/GppRepository/GppRepository.dart';
 import 'package:pmis/features/pmis/gpp/models/GppModel.dart';
 import 'package:pmis/utils/helpers/networkmanager.dart';
 import 'package:pmis/utils/popups/loaders.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -27,9 +28,11 @@ class GppController extends GetxController {
   final inspectionDateController = TextEditingController();
   final inspectionTimeController = TextEditingController();
   final inspectorNameController = TextEditingController();
+  final inspectorIdController = TextEditingController();
   final contactController = TextEditingController();
   final gpsLocationController =
       TextEditingController(); // auto-load current location
+  final licenseNoController = TextEditingController();
 
   // Section: Region Details
   var selectedRegion = ''.obs;
@@ -138,6 +141,9 @@ class GppController extends GetxController {
           matchesCategoryOfDrugs;
     }).toList();
 
+    // Sort by inspection date (latest first)
+    filtered.sort((a, b) => b.inspectionDate.compareTo(a.inspectionDate));
+
     filteredActivities.assignAll(filtered);
   }
 
@@ -217,10 +223,10 @@ class GppController extends GetxController {
         facilityType: _getFacilityType(selectedFacilityType.value),
         certStatus: _getCertStatus(selectedCertificationStatus.value),
         recommendedforGPP: _getRecommendedForGpp(recommendedForGpp.value),
-        inspectorId: null,
+        inspectorId: inspectorIdController.text,
         latitude: currentLatitude.value,
         longitude: currentLongitude.value,
-        licenseNo: null,
+        licenseNo: selectedLicensedStatus.value == "Licensed" ? licenseNoController.text : null,
       );
 
       // Here, check for connectivity (this is a dummy flag).
@@ -275,6 +281,8 @@ class GppController extends GetxController {
     inspectionDateController.clear();
     inspectionTimeController.clear();
     inspectorNameController.clear();
+    inspectorIdController.clear();
+    licenseNoController.clear();
     // gpsLocationController remains as it is auto-filled.
     facilityNameController.clear();
     personFoundController.value = '';
@@ -294,51 +302,15 @@ class GppController extends GetxController {
 
   // Helper methods to map form values to API values
   String _getRegionGuid(String region) {
-    // Map region names to actual GUIDs from the API
-    switch (region) {
-      case "Central Region":
-      case "Kampala":
-        return "deaf2c98-3dbb-489f-bdea-9e5fd49eec78";
-      case "Eastern Region":
-        return "57a2afce-98b8-48b2-984e-cc04e3d84264";
-      case "Northern Region":
-        return "12345678-1234-1234-1234-123456789012";
-      case "Western Region":
-        return "87654321-4321-4321-4321-210987654321";
-      default:
-        return "deaf2c98-3dbb-489f-bdea-9e5fd49eec78"; // Default to Central Region
-    }
+    return RegionDistrictConstants.getRegionGuid(region);
   }
 
   String _getRegionName(String guid) {
-    // Map GUIDs back to region names for display
-    switch (guid) {
-      case "deaf2c98-3dbb-489f-bdea-9e5fd49eec78":
-        return "Central Region";
-      case "57a2afce-98b8-48b2-984e-cc04e3d84264":
-        return "Eastern Region";
-      case "12345678-1234-1234-1234-123456789012":
-        return "Northern Region";
-      case "87654321-4321-4321-4321-210987654321":
-        return "Western Region";
-      default:
-        return "Central Region";
-    }
+    return RegionDistrictConstants.getRegionName(guid);
   }
 
   int _getDistrictId(String district) {
-    switch (district) {
-      case "District A":
-        return 1;
-      case "District B":
-        return 2;
-      case "District C":
-        return 3;
-      case "District D":
-        return 4;
-      default:
-        return 1;
-    }
+    return RegionDistrictConstants.getDistrictId(district);
   }
 
   int _getFacilityStatus(String status) {

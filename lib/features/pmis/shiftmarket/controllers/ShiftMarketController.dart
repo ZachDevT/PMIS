@@ -1,0 +1,300 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:pmis/features/pmis/shiftmarket/models/ShiftMarketModel.dart';
+import 'package:pmis/data/repositories/ShiftMarketRepository/ShiftMarketRepository.dart';
+import 'package:pmis/utils/helpers/networkmanager.dart';
+import 'package:pmis/utils/popups/loaders.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+class ShiftMarketController extends GetxController {
+  // List of Shift Market activities
+  var activities = <ShiftMarketModel>[].obs;
+  var filteredActivities = <ShiftMarketModel>[].obs;
+  final repository = Get.find<ShiftMarketRepository>();
+
+  // Search and filter variables
+  var searchQuery = ''.obs;
+  var filterRegion = ''.obs;
+  var filterDistrict = ''.obs;
+  var filterFacilityStatus = ''.obs;
+  var filterCategoryOfPremises = ''.obs;
+
+  // Form state
+  var isLoading = false.obs;
+  var isSubmitting = false.obs;
+  var isGettingLocation = false.obs;
+
+  // Location data
+  var currentLatitude = 0.0.obs;
+  var currentLongitude = 0.0.obs;
+
+  // ------------------ Form Controllers ------------------
+  final formKey = GlobalKey<FormState>();
+
+  // Section: Basic Information
+  final inspectionDateController = TextEditingController();
+  final inspectionTimeController = TextEditingController();
+  final inspectorNameController = TextEditingController();
+
+  // Section: Location Details
+  var selectedRegion = ''.obs;
+  var selectedDistrict = ''.obs;
+  final facilityNameController = TextEditingController();
+
+  // Section: Facility Details
+  var selectedFacilityStatus = ''.obs;
+  final personNameController = TextEditingController();
+  final contactController = TextEditingController();
+  final qualificationsController = TextEditingController();
+
+  // Section: Category and Actions
+  var selectedCategoryOfPremises = ''.obs;
+  var selectedRegulatoryAction = ''.obs;
+  final regulatoryActionTakenController = TextEditingController();
+  final consignmentsImpoundedController = TextEditingController();
+
+  // GPS Location controller (auto-filled)
+  final gpsLocationController = TextEditingController();
+
+  // Category of Premises options
+  final List<String> categoryOfPremisesOptions = [
+    "Wholesale Pharmacy",
+    "Retail Pharmacy", 
+    "Drug Shop",
+    "External Stores",
+    "Hospital",
+    "HCIV",
+    "HCIII",
+    "Clinic",
+    "Herbal Selling Outlet",
+    "Shift Market",
+    "Pharmaceutical/Medical Device Manufacturing Premise",
+    "RTS(Radio talk Show)",
+    "Enforcement",
+    "Other"
+  ];
+
+  @override
+  void onInit() {
+    super.onInit();
+    _initializeForm();
+    loadActivities();
+  }
+
+  void _initializeForm() {
+    // Set default values
+    inspectionDateController.text = DateTime.now().toString();
+    inspectionTimeController.text = DateTime.now().toString();
+    
+    // Initialize with current location
+    getCurrentLocation();
+  }
+
+  /// Load activities from local storage or API
+  Future<void> loadActivities() async {
+    try {
+      isLoading.value = true;
+      var data = await repository.getShiftMarketData();
+      var shiftMarketActivities = data.map((item) => ShiftMarketModel.fromJson(item)).toList();
+      activities.assignAll(shiftMarketActivities);
+      filterActivities();
+    } catch (e) {
+      Loaders.errorSnackbar(title: "Error", message: "Failed to load ShiftMarket activities: ${e.toString()}");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Update search query and filter activities
+  void updateSearchQuery(String query) {
+    searchQuery.value = query;
+    filterActivities();
+  }
+
+  /// Submit ShiftMarket activity
+  Future<void> submitActivity() async {
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+
+    try {
+      isSubmitting.value = true;
+
+      // Create ShiftMarket model
+      final shiftMarketActivity = ShiftMarketModel(
+        inspectionDate: inspectionDateController.text,
+        inspectorName: inspectorNameController.text,
+        latitude: currentLatitude.value,
+        longitude: currentLongitude.value,
+        region: selectedRegion.value,
+        district: selectedDistrict.value,
+        facilityName: facilityNameController.text,
+        facilityStatus: selectedFacilityStatus.value,
+        personName: personNameController.text,
+        contact: contactController.text,
+        qualifications: qualificationsController.text,
+        categoryOfPremises: selectedCategoryOfPremises.value,
+        regulatoryActionTaken: selectedRegulatoryAction.value,
+        consignmentsImpounded: consignmentsImpoundedController.text,
+        createdAt: DateTime.now(),
+        isSynced: false,
+      );
+
+      bool online = await NetworkManager.instance.isconnected();
+      var activityData = shiftMarketActivity.toJson();
+      
+      print('🔍 DEBUG: Network status: $online');
+      print('🔍 DEBUG: ShiftMarket activity data to send: $activityData');
+      
+      if (online) {
+        try {
+          print('🚀 DEBUG: Attempting to send ShiftMarket data to API...');
+          var result = await repository.postShiftMarketData(activityData);
+          print('✅ DEBUG: API response received: $result');
+          
+          activities.add(shiftMarketActivity);
+          Loaders.successSnackbar(
+              title: "Success", message: "ShiftMarket activity sent to API successfully!");
+        } catch (e) {
+          print('❌ DEBUG: API call failed: $e');
+          // If online submission fails, save locally as fallback
+          await repository.saveActivityLocally(activityData);
+          activities.add(shiftMarketActivity);
+          Loaders.errorSnackbar(
+              title: "Network Error", 
+              message: "Failed to send to API. Saved locally for sync.");
+        }
+      } else {
+        print('📱 DEBUG: Offline mode - saving locally');
+        // For offline mode - save locally
+        await repository.saveActivityLocally(activityData);
+        activities.add(shiftMarketActivity);
+        Loaders.successSnackbar(
+            title: "Offline",
+            message: "ShiftMarket activity saved locally. Will sync when online.");
+      }
+
+      filterActivities();
+      clearForm();
+    } catch (e) {
+      Loaders.errorSnackbar(title: "Error", message: "Failed to submit activity");
+    } finally {
+      isSubmitting.value = false;
+      Navigator.pop(Get.context!); // Close the modal bottom sheet
+    }
+  }
+
+  /// Filter activities based on search and filter criteria
+  void filterActivities() {
+    var filtered = activities.where((activity) {
+      bool matchesSearch = searchQuery.value.isEmpty ||
+          activity.facilityName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          activity.inspectorName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          activity.personName.toLowerCase().contains(searchQuery.value.toLowerCase());
+
+      bool matchesRegion = filterRegion.value.isEmpty ||
+          activity.region == filterRegion.value;
+
+      bool matchesDistrict = filterDistrict.value.isEmpty ||
+          activity.district == filterDistrict.value;
+
+      bool matchesFacilityStatus = filterFacilityStatus.value.isEmpty ||
+          activity.facilityStatus == filterFacilityStatus.value;
+
+      bool matchesCategory = filterCategoryOfPremises.value.isEmpty ||
+          activity.categoryOfPremises == filterCategoryOfPremises.value;
+
+      return matchesSearch && matchesRegion && matchesDistrict && 
+             matchesFacilityStatus && matchesCategory;
+    }).toList();
+
+    // Sort by creation date (latest first)
+    filtered.sort((a, b) {
+      if (a.createdAt == null && b.createdAt == null) return 0;
+      if (a.createdAt == null) return 1;
+      if (b.createdAt == null) return -1;
+      return b.createdAt!.compareTo(a.createdAt!);
+    });
+
+    filteredActivities.value = filtered;
+  }
+
+
+  void clearForm() {
+    inspectionDateController.clear();
+    inspectionTimeController.clear();
+    inspectorNameController.clear();
+    facilityNameController.clear();
+    personNameController.clear();
+    contactController.clear();
+    qualificationsController.clear();
+    regulatoryActionTakenController.clear();
+    selectedRegulatoryAction.value = '';
+    consignmentsImpoundedController.clear();
+    selectedRegion.value = '';
+    selectedDistrict.value = '';
+    selectedFacilityStatus.value = '';
+    selectedCategoryOfPremises.value = '';
+    
+    // Re-initialize with current values
+    _initializeForm();
+  }
+
+  /// Get current location
+  Future<void> getCurrentLocation() async {
+    try {
+      isGettingLocation.value = true;
+
+      // Check location permission
+      PermissionStatus status = await Permission.location.status;
+      if (!status.isGranted) {
+        status = await Permission.location.request();
+      }
+
+      if (status.isGranted) {
+        // Get current position
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+
+        currentLatitude.value = position.latitude;
+        currentLongitude.value = position.longitude;
+
+        // Update GPS location controller
+        gpsLocationController.text =
+            "Lat: ${position.latitude.toStringAsFixed(6)}, Lon: ${position.longitude.toStringAsFixed(6)}";
+      } else {
+        // Permission denied, use default values
+        currentLatitude.value = 0.0;
+        currentLongitude.value = 0.0;
+        gpsLocationController.text = "Location permission denied";
+      }
+    } catch (e) {
+      // Error getting location, use default values
+      currentLatitude.value = 0.0;
+      currentLongitude.value = 0.0;
+      gpsLocationController.text = "Unable to get location";
+    } finally {
+      isGettingLocation.value = false;
+    }
+  }
+
+  // Helper methods to map form values to API values
+  String getRegionGuid(String region) {
+    return RegionDistrictConstants.getRegionGuid(region);
+  }
+
+  int getDistrictId(String district) {
+    return RegionDistrictConstants.getDistrictId(district);
+  }
+
+  String getRegionName(String guid) {
+    return RegionDistrictConstants.getRegionName(guid);
+  }
+
+  String getDistrictName(int id) {
+    return RegionDistrictConstants.getDistrictName(id);
+  }
+}

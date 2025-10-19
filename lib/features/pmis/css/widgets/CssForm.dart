@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:pmis/commons/widgets/icons/circular_icon.dart';
 import 'package:pmis/features/pmis/css/controllers/CssController.dart';
 import 'package:pmis/utils/constants/colors.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 
 class CssForm extends StatelessWidget {
   final CssController controller = Get.find<CssController>();
@@ -125,6 +126,12 @@ class CssForm extends StatelessWidget {
                     validator: (value) => value!.isEmpty ? "Required" : null,
                   ),
                   buildTextField(
+                    controller: controller.inspectorNameController,
+                    label: "Inspector Name",
+                    prefixIcon: Icons.person,
+                    validator: (value) => value!.isEmpty ? "Required" : null,
+                  ),
+                  buildTextField(
                     controller: controller.inspectionTimeController,
                     label: "Inspection Time",
                     prefixIcon: Icons.access_time,
@@ -139,17 +146,23 @@ class CssForm extends StatelessWidget {
                     },
                     validator: (value) => value!.isEmpty ? "Required" : null,
                   ),
+                  buildTextField(
+                    controller: controller.gpsLocationController,
+                    label: "GPS Location",
+                    prefixIcon: Icons.gps_fixed,
+                    readOnly: true,
+                  ),
 
                   // Location Details
                   buildDropdown(
                     label: "Region",
-                    items: ["Region 1", "Region 2", "Region 3"],
+                    items: RegionDistrictConstants.regions,
                     selectedItem: controller.selectedRegion,
                     prefixIcon: Icons.map,
                   ),
                   buildDropdown(
                     label: "District",
-                    items: ["District A", "District B", "District C"],
+                    items: RegionDistrictConstants.districts,
                     selectedItem: controller.selectedDistrict,
                     prefixIcon: Icons.location_city,
                   ),
@@ -201,17 +214,42 @@ class CssForm extends StatelessWidget {
                         "Hospital",
                         "HCIV",
                         "HCIII",
-                        "Clinic"
+                        "Clinic",
+                        "Other"
                       ],
                       selectedItem: controller.selectedCategoryOfFacility,
                       prefixIcon: Icons.category,
                     ),
+                    if (controller.selectedCategoryOfFacility.value == "Other") ...[
+                      buildTextField(
+                        controller: controller.otherCategoryPremiseController,
+                        label: "State the other type of facility",
+                        prefixIcon: Icons.edit,
+                        validator: (value) => value!.isEmpty ? "Required" : null,
+                      ),
+                    ],
                     buildDropdown(
                       label: "Licensed Status",
                       items: ["Licensed", "Unlicensed", "Not Applicable"],
                       selectedItem: controller.selectedLicensedStatus,
                       prefixIcon: Icons.verified_user,
                     ),
+                    if (controller.selectedLicensedStatus.value == "Licensed") ...[
+                      buildTextField(
+                        controller: controller.licenseNoController,
+                        label: "License No.",
+                        prefixIcon: Icons.badge,
+                        validator: (value) => value!.isEmpty ? "Required" : null,
+                      ),
+                    ],
+                    if (controller.selectedLicensedStatus.value == "Unlicensed") ...[
+                      buildDropdown(
+                        label: "Previously Licensed or Illegal Outlet",
+                        items: ["Previously Licensed", "Illegal Outlet"],
+                        selectedItem: controller.selectedPreviouslyLicensed,
+                        prefixIcon: Icons.warning,
+                      ),
+                    ],
                     buildDropdown(
                       label: "Category of Drugs",
                       items: [
@@ -236,6 +274,14 @@ class CssForm extends StatelessWidget {
                       selectedItem: controller.selectedUnregisteredDrugs,
                       prefixIcon: Icons.warning,
                     ),
+                    if (controller.selectedUnregisteredDrugs.value == "Present") ...[
+                      buildTextField(
+                        controller: controller.unRegDrugQtyController,
+                        label: "State the name and quantities of unregistered drug",
+                        prefixIcon: Icons.medication,
+                        validator: (value) => value!.isEmpty ? "Required" : null,
+                      ),
+                    ],
                     buildDropdown(
                       label: "Condition of Premises",
                       items: ["Poor", "Fair", "Good", "Excellent"],

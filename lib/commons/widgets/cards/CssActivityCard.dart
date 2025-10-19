@@ -41,6 +41,17 @@ class CssActivityCard extends StatelessWidget {
     }
   }
 
+  String _getDistrictName(int? districtId) {
+    if (districtId == null) return 'Unknown';
+    switch (districtId) {
+      case 1: return 'Kampala';
+      case 2: return 'Masaka';
+      case 3: return 'Kabale';
+      case 4: return 'Fortportal';
+      default: return 'Unknown';
+    }
+  }
+
   String _getFacilityStatusText(int status) {
     switch (status) {
       case 1: return 'Open';
@@ -103,9 +114,11 @@ class CssActivityCard extends StatelessWidget {
   String _getActionText(int? action) {
     if (action == null) return 'Not specified';
     switch (action) {
-      case 1: return 'Warning';
-      case 2: return 'Fine';
-      case 3: return 'Closure';
+      case 1: return 'Closed';
+      case 2: return 'Outlet abandoned by owner';
+      case 3: return 'Impounded';
+      case 4: return 'Suspect arrested';
+      case 5: return 'No action taken';
       default: return 'Unknown';
     }
   }
@@ -175,7 +188,7 @@ class CssActivityCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${_getRegionName(activity.intRegion)} • District ${activity.districtId}',
+                        '${_getRegionName(activity.intRegion)} • ${_getDistrictName(activity.districtId)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.grey.shade600,
                               fontWeight: FontWeight.w400,

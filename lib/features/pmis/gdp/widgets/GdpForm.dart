@@ -4,6 +4,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:pmis/commons/widgets/icons/circular_icon.dart';
 import 'package:pmis/features/pmis/gdp/controllers/GdpController.dart';
 import 'package:pmis/utils/constants/colors.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 
 class GdpForm extends StatelessWidget {
   final GdpController controller = Get.find<GdpController>();
@@ -157,13 +158,13 @@ class GdpForm extends StatelessWidget {
                           TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                   buildDropdown(
                     label: "Region",
-                    items: ["Region 1", "Region 2", "Region 3"],
+                    items: RegionDistrictConstants.regions,
                     selectedItem: controller.selectedRegion,
                     prefixIcon: Icons.map,
                   ),
                   buildDropdown(
                     label: "District",
-                    items: ["District A", "District B", "District C"],
+                    items: RegionDistrictConstants.districts,
                     selectedItem: controller.selectedDistrict,
                     prefixIcon: Icons.location_city,
                   ),
