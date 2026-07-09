@@ -17,6 +17,7 @@ class CssModel {
   final String otherCategoryPremise;
   final int licenseStatus;
   final String licenseNo;
+  final String licenseExpiryDate;
   final int unlicensed;
   final int categoryStatus;
   final int premisesCondition;
@@ -45,6 +46,7 @@ class CssModel {
     required this.otherCategoryPremise,
     required this.licenseStatus,
     required this.licenseNo,
+    required this.licenseExpiryDate,
     required this.unlicensed,
     required this.categoryStatus,
     required this.premisesCondition,
@@ -56,16 +58,31 @@ class CssModel {
   });
 
   factory CssModel.fromJson(Map<String, dynamic> json) {
+    // Debug: Print what we're receiving
+    print('=== CSS Model fromJson Debug ===');
+    print('JSON keys: ${json.keys.toList()}');
+    print('Raw inspectorName: ${json['inspectorName']}');
+    print('Raw InspectorName: ${json['InspectorName']}');
+    print('Raw inspectorId: ${json['inspectorId']}');
+    print('Raw InspectorId: ${json['InspectorId']}');
+    
+    final inspectorName = json['inspectorName'] ?? json['InspectorName'] ?? '';
+    final inspectorId = json['inspectorId'] ?? json['InspectorId'] ?? '';
+    
+    print('Final inspectorName: $inspectorName');
+    print('Final inspectorId: $inspectorId');
+    print('=== End CSS Model Debug ===');
+    
     return CssModel(
       id: json['id'] ?? 0,
-      inspectionDate: DateTime.parse(json['inspectionDate'] ?? DateTime.now().toIso8601String()),
-      inspectorName: json['inspectorName'] ?? '',
-      inspectorId: json['inspectorId'] ?? '',
-      latitude: (json['latitude'] ?? 0).toDouble(),
-      longitude: (json['longitude'] ?? 0).toDouble(),
-      intRegion: json['intRegion'] ?? '',
-      districtId: json['districtId'] ?? 0,
-      facilityName: json['facilityName'] ?? '',
+      inspectionDate: DateTime.parse(json['inspectionDate'] ?? json['InspectionDate'] ?? DateTime.now().toIso8601String()),
+      inspectorName: inspectorName,
+      inspectorId: inspectorId,
+      latitude: (json['latitude'] ?? json['Latitude'] ?? 0).toDouble(),
+      longitude: (json['longitude'] ?? json['Longitude'] ?? 0).toDouble(),
+      intRegion: json['intRegion'] ?? json['IntRegion'] ?? '',
+      districtId: json['districtId'] ?? json['DistrictId'] ?? 0,
+      facilityName: json['facilityName'] ?? json['FacilityName'] ?? '',
       facilityStatus: json['facilityStatus'] ?? 0,
       facilityPersonType: json['facilityPersonType'] ?? 0,
       personName: json['personName'] ?? '',
@@ -75,6 +92,7 @@ class CssModel {
       otherCategoryPremise: json['other_CategoryPremise'] ?? '',
       licenseStatus: json['licenseStatus'] ?? 0,
       licenseNo: json['licenseNo'] ?? '',
+      licenseExpiryDate: json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? '',
       unlicensed: json['unlicensed'] ?? 0,
       categoryStatus: json['categoryStatus'] ?? 0,
       premisesCondition: json['premisesCondition'] ?? 0,
@@ -106,6 +124,7 @@ class CssModel {
       'other_CategoryPremise': otherCategoryPremise,
       'licenseStatus': licenseStatus,
       'licenseNo': licenseNo,
+      'licenseExpiryDate': licenseExpiryDate,
       'unlicensed': unlicensed,
       'categoryStatus': categoryStatus,
       'premisesCondition': premisesCondition,
@@ -235,6 +254,7 @@ class CssModel {
     String? otherCategoryPremise,
     int? licenseStatus,
     String? licenseNo,
+    String? licenseExpiryDate,
     int? unlicensed,
     int? categoryStatus,
     int? premisesCondition,
@@ -263,6 +283,7 @@ class CssModel {
       otherCategoryPremise: otherCategoryPremise ?? this.otherCategoryPremise,
       licenseStatus: licenseStatus ?? this.licenseStatus,
       licenseNo: licenseNo ?? this.licenseNo,
+      licenseExpiryDate: licenseExpiryDate ?? this.licenseExpiryDate,
       unlicensed: unlicensed ?? this.unlicensed,
       categoryStatus: categoryStatus ?? this.categoryStatus,
       premisesCondition: premisesCondition ?? this.premisesCondition,

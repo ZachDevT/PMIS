@@ -1,22 +1,37 @@
+import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:pmis/data/repositories/CssRepository/CssRepository.dart';
 import 'package:pmis/data/repositories/GdpRepository/GdpRepository.dart';
 import 'package:pmis/data/repositories/GppRepository/GppRepository.dart';
 import 'package:pmis/data/repositories/PmsaRepo/PmsaRepo.dart';
+import 'package:pmis/data/repositories/RtsRepository/RtsRepository.dart';
+import 'package:pmis/data/repositories/ShiftMarketRepository/ShiftMarketRepository.dart';
+import 'package:pmis/data/repositories/EnforcementRepository/EnforcementRepository.dart';
+import 'package:pmis/data/repositories/SensitizationMeetingRepository/SensitizationMeetingRepository.dart';
 import 'package:pmis/utils/popups/loaders.dart';
 
 class SyncManager extends GetxController {
   static SyncManager get instance => Get.find();
 
-  final CssRepository _cssRepo = Get.find<CssRepository>();
-  final GdpRepository _gdpRepo = Get.find<GdpRepository>();
-  final GppRepository _gppRepo = Get.find<GppRepository>();
-  final PmsaRepository _pmsaRepo = Get.find<PmsaRepository>();
+  // Use lazy getters instead of field initializers to avoid null errors
+  CssRepository get _cssRepo => Get.find<CssRepository>();
+  GdpRepository get _gdpRepo => Get.find<GdpRepository>();
+  GppRepository get _gppRepo => Get.find<GppRepository>();
+  PmsaRepository get _pmsaRepo => Get.find<PmsaRepository>();
+  RtsRepository get _rtsRepo => Get.find<RtsRepository>();
+  ShiftMarketRepository get _shiftMarketRepo =>
+      Get.find<ShiftMarketRepository>();
+  EnforcementRepository get _enforcementRepo =>
+      Get.find<EnforcementRepository>();
+  SensitizationMeetingRepository get _sensitizationRepo =>
+      Get.find<SensitizationMeetingRepository>();
 
   final RxBool _isSyncing = false.obs;
   final RxInt _totalPendingItems = 0.obs;
+  bool _isInitialized = false;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   /// Get sync status
   bool get isSyncing => _isSyncing.value;
@@ -24,24 +39,67 @@ class SyncManager extends GetxController {
   /// Get total pending items count
   int get totalPendingItems => _totalPendingItems.value;
 
+  /// Check if SyncManager is already initialized
+  bool get isInitialized => _isInitialized;
+
+  @override
+  void onClose() {
+    _connectivitySubscription?.cancel();
+    super.onClose();
+  }
+
   /// Initialize sync manager and listen for connectivity changes
   void initialize() {
-    // Listen for connectivity changes
-    Connectivity()
-        .onConnectivityChanged
-        .listen((List<ConnectivityResult> results) {
-      if (results.first != ConnectivityResult.none) {
-        // Connection restored, trigger automatic sync after a short delay
-        print('🌐 Internet connection restored - checking for pending data...');
-        Future.delayed(const Duration(seconds: 2), () async {
-          await performSync(showProgress: true); // Show progress for connectivity restoration
-        });
-      }
-    });
+    // Prevent multiple initializations
+    if (_isInitialized) {
+      print('⚠️ SyncManager already initialized, skipping...');
+      return;
+    }
 
-    // Calculate initial pending count
-    _updatePendingCount();
-    print('✅ SyncManager initialized - Automatic sync enabled');
+    try {
+      // Listen for connectivity changes
+      _connectivitySubscription = Connectivity()
+          .onConnectivityChanged
+          .listen((List<ConnectivityResult> results) {
+        try {
+          final resolvedResult = _resolveConnectivityResult(results);
+          if (resolvedResult != ConnectivityResult.none) {
+            // Connection restored, trigger automatic sync after a short delay
+            print(
+                '🌐 Internet connection restored - checking for pending data...');
+            Future.delayed(const Duration(seconds: 2), () async {
+              try {
+                await performSync(showProgress: true);
+              } catch (e) {
+                print('Error during auto-sync: $e');
+              }
+            });
+          }
+        } catch (e) {
+          print('Error handling connectivity change: $e');
+        }
+      });
+
+      // Calculate initial pending count (defer to avoid blocking main thread)
+      Future.microtask(() => _updatePendingCount());
+
+      _isInitialized = true;
+      print('✅ SyncManager initialized - Automatic sync enabled');
+    } catch (e) {
+      print('Error initializing SyncManager: $e');
+      // Still allow the manager to function, just without connectivity listener
+      Future.microtask(() => _updatePendingCount());
+      _isInitialized =
+          true; // Mark as initialized even on error to prevent retries
+    }
+  }
+
+  ConnectivityResult _resolveConnectivityResult(List<ConnectivityResult> results) {
+    if (results.isEmpty) return ConnectivityResult.none;
+    if (results.any((item) => item != ConnectivityResult.none)) {
+      return ConnectivityResult.wifi;
+    }
+    return ConnectivityResult.none;
   }
 
   /// Update the total count of pending sync items
@@ -53,8 +111,19 @@ class SyncManager extends GetxController {
       // Get counts from repositories
       final gdpCount = _gdpRepo.getOfflineActivitiesCount();
       final pmsCount = _pmsaRepo.getOfflineActivitiesCount();
+      final rtsCount = _rtsRepo.getOfflineActivitiesCount();
+      final shiftMarketCount = _shiftMarketRepo.getOfflineActivitiesCount();
+      final enforcementCount = _enforcementRepo.getOfflineActivitiesCount();
+      final sensitizationCount = _sensitizationRepo.getOfflineActivitiesCount();
 
-      _totalPendingItems.value = cssCount + gdpCount + gppCount + pmsCount;
+      _totalPendingItems.value = cssCount +
+          gdpCount +
+          gppCount +
+          pmsCount +
+          rtsCount +
+          shiftMarketCount +
+          enforcementCount +
+          sensitizationCount;
     } catch (e) {
       print('Error updating pending count: $e');
     }
@@ -83,8 +152,8 @@ class SyncManager extends GetxController {
 
     try {
       // Check connectivity
-      final connectivity = await Connectivity().checkConnectivity();
-      if (connectivity.first == ConnectivityResult.none) {
+      final results = await Connectivity().checkConnectivity();
+      if (_resolveConnectivityResult(results) == ConnectivityResult.none) {
         Loaders.errorSnackbar(
           title: "No Internet",
           message: "Please check your internet connection",
@@ -132,8 +201,53 @@ class SyncManager extends GetxController {
         syncResults['pms'] = 0;
       }
 
+      // Sync RTS activities
+      try {
+        final rtsSynced = await _rtsRepo.syncLocalActivities();
+        syncResults['rts'] = rtsSynced.length;
+        print('RTS sync completed: ${rtsSynced.length} items');
+      } catch (e) {
+        print('RTS sync failed: $e');
+        syncResults['rts'] = 0;
+      }
+
+      // Sync Shift Market activities
+      try {
+        final shiftMarketSynced = await _shiftMarketRepo.syncLocalActivities();
+        syncResults['shiftmarket'] = shiftMarketSynced.length;
+        print('Shift Market sync completed: ${shiftMarketSynced.length} items');
+      } catch (e) {
+        print('Shift Market sync failed: $e');
+        syncResults['shiftmarket'] = 0;
+      }
+
+      // Sync Enforcement activities
+      try {
+        final enforcementSynced = await _enforcementRepo.syncLocalActivities();
+        syncResults['enforcement'] = enforcementSynced.length;
+        print('Enforcement sync completed: ${enforcementSynced.length} items');
+      } catch (e) {
+        print('Enforcement sync failed: $e');
+        syncResults['enforcement'] = 0;
+      }
+
+      // Sync Sensitization Meeting activities
+      try {
+        final sensitizationSynced =
+            await _sensitizationRepo.syncLocalActivities();
+        syncResults['sensitization'] = sensitizationSynced.length;
+        print(
+            'Sensitization Meeting sync completed: ${sensitizationSynced.length} items');
+      } catch (e) {
+        print('Sensitization Meeting sync failed: $e');
+        syncResults['sensitization'] = 0;
+      }
+
       // Update pending count
       _updatePendingCount();
+
+      // ⬇️ FIX: Reload all controller data so synced records appear in reports
+      await _reloadAllControllerData();
 
       // Show success message
       if (showProgress) {
@@ -178,6 +292,103 @@ class SyncManager extends GetxController {
     return syncResults;
   }
 
+  /// Reload all controller data after sync to show synced records immediately
+  Future<void> _reloadAllControllerData() async {
+    print('🔄 Reloading all controller data after sync...');
+
+    // Reload CSS controller if registered
+    try {
+      if (Get.isRegistered<dynamic>(tag: 'CssController')) {
+        final dynamic controller = Get.find(tag: 'CssController');
+        await controller.loadActivities();
+        print(' Reloaded CSS data');
+      }
+    } catch (e) {
+      print('CSS controller not registered or error reloading: $e');
+    }
+
+    // Reload GPP controller
+    try {
+      if (Get.isRegistered<dynamic>(tag: 'GppController')) {
+        final dynamic controller = Get.find(tag: 'GppController');
+        await controller.loadActivities();
+        print('✓ Reloaded GPP data');
+      }
+    } catch (e) {
+      print('GPP controller not registered or error reloading: $e');
+    }
+
+    // Reload GDP controller
+    try {
+      if (Get.isRegistered<dynamic>(tag: 'GdpController')) {
+        final dynamic controller = Get.find(tag: 'GdpController');
+        await controller.loadActivities();
+        print('✓ Reloaded GDP data');
+      }
+    } catch (e) {
+      print('GDP controller not registered or error reloading: $e');
+    }
+
+    // Reload PMSA controller
+    try {
+      if (Get.isRegistered<dynamic>(tag: 'PmsaController')) {
+        final dynamic controller = Get.find(tag: 'PmsaController');
+        await controller.loadActivities();
+        print('✓ Reloaded PMSA data');
+      }
+    } catch (e) {
+      print('PMSA controller not registered or error reloading: $e');
+    }
+
+    // Reload RTS controller
+    try {
+      if (Get.isRegistered<dynamic>(tag: 'RtsController')) {
+        final dynamic controller = Get.find(tag: 'RtsController');
+        await controller.loadActivities();
+        print('✓ Reloaded RTS data');
+      }
+    } catch (e) {
+      print('RTS controller not registered or error reloading: $e');
+    }
+
+    // Reload Shift Market controller
+    try {
+      if (Get.isRegistered<dynamic>(tag: 'ShiftMarketController')) {
+        final dynamic controller = Get.find(tag: 'ShiftMarketController');
+        await controller.loadActivities();
+        print('✓ Reloaded Shift Market data');
+      }
+    } catch (e) {
+      print('Shift Market controller not registered or error reloading: $e');
+    }
+
+    // Reload Enforcement controller
+    try {
+      if (Get.isRegistered<dynamic>(tag: 'EnforcementController')) {
+        final dynamic controller = Get.find(tag: 'EnforcementController');
+        await controller.loadActivities();
+        print('✓ Reloaded Enforcement data');
+      }
+    } catch (e) {
+      print('Enforcement controller not registered or error reloading: $e');
+    }
+
+    // Reload Sensitization Meeting controller
+    try {
+      if (Get.isRegistered<dynamic>(tag: 'SensitizationMeetingController')) {
+        final dynamic controller =
+            Get.find(tag: 'SensitizationMeetingController');
+        await controller.loadActivities();
+        print('✓ Reloaded Sensitization Meeting data');
+      }
+    } catch (e) {
+      print(
+          'Sensitization Meeting controller not registered or error reloading: $e');
+    }
+
+    print('✅ Controller data reload complete');
+  }
+
   /// Sync specific module only
   Future<int> syncModule(String moduleName) async {
     if (_isSyncing.value) return 0;
@@ -200,6 +411,21 @@ class SyncManager extends GetxController {
         case 'pms':
         case 'pmsa':
           syncedItems = await _pmsaRepo.syncLocalActivities();
+          break;
+        case 'rts':
+          syncedItems = await _rtsRepo.syncLocalActivities();
+          break;
+        case 'shiftmarket':
+        case 'sm':
+          syncedItems = await _shiftMarketRepo.syncLocalActivities();
+          break;
+        case 'enforcement':
+        case 'enf':
+          syncedItems = await _enforcementRepo.syncLocalActivities();
+          break;
+        case 'sensitization':
+        case 'sensitizationmeeting':
+          syncedItems = await _sensitizationRepo.syncLocalActivities();
           break;
         default:
           print('Unknown module: $moduleName');
@@ -233,6 +459,10 @@ class SyncManager extends GetxController {
       'gdp': _gdpRepo.getOfflineActivitiesCount(),
       'gpp': _gppRepo.getOfflineActivitiesCount(),
       'pms': _pmsaRepo.getOfflineActivitiesCount(),
+      'rts': _rtsRepo.getOfflineActivitiesCount(),
+      'shiftmarket': _shiftMarketRepo.getOfflineActivitiesCount(),
+      'enforcement': _enforcementRepo.getOfflineActivitiesCount(),
+      'sensitization': _sensitizationRepo.getOfflineActivitiesCount(),
       'total': _totalPendingItems.value,
     };
   }

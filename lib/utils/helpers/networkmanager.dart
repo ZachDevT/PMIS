@@ -14,37 +14,38 @@ class NetworkManager extends GetxController {
 
   final Rx<ConnectivityResult> _connectionStatus = ConnectivityResult.none.obs;
 
-// Initialize the network Manager and listen to the status
   @override
   void onInit() {
-    // implement onInit
     super.onInit();
-    connectivitysubscription =
-        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    connectivitysubscription = _connectivity.onConnectivityChanged
+        .listen(_updateConnectionStatus);
   }
 
   // update the connection status
-
   Future<void> _updateConnectionStatus(List<ConnectivityResult> results) async {
-    _connectionStatus.value = results.first;
+    final normalizedResult = _resolveConnectivityResult(results);
+    _connectionStatus.value = normalizedResult;
     if (_connectionStatus.value == ConnectivityResult.none) {
       Loaders.errorSnackbar(
         title: "Oups!",
-        message: "No Internet Connection");
+        message: "No Internet Connection",
+      );
     }
   }
 
-  // Check the internet connection status
+  ConnectivityResult _resolveConnectivityResult(List<ConnectivityResult> results) {
+    if (results.isEmpty) return ConnectivityResult.none;
+    if (results.any((item) => item != ConnectivityResult.none)) {
+      return ConnectivityResult.wifi;
+    }
+    return ConnectivityResult.none;
+  }
 
+  // Check the internet connection status
   Future<bool> isconnected() async {
     try {
-      final result = await _connectivity.checkConnectivity();
-
-      if (result == ConnectivityResult.none) {
-        return false;
-      } else {
-        return true;
-      }
+      final results = await _connectivity.checkConnectivity();
+      return _resolveConnectivityResult(results) != ConnectivityResult.none;
     } on PlatformException catch (_) {
       return false;
     }
