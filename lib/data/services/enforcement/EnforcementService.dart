@@ -22,6 +22,8 @@ class EnforcementService {
       ).timeout(_timeoutDuration);
 
       return _handleResponse(response);
+    } on TimeoutException {
+      throw const TimeoutException('Request timeout. Please try again.');
     } on SocketException {
       throw const NetworkException(
           'No internet connection. Please check your network.');
@@ -31,6 +33,11 @@ class EnforcementService {
       throw const ServerException('Invalid response format from server.');
     } catch (e) {
       if (e is ApiException) rethrow;
+      // Check if it's a timeout error
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
+        throw const TimeoutException('Request timeout. Please try again.');
+      }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
     }
   }
@@ -102,35 +109,125 @@ class EnforcementService {
 
   /// Convert to API format for Enforcement
   Map<String, dynamic> _convertToPascalCase(Map<String, dynamic> data) {
-    // Based on the existing Enforcement data structure
-    return {
-      'inspectionDate': data['inspectionDate'] is DateTime 
-          ? (data['inspectionDate'] as DateTime).toIso8601String()
-          : DateTime.parse(data['inspectionDate']).toIso8601String(),
-      'inspectorName': data['inspectorName'],
-      'GPS': data['gps'] ?? '${data['latitude']?.toDouble() ?? 0.0}, ${data['longitude']?.toDouble() ?? 0.0}',
-      'latitude': data['latitude']?.toDouble() ?? 0.0,
-      'longitude': data['longitude']?.toDouble() ?? 0.0,
-      'intRegion': data['region'] != null ? _getRegionGuid(data['region']) : null,
-      'districtId': data['district'] != null ? _getDistrictId(data['district']) : null,
-      'FacilityName': data['facilityName'], // PascalCase for API
-      'facilityStatus': _getFacilityStatus(data['facilityStatus']),
-      'facilityPersonType': 1, // Default value
-      'PersonName': data['personName'], // PascalCase for API
-      'Contact': data['contact'], // PascalCase for API
-      'Qualifications': data['qualifications'], // PascalCase for API
-      'categoryOfpremises': _getCategoryOfPremises(data['categoryOfPremises']),
-      'licenseStatus': 1, // Default value
-      'licenseNo': '',
-      'unlicensed': 0, // Default value
-      'categoryStatus': 1, // Default value
-      'premisesCondition': 1, // Default value
-      'recordKeeping': 1, // Default value
-      'classofDrugs': 0, // Default value
-      'unRegisteredDrug': 0, // Default value
-      'unRegDrugQty': '',
-      'action': 0, // Default value
-    };
+    final Map<String, dynamic> converted = {};
+
+    // Inspection date
+    if (data['inspectionDate'] is DateTime) {
+      converted['InspectionDate'] =
+          (data['inspectionDate'] as DateTime).toIso8601String();
+    } else {
+      converted['InspectionDate'] =
+          DateTime.parse(data['inspectionDate']).toIso8601String();
+    }
+
+    // Basic fields
+    converted['InspectorName'] = data['inspectorName'];
+    converted['InspectorId'] = data['inspectorId'];
+
+    // GPS / LatLng
+    if (data['gps'] != null && (data['gps'] as String).isNotEmpty) {
+      converted['Gps'] = data['gps'];
+    } else {
+      final lat = data['latitude']?.toDouble() ?? 0.0;
+      final lon = data['longitude']?.toDouble() ?? 0.0;
+      converted['Gps'] = '\$lat,\$lon'
+          .replaceAll('\$lat', lat.toString())
+          .replaceAll('\$lon', lon.toString());
+      converted['Latitude'] = lat;
+      converted['Longitude'] = lon;
+    }
+
+    // Region / District
+    converted['IntRegion'] =
+        data['region'] != null ? _getRegionGuid(data['region']) : null;
+    converted['DistrictId'] =
+        data['district'] != null ? _getDistrictId(data['district']) : null;
+
+    // Facility details
+    converted['FacilityName'] = data['facilityName'];
+    converted['FacilityStatus'] = _getFacilityStatus(data['facilityStatus']);
+    converted['FacilityPersonType'] = 1;
+    converted['PersonName'] = data['personName'];
+    converted['Contact'] = data['contact'];
+    converted['Qualifications'] = data['qualifications'];
+    converted['CategoryOfpremises'] =
+        _getCategoryOfPremises(data['categoryOfPremises']);
+
+    // License handling
+    converted['LicenseStatus'] = _mapLicenseStatus(data['licenseStatus']);
+    if (data.containsKey('licenseNo'))
+      converted['LicenseNo'] = data['licenseNo'];
+    if (data.containsKey('licenseExpiryDate') &&
+        (data['licenseExpiryDate'] as String).isNotEmpty) {
+      converted['LicenseExpiryDate'] = data['licenseExpiryDate'];
+    }
+
+    // Category and enforcement action
+    converted['CategoryStatus'] = _mapCategoryStatus(data['categoryStatus']);
+    final actionCode = _mapEnforcementAction(data['enforcementActionTaken']);
+    converted['EnfAction'] = actionCode;
+    // Some backends expect 'enforcement' field name — include both
+    converted['Enforcement'] = actionCode;
+    converted['Comments'] = data['comments'];
+
+    return converted;
+  }
+
+  int _mapLicenseStatus(dynamic status) {
+    // Accept numeric or string labels
+    if (status is int) return status;
+    if (status is String) {
+      final s = status.toLowerCase();
+      if (s.contains('licensed')) return 1;
+      if (s.contains('un')) return 2;
+      if (s.contains('not')) return 3;
+    }
+    return 1; // default to Licensed
+  }
+
+  int _mapEnforcementAction(dynamic action) {
+    if (action is int) return action;
+    if (action is String) {
+      switch (action.toLowerCase()) {
+        case 'warning':
+          return 1;
+        case 'fine':
+          return 2;
+        case 'closure':
+        case 'close':
+          return 3;
+        case 'impound':
+          return 4;
+        case 'seizure':
+          return 5;
+        case 'arrest':
+          return 6;
+        default:
+          return 0;
+      }
+    }
+    return 0;
+  }
+
+  int _mapCategoryStatus(dynamic status) {
+    if (status is int) return status;
+    if (status is String) {
+      switch (status) {
+        case 'Medical Device':
+          return 1;
+        case 'Veterinary drugs':
+          return 2;
+        case 'Human drugs':
+          return 3;
+        case 'Public Healthcare products':
+          return 4;
+        case 'Herbal drugs':
+          return 5;
+        default:
+          return 1;
+      }
+    }
+    return 1;
   }
 
   /// Get region GUID from region name
@@ -171,7 +268,7 @@ class EnforcementService {
 
   /// Get facility status code
   int _getFacilityStatus(String status) {
-    switch (status?.toUpperCase()) {
+    switch (status.toUpperCase()) {
       case 'OPEN':
         return 1;
       case 'CLOSED':
@@ -183,7 +280,7 @@ class EnforcementService {
 
   /// Get category of premises code
   int _getCategoryOfPremises(String category) {
-    switch (category?.toUpperCase()) {
+    switch (category.toUpperCase()) {
       case 'WHOLESALE PHARMACY':
         return 1;
       case 'RETAIL PHARMACY':
@@ -219,13 +316,15 @@ class EnforcementService {
 
   /// Post Enforcement data to the API
   /// Returns success response on success, throws appropriate exception on failure
-  Future<Map<String, dynamic>> postEnforcementData(Map<String, dynamic> enforcementData) async {
+  Future<Map<String, dynamic>> postEnforcementData(
+      Map<String, dynamic> enforcementData) async {
     try {
       final uri = Uri.parse('$_baseUrl/Enforcement');
       print('🌐 DEBUG: Enforcement API URL: $uri');
 
       // Convert camelCase to PascalCase for API
-      final Map<String, dynamic> apiData = _convertToPascalCase(enforcementData);
+      final Map<String, dynamic> apiData =
+          _convertToPascalCase(enforcementData);
       print('🔄 DEBUG: Converted Enforcement API data: $apiData');
 
       print('📤 DEBUG: Sending POST request to Enforcement API...');
@@ -240,10 +339,13 @@ class EnforcementService {
           )
           .timeout(_timeoutDuration);
 
-      print('📥 DEBUG: Enforcement API Response Status: ${response.statusCode}');
+      print(
+          '📥 DEBUG: Enforcement API Response Status: ${response.statusCode}');
       print('📥 DEBUG: Enforcement API Response Body: ${response.body}');
 
       return _handlePostResponse(response);
+    } on TimeoutException {
+      throw const TimeoutException('Request timeout. Please try again.');
     } on SocketException {
       throw const NetworkException(
           'No internet connection. Please check your network.');
@@ -253,6 +355,11 @@ class EnforcementService {
       throw const ServerException('Invalid response format from server.');
     } catch (e) {
       if (e is ApiException) rethrow;
+      // Check if it's a timeout error
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
+        throw const TimeoutException('Request timeout. Please try again.');
+      }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
     }
   }
@@ -264,7 +371,10 @@ class EnforcementService {
       case 201:
         try {
           if (response.body.isEmpty) {
-            return {'success': true, 'message': 'Enforcement data saved successfully'};
+            return {
+              'success': true,
+              'message': 'Enforcement data saved successfully'
+            };
           }
 
           final Map<String, dynamic> data =

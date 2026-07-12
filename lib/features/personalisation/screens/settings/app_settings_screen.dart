@@ -86,7 +86,7 @@ class AppSettingsScreen extends StatelessWidget {
                   trailing: Switch(
                     value: true,
                     onChanged: (value) {},
-                    activeColor: Tcolors.primary,
+                    activeThumbColor: Tcolors.primary,
                   ),
                 ),
                 _buildSettingsItem(
@@ -305,7 +305,10 @@ class AppSettingsScreen extends StatelessWidget {
       child: InkWell(
         onTap: () {
           Get.back();
-          Get.snackbar('Language Changed', 'Language set to $name');
+          Loaders.successSnackbar(
+            title: 'Language Changed',
+            message: 'Language set to $name',
+          );
         },
         child: Container(
           padding: const EdgeInsets.all(16),
@@ -446,7 +449,10 @@ class AppSettingsScreen extends StatelessWidget {
       child: InkWell(
         onTap: () {
           Get.back();
-          Get.snackbar('Setting Changed', '$value selected');
+          Loaders.successSnackbar(
+            title: 'Setting Changed',
+            message: '$value selected',
+          );
         },
         child: Container(
           padding: const EdgeInsets.all(16),
@@ -496,7 +502,10 @@ class AppSettingsScreen extends StatelessWidget {
           TextButton(
             onPressed: () {
               Get.back();
-              Get.snackbar('Cache Cleared', 'App cache has been cleared');
+              Loaders.successSnackbar(
+                title: 'Cache Cleared',
+                message: 'App cache has been cleared',
+              );
             },
             child: const Text('Clear'),
           ),
@@ -506,13 +515,16 @@ class AppSettingsScreen extends StatelessWidget {
   }
 
   void _showOfflineDialog(BuildContext context) {
-    Get.snackbar('Offline Mode', 'Offline mode feature coming soon');
+    Loaders.warningSnackbar(
+      title: 'Offline Mode',
+      message: 'Offline mode feature coming soon',
+    );
   }
 
   String _getSyncStatus() {
     try {
       final syncManager = Get.find<SyncManager>();
-      return syncManager.totalPendingItems > 0 
+      return syncManager.totalPendingItems > 0
           ? '${syncManager.totalPendingItems} items pending'
           : 'All data synced';
     } catch (e) {
@@ -524,47 +536,47 @@ class AppSettingsScreen extends StatelessWidget {
     try {
       final syncManager = Get.find<SyncManager>();
       syncManager.initialize();
-    
-    if (syncManager.isSyncing) {
-      Loaders.warningSnackbar(
-        title: "Already Syncing",
-        message: "Synchronization is already in progress...",
-      );
-      return;
-    }
 
-    if (syncManager.totalPendingItems == 0) {
-      Loaders.successSnackbar(
-        title: "Nothing to Sync",
-        message: "All data is already synchronized",
-      );
-      return;
-    }
+      if (syncManager.isSyncing) {
+        Loaders.warningSnackbar(
+          title: "Already Syncing",
+          message: "Synchronization is already in progress...",
+        );
+        return;
+      }
 
-    // Show confirmation dialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sync Offline Data'),
-        content: Text('Sync ${syncManager.totalPendingItems} pending items?'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Get.back();
-              await syncManager.performSync();
-              // Update the page to reflect new counts
-              Get.back(); // Close settings
-              Get.to(() => const AppSettingsScreen()); // Refresh settings
-            },
-            child: const Text('Sync'),
-          ),
-        ],
-      ),
-    );
+      if (syncManager.totalPendingItems == 0) {
+        Loaders.successSnackbar(
+          title: "Nothing to Sync",
+          message: "All data is already synchronized",
+        );
+        return;
+      }
+
+      // Show confirmation dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Sync Offline Data'),
+          content: Text('Sync ${syncManager.totalPendingItems} pending items?'),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Get.back();
+                await syncManager.performSync();
+                // Update the page to reflect new counts
+                Get.back(); // Close settings
+                Get.to(() => const AppSettingsScreen()); // Refresh settings
+              },
+              child: const Text('Sync'),
+            ),
+          ],
+        ),
+      );
     } catch (e) {
       Loaders.errorSnackbar(
         title: "Sync Error",

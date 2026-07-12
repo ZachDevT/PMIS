@@ -5,6 +5,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:pmis/utils/constants/colors.dart';
 import 'package:pmis/utils/constants/sizes.dart';
 import 'package:pmis/utils/helpers/helpers_functions.dart';
+import 'package:pmis/utils/popups/loaders.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -258,7 +259,7 @@ class _NotificationSettingsScreenState
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Tcolors.primary,
+            activeThumbColor: Tcolors.primary,
           ),
         ],
       ),
@@ -479,7 +480,10 @@ class _NotificationSettingsScreenState
       child: InkWell(
         onTap: () {
           Get.back();
-          Get.snackbar('Quiet Hours', 'Set to $time');
+          Loaders.successSnackbar(
+            title: 'Quiet Hours',
+            message: 'Set to $time',
+          );
         },
         child: Container(
           padding: const EdgeInsets.all(16),
@@ -522,7 +526,10 @@ class _NotificationSettingsScreenState
       child: InkWell(
         onTap: () {
           Get.back();
-          Get.snackbar('Weekend Notifications', 'Set to $option');
+          Loaders.successSnackbar(
+            title: 'Weekend Notifications',
+            message: 'Set to $option',
+          );
         },
         child: Container(
           padding: const EdgeInsets.all(16),

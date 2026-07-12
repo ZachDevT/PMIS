@@ -1,14 +1,44 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:pmis/data/services/enforcement/EnforcementService.dart';
+import 'package:pmis/utils/helpers/networkmanager.dart';
+import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'dart:io';
 
 class EnforcementRepository {
   final EnforcementService _service = Get.find<EnforcementService>();
   final box = GetStorage();
 
   /// Fetch Enforcement data from the API
-  Future<List<Map<String, dynamic>>> getEnforcementData() {
-    return _service.getEnforcementData();
+  Future<List<Map<String, dynamic>>> getEnforcementData() async {
+    try {
+      // Check connectivity before making API call
+      final networkManager = Get.find<NetworkManager>();
+      final isOnline = await networkManager.isconnected();
+      
+      if (!isOnline) {
+        print('No internet connection, returning empty list');
+        return [];
+      }
+      
+      return await _service.getEnforcementData();
+    } on TimeoutException catch (e) {
+      print('Timeout error fetching Enforcement data: ${e.message}');
+      return [];
+    } on SocketException catch (e) {
+      print('Network error fetching Enforcement data: ${e.message}');
+      return [];
+    } on NetworkException catch (e) {
+      print('Network exception: ${e.message}');
+      return [];
+    } catch (e) {
+      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+        print('Timeout error detected: ${e.toString()}');
+        return [];
+      }
+      print('Error fetching Enforcement data: $e');
+      return [];
+    }
   }
 
   /// Post Enforcement data to the API

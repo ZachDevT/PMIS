@@ -1,0 +1,101 @@
+Subject: Supabase realtime + API 500 errors observed from client
+
+Environment:
+- App: PMIS (debug APK)
+- Device: Android emulator
+- Date: 2026-07-12
+
+Observed client issues (copy-paste-ready):
+
+1) Realtime websocket upgrade failing with HTTP 403
+---
+Unhandled Exception: RealtimeSubscribeException(status: RealtimeSubscribeStatus.channelError,
+ details: WebSocketChannelException: WebSocketException:
+ Connection to 'https://rcyxpjpoablzzyoepscr.supabase.co:0/realtime/v1/websocket?apikey=[REDACTED]&vsn=1.0.0#'
+ was not upgraded to websocket, HTTP status code: 403)
+Stack (top frames):
+- package:supabase/src/supabase_stream_builder.dart:333:67
+- package:realtime_client/src/realtime_channel.dart:148:39
+- package:realtime_client/src/realtime_client.dart:192:11
+---
+
+2) DNS / host lookup failures (intermittent)
+---
+Unhandled Exception: RealtimeSubscribeException(status: RealtimeSubscribeStatus.channelError,
+ details: WebSocketChannelException: SocketException: Failed host lookup: 'rcyxpjpoablzzyoepscr.supabase.co'
+ (OS Error: No address associated with hostname, errno = 7))
+Stack (top frames): same as above
+---
+
+3) Internal server errors (500) for several endpoints
+---
+Error fetching GPP data: ApiException: Internal server error. Please try again later
+Error fetching GDP activities: ApiException: Internal server error. Please try again later
+Error fetching Enforcement data: ApiException: Internal server error. Please try again later
+---
+
+Client-side context and notes:
+- CSS and PMS GETs succeeded; CSS returned 4 records. Example record:
+  { ..., licenseStatus: 1, licenseNo: null, unlicensed: 1, ... }
+- Realtime connect attempts appear to be using an URL with ":0" port and HTTP scheme in logs. Client uses Supabase/realtime client library.
+- API key is masked in this report; full URLs in app logs contained the publishable key.
+
+Suggested checks for backend developer (high priority):
+- Realtime (403):
+  - Confirm Realtime is enabled in the Supabase project and the correct realtime endpoint is documented for clients.
+  - Verify clients should connect to the correct scheme+host (prefer `wss://<project>.supabase.co/realtime/v1`) and that client code is not appending `:0` port.
+  - Verify the API key used is permitted for websocket subscriptions; check publishable vs service-role key usage and any restrictions.
+  - Check Realtime server logs for the rejected connection attempts and exact rejection reason (CORS/origin, auth, invalid path).
+  - Validate RLS/policies that may block subscribe requests.
+
+- DNS / host lookup:
+  - Confirm the project domain resolves correctly from client networks (dig/nslookup from CI or cloud region).
+  - Check for recent DNS changes, CDN outages, or firewall/route rules that may prevent resolution.
+
+- 500 Internal errors:
+  - Inspect server logs for stack traces at the timestamps when client reported failures and attach them.
+  - Check DB connectivity, migrations, and input validation for GPP/GDP/Enforcement endpoints.
+  - Share request IDs or exact timestamps so client logs can be correlated.
+
+What client can provide on request:
+- Exact request payloads for failed POSTs (I can capture and attach if you need them).
+- Full client log excerpts with timestamps and request IDs (API key masked).
+- Steps to reproduce locally on emulator (I can re-run and capture timestamps on demand).
+
+Immediate asks to backend dev:
+1) Look up realtime logs for connection rejections around 2026-07-12 and share rejection reasons.
+2) Check GPP/GDP/Enforcement endpoint server logs for 500s and share stack traces or root cause.
+3) Confirm recommended realtime URL and whether publishable keys may be rejected for subscribe.
+
+If you want me to attach the full masked log file or capture request payloads/timestamps, say which items you need and I'll produce them.
+
+Latest client run logs (2026-07-12) — copy-paste-ready (API keys masked):
+
+--- Realtime 403 (websocket upgrade failed) ---
+Unhandled Exception: RealtimeSubscribeException(status: RealtimeSubscribeStatus.channelError,
+ details: WebSocketChannelException: WebSocketException:
+ Connection to 'https://rcyxpjpoablzzyoepscr.supabase.co:0/realtime/v1/websocket?apikey=[REDACTED]&vsn=1.0.0#'
+ was not upgraded to websocket, HTTP status code: 403)
+#0      SupabaseStreamBuilder._addException (package:supabase/src/supabase_stream_builder.dart:333:67)
+#1      SupabaseStreamBuilder._getStreamData.<anonymous closure> (package:supabase/src/supabase_stream_builder.dart:231:11)
+#2      RealtimeChannel.subscribe.<anonymous closure> (package:realtime_client/src/realtime_channel.dart:148:39)
+#3      RealtimeChannel._onError.<anonymous closure> (package:realtime_client/src/realtime_channel.dart:290:36)
+
+--- DNS / host lookup failure (intermittent) ---
+Unhandled Exception: RealtimeSubscribeException(status: RealtimeSubscribeStatus.channelError,
+ details: WebSocketChannelException: SocketException: Failed host lookup: 'rcyxpjpoablzzyoepscr.supabase.co'
+ (OS Error: No address associated with hostname, errno = 7))
+#0      SupabaseStreamBuilder._addException (package:supabase/src/supabase_stream_builder.dart:333:67)
+#1      SupabaseStreamBuilder._getStreamData.<anonymous closure> (package:supabase/src/supabase_stream_builder.dart:231:11)
+
+--- Internal server errors observed ---
+Error fetching GPP data: ApiException: Internal server error. Please try again later
+Error fetching GDP activities: ApiException: Internal server error. Please try again later
+Error fetching Enforcement data: ApiException: Internal server error. Please try again later
+
+Notes on reproduction from client run:
+- App built and installed via Flutter debug APK on Android emulator.
+- CSS and PMS GETs succeeded in same run; CSS returned 4 records (sample included earlier).
+- Realtime failures occur repeatedly during initialization; DNS failures appear after intermittent network restoration.
+
+-- End of report

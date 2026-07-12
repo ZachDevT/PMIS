@@ -21,6 +21,7 @@ class GppActivity {
   final double latitude;
   final double longitude;
   final String? licenseNo;
+  final String? licenseExpiryDate;
 
   GppActivity({
     required this.id,
@@ -45,6 +46,7 @@ class GppActivity {
     required this.latitude,
     required this.longitude,
     this.licenseNo,
+    this.licenseExpiryDate,
   });
 
   factory GppActivity.fromJson(Map<String, dynamic> json) => GppActivity(
@@ -70,6 +72,7 @@ class GppActivity {
         latitude: (json['latitude'] ?? 0.0).toDouble(),
         longitude: (json['longitude'] ?? 0.0).toDouble(),
         licenseNo: json['licenseNo'],
+        licenseExpiryDate: json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -95,6 +98,7 @@ class GppActivity {
         'latitude': latitude,
         'longitude': longitude,
         'licenseNo': licenseNo,
+        'licenseExpiryDate': licenseExpiryDate,
       };
 
   // Helper methods to convert numeric values to text

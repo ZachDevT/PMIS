@@ -142,7 +142,7 @@ class GdpForm extends StatelessWidget {
                   ),
                   buildTextField(
                     controller: controller.inspectorNameController,
-                    label: "Name of Inspector",
+                    label: "Inspector Name",
                     prefixIcon: Icons.person,
                     validator: (value) => value!.isEmpty ? "Required" : null,
                   ),
@@ -188,10 +188,23 @@ class GdpForm extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        buildDropdown(
+                          label: "Person found at facility",
+                          items: ["In-charge", "(Attendant/Operator)"],
+                          selectedItem: controller.personFoundController,
+                          prefixIcon: Icons.person_outline,
+                        ),
                         buildTextField(
-                          controller: controller.contactQualificationsController,
-                          label: "Contact Qualifications",
-                          prefixIcon: HugeIcons.strokeRoundedGraduateMale,
+                          controller: controller.nameController,
+                          label: "Name",
+                          prefixIcon: HugeIcons.strokeRoundedUser,
+                          validator: (value) =>
+                              value!.isEmpty ? "Required" : null,
+                        ),
+                        buildTextField(
+                          controller: controller.contactController,
+                          label: "Contact",
+                          prefixIcon: Icons.contact_phone,
                           validator: (value) =>
                               value!.isEmpty ? "Required" : null,
                         ),
@@ -202,13 +215,6 @@ class GdpForm extends StatelessWidget {
                           validator: (value) =>
                               value!.isEmpty ? "Required" : null,
                         ),
-                        buildTextField(
-                          controller: controller.nameController,
-                          label: "Name",
-                          prefixIcon: HugeIcons.strokeRoundedUser,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
-                        ),
                         // SECTION: Facility Category
                         const Text("Facility Category",
                             style: TextStyle(
@@ -216,16 +222,55 @@ class GdpForm extends StatelessWidget {
                         buildDropdown(
                           label: "Category of Facility",
                           items: [
+                            "Wholesale Pharmacy",
                             "Retail Pharmacy",
                             "Drug Shop",
+                            "External Stores",
                             "Hospital",
                             "HCIV",
                             "HCIII",
-                            "Clinic"
+                            "Clinic",
+                            "Herbal Selling Outlet",
+                            "Shift Market",
+                            "Pharmaceutical/Medical Device Manufacturing Premise",
+                            "Others"
                           ],
                           selectedItem: controller.selectedCategoryOfFacility,
                           prefixIcon: Icons.category,
                         ),
+                        buildDropdown(
+                          label: "License Status",
+                          items: ["Licensed", "Un-Licensed", "Not-Applicable"],
+                          selectedItem: controller.selectedLicenseStatus,
+                          prefixIcon: Icons.verified_user,
+                        ),
+                        if (controller.selectedLicenseStatus.value == "Licensed") ...[
+                          buildTextField(
+                            controller: controller.licenseNoController,
+                            label: "License No.",
+                            prefixIcon: Icons.badge,
+                            validator: (value) => value!.isEmpty ? "Required" : null,
+                          ),
+                          buildTextField(
+                            controller: controller.licenseExpiryDateController,
+                            label: "License Expiry Date",
+                            prefixIcon: Icons.date_range,
+                            readOnly: true,
+                            onTap: () async {
+                              DateTime? picked = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
+                              if (picked != null) {
+                                controller.licenseExpiryDateController.text =
+                                    picked.toLocal().toString().split(' ')[0];
+                              }
+                            },
+                            validator: (value) => value!.isEmpty ? "Required" : null,
+                          ),
+                        ],
                         // SECTION: Drugs & GDP Details
                         const Text("Drugs & GDP Details",
                             style: TextStyle(
@@ -248,6 +293,10 @@ class GdpForm extends StatelessWidget {
                           selectedItem: controller.selectedFacilityType,
                           prefixIcon: Icons.apartment,
                         ),
+                        // SECTION: GDP Certification
+                        const Text("GDP Certification",
+                            style: TextStyle(
+                                fontSize: 14, fontWeight: FontWeight.w500)),
                         buildDropdown(
                           label: "Certification Status",
                           items: ["Certified", "Not certified"],
@@ -255,10 +304,10 @@ class GdpForm extends StatelessWidget {
                           prefixIcon: Icons.verified,
                         ),
                         buildDropdown(
-                          label: "Recommended for GPP",
+                          label: "Recommended for GDP",
                           items: [
-                            "GPP certification",
-                            "Not recommended for GPP certification"
+                            "GDP certification",
+                            "Not recommended for GDP certification"
                           ],
                           selectedItem: controller.recommendedForGpp,
                           prefixIcon: Icons.recommend,

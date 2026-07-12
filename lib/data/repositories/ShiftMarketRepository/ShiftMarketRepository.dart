@@ -1,14 +1,44 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:pmis/data/services/shiftmarket/ShiftMarketService.dart';
+import 'package:pmis/utils/helpers/networkmanager.dart';
+import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'dart:io';
 
 class ShiftMarketRepository {
   final ShiftMarketService _service = Get.find<ShiftMarketService>();
   final box = GetStorage();
 
   /// Fetch Shift Market data from the API
-  Future<List<Map<String, dynamic>>> getShiftMarketData() {
-    return _service.getShiftMarketData();
+  Future<List<Map<String, dynamic>>> getShiftMarketData() async {
+    try {
+      // Check connectivity before making API call
+      final networkManager = Get.find<NetworkManager>();
+      final isOnline = await networkManager.isconnected();
+      
+      if (!isOnline) {
+        print('No internet connection, returning empty list');
+        return [];
+      }
+      
+      return await _service.getShiftMarketData();
+    } on TimeoutException catch (e) {
+      print('Timeout error fetching Shift Market data: ${e.message}');
+      return [];
+    } on SocketException catch (e) {
+      print('Network error fetching Shift Market data: ${e.message}');
+      return [];
+    } on NetworkException catch (e) {
+      print('Network exception: ${e.message}');
+      return [];
+    } catch (e) {
+      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+        print('Timeout error detected: ${e.toString()}');
+        return [];
+      }
+      print('Error fetching Shift Market data: $e');
+      return [];
+    }
   }
 
   /// Post Shift Market data to the API

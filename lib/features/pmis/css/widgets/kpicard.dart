@@ -26,7 +26,7 @@ class KpiCard extends StatelessWidget {
             width: 8,
             decoration: BoxDecoration(
               color: Tcolors.primary,
-              borderRadius: BorderRadius.only(
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(8),
                 bottomLeft: Radius.circular(8),
               ),

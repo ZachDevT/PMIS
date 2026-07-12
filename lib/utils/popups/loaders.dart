@@ -1,92 +1,104 @@
-import 'package:pmis/utils/constants/colors.dart';
-import 'package:pmis/utils/helpers/helpers_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:toastification/toastification.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
 
 class Loaders {
-  static void hideSnackbar() =>
-      ScaffoldMessenger.of(Get.context!).hideCurrentSnackBar();
-
-  static customToast({required message}) {
-    ScaffoldMessenger.of(Get.context!).showSnackBar(SnackBar(
-      elevation: 0,
-      duration: const Duration(seconds: 5),
-      backgroundColor: Colors.transparent,
-      content: Container(
-        padding: const EdgeInsets.all(12),
-        margin: const EdgeInsets.symmetric(horizontal: 30),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          color: THelperFunctions.isDarkMode(Get.context!)
-              ? Tcolors.darkerGrey.withOpacity(0.9)
-              : Tcolors.grey.withOpacity(0.9),
-        ),
-        child: Center(
-          child: Text(
-            message,
-            style: Theme.of(Get.context!).textTheme.labelLarge,
-          ),
-        ),
-      ),
-    ));
+  /// Hide any currently showing toast
+  static void hideSnackbar() {
+    // toastification toasts are auto-dismissible
   }
 
-  static warningSnackbar({required title, message = ""}) {
-    Get.snackbar(
-      title,
-      message,
-      isDismissible: true,
-      shouldIconPulse: true,
-      colorText: Tcolors.white,
-      backgroundColor: Tcolors.warning,
-      snackStyle: SnackStyle.FLOATING,
-      snackPosition: SnackPosition.TOP,
-      duration: const Duration(seconds: 5),
-      margin: const EdgeInsets.all(20),
-      icon: const Icon(
-        Iconsax.warning_2,
-        color: Tcolors.white,
-      ),
-    );
+  /// Custom toast message
+  static customToast({required String message}) {
+    final context = _getContext();
+    if (context != null) {
+      toastification.show(
+        context: context,
+        title: Text(message),
+        type: ToastificationType.info,
+        style: ToastificationStyle.flat,
+        alignment: Alignment.bottomCenter,
+        autoCloseDuration: const Duration(seconds: 3),
+        borderRadius: BorderRadius.circular(12),
+      );
+    }
   }
 
-  static successSnackbar({required title, message = "", duration = 5}) {
-    Get.snackbar(
-      title,
-      message,
-      isDismissible: true,
-      shouldIconPulse: true,
-      colorText: Tcolors.white,
-      backgroundColor: Tcolors.warning,
-      snackStyle: SnackStyle.FLOATING,
-      snackPosition: SnackPosition.TOP,
-      duration: Duration(seconds: duration),
-      margin: const EdgeInsets.all(20),
-      icon: const Icon(
-        Iconsax.check,
-        color: Tcolors.white,
-      ),
-    );
+  /// Warning snackbar
+  static warningSnackbar({required String title, String message = ""}) {
+    final context = _getContext();
+    if (context != null) {
+      toastification.show(
+        context: context,
+        title: Text(title),
+        description: message.isNotEmpty ? Text(message) : null,
+        type: ToastificationType.warning,
+        style: ToastificationStyle.flatColored,
+        alignment: Alignment.topCenter,
+        autoCloseDuration: const Duration(seconds: 4),
+        borderRadius: BorderRadius.circular(12),
+      );
+    }
   }
 
-  static errorSnackbar({required title, message = "", duration = 5}) {
-    Get.snackbar(
-      title,
-      message,
-      isDismissible: true,
-      shouldIconPulse: true,
-      colorText: Tcolors.white,
-      backgroundColor: Colors.red.shade600,
-      showProgressIndicator: true,
-      snackStyle: SnackStyle.FLOATING,
-      snackPosition: SnackPosition.TOP,
-      duration: Duration(seconds: duration),
-      margin: const EdgeInsets.all(20),
-      icon: const Icon(
-        Iconsax.check,
-        color: Tcolors.white,
-      ),
-    );
+  /// Success snackbar
+  static successSnackbar(
+      {required String title, String message = "", int duration = 5}) {
+    final context = _getContext();
+    if (context != null) {
+      toastification.show(
+        context: context,
+        title: Text(title),
+        description: message.isNotEmpty ? Text(message) : null,
+        type: ToastificationType.success,
+        style: ToastificationStyle.flatColored,
+        alignment: Alignment.topCenter,
+        autoCloseDuration: Duration(seconds: duration),
+        borderRadius: BorderRadius.circular(12),
+      );
+    }
+  }
+
+  /// Error snackbar
+  static errorSnackbar(
+      {required String title, String message = "", int duration = 5}) {
+    final context = _getContext();
+    if (context != null) {
+      toastification.show(
+        context: context,
+        title: Text(title),
+        description: message.isNotEmpty ? Text(message) : null,
+        type: ToastificationType.error,
+        style: ToastificationStyle.flatColored,
+        alignment: Alignment.topCenter,
+        autoCloseDuration: Duration(seconds: duration),
+        borderRadius: BorderRadius.circular(12),
+      );
+    }
+  }
+
+  /// Get context safely - tries multiple methods
+  static BuildContext? _getContext() {
+    try {
+      // Try GetX context first
+      final getContext = Get.key.currentContext ?? Get.context;
+      if (getContext != null && getContext.mounted) {
+        return getContext;
+      }
+    } catch (e) {
+      // If GetX context fails, try again after a microtask delay
+      Future.microtask(() {
+        try {
+          final getContext = Get.key.currentContext ?? Get.context;
+          if (getContext != null && getContext.mounted) {
+            return getContext;
+          }
+        } catch (e) {
+          // Ignore
+        }
+        return null;
+      });
+    }
+    return null;
   }
 }

@@ -7,6 +7,7 @@ import 'package:pmis/utils/popups/loaders.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
 class ShiftMarketController extends GetxController {
   // List of Shift Market activities
@@ -44,16 +45,18 @@ class ShiftMarketController extends GetxController {
   final facilityNameController = TextEditingController();
 
   // Section: Facility Details
-  var selectedFacilityStatus = ''.obs;
-  final personNameController = TextEditingController();
-  final contactController = TextEditingController();
-  final qualificationsController = TextEditingController();
+    var selectedFacilityStatus = ''.obs;
+    var selectedPersonFoundAtFacility =
+      ''.obs; // New field replacing removed person fields
 
   // Section: Category and Actions
   var selectedCategoryOfPremises = ''.obs;
   var selectedRegulatoryAction = ''.obs;
   final regulatoryActionTakenController = TextEditingController();
   final consignmentsImpoundedController = TextEditingController();
+  var selectedLicenseStatus = ''.obs;
+  final licenseNoController = TextEditingController();
+  final licenseExpiryController = TextEditingController();
 
   // GPS Location controller (auto-filled)
   final gpsLocationController = TextEditingController();
@@ -61,7 +64,7 @@ class ShiftMarketController extends GetxController {
   // Category of Premises options
   final List<String> categoryOfPremisesOptions = [
     "Wholesale Pharmacy",
-    "Retail Pharmacy", 
+    "Retail Pharmacy",
     "Drug Shop",
     "External Stores",
     "Hospital",
@@ -80,16 +83,42 @@ class ShiftMarketController extends GetxController {
   void onInit() {
     super.onInit();
     _initializeForm();
-    loadActivities();
+    // Defer activity loading to avoid blocking main thread during initialization
+    Future.microtask(() => loadActivities());
+    // Clear dependent fields when facility status changes to Closed
+    ever(selectedFacilityStatus, (String _) {
+      if (selectedFacilityStatus.value == 'Closed') {
+        selectedPersonFoundAtFacility.value = '';
+        // clear visible controllers
+        facilityNameController.clear();
+        regulatoryActionTakenController.clear();
+        consignmentsImpoundedController.clear();
+        selectedCategoryOfPremises.value = '';
+        selectedLicenseStatus.value = '';
+        licenseNoController.clear();
+        licenseExpiryController.clear();
+      }
+    });
   }
 
   void _initializeForm() {
     // Set default values
     inspectionDateController.text = DateTime.now().toString();
     inspectionTimeController.text = DateTime.now().toString();
-    
+
     // Initialize with current location
     getCurrentLocation();
+
+    // Auto-fill inspector name
+    if (Get.isRegistered<AuthController>()) {
+      final authController = Get.find<AuthController>();
+      inspectorNameController.text = authController.userDisplayName;
+    }
+
+    // Default license status to Licensed so fields show by default
+    selectedLicenseStatus.value = 'Licensed';
+    // Default facility status to Open so fields show by default
+    selectedFacilityStatus.value = 'Open';
   }
 
   /// Load activities from local storage or API
@@ -97,11 +126,14 @@ class ShiftMarketController extends GetxController {
     try {
       isLoading.value = true;
       var data = await repository.getShiftMarketData();
-      var shiftMarketActivities = data.map((item) => ShiftMarketModel.fromJson(item)).toList();
+      var shiftMarketActivities =
+          data.map((item) => ShiftMarketModel.fromJson(item)).toList();
       activities.assignAll(shiftMarketActivities);
       filterActivities();
     } catch (e) {
-      Loaders.errorSnackbar(title: "Error", message: "Failed to load ShiftMarket activities: ${e.toString()}");
+      Loaders.errorSnackbar(
+          title: "Error",
+          message: "Failed to load ShiftMarket activities: ${e.toString()}");
     } finally {
       isLoading.value = false;
     }
@@ -123,7 +155,7 @@ class ShiftMarketController extends GetxController {
       isSubmitting.value = true;
 
       // Create ShiftMarket model
-      final shiftMarketActivity = ShiftMarketModel(
+        final shiftMarketActivity = ShiftMarketModel(
         inspectionDate: inspectionDateController.text,
         inspectorName: inspectorNameController.text,
         latitude: currentLatitude.value,
@@ -132,38 +164,50 @@ class ShiftMarketController extends GetxController {
         district: selectedDistrict.value,
         facilityName: facilityNameController.text,
         facilityStatus: selectedFacilityStatus.value,
-        personName: personNameController.text,
-        contact: contactController.text,
-        qualifications: qualificationsController.text,
-        categoryOfPremises: selectedCategoryOfPremises.value,
-        regulatoryActionTaken: selectedRegulatoryAction.value,
+        personFoundAtFacility: selectedFacilityStatus.value == 'Closed'
+          ? ''
+          : selectedPersonFoundAtFacility.value,
+        categoryOfPremises: selectedFacilityStatus.value == 'Closed'
+          ? ''
+          : selectedCategoryOfPremises.value,
+        licenseStatus: selectedFacilityStatus.value == 'Closed'
+          ? ''
+          : selectedLicenseStatus.value,
+        licenseNo: selectedFacilityStatus.value == 'Closed'
+          ? ''
+          : licenseNoController.text,
+        licenseExpiryDate: selectedFacilityStatus.value == 'Closed'
+          ? ''
+          : licenseExpiryController.text,
+        regulatoryActionTaken: regulatoryActionTakenController.text,
         consignmentsImpounded: consignmentsImpoundedController.text,
         createdAt: DateTime.now(),
         isSynced: false,
-      );
+        );
 
       bool online = await NetworkManager.instance.isconnected();
       var activityData = shiftMarketActivity.toJson();
-      
+
       print('🔍 DEBUG: Network status: $online');
       print('🔍 DEBUG: ShiftMarket activity data to send: $activityData');
-      
+
       if (online) {
         try {
           print('🚀 DEBUG: Attempting to send ShiftMarket data to API...');
           var result = await repository.postShiftMarketData(activityData);
           print('✅ DEBUG: API response received: $result');
-          
+
           activities.add(shiftMarketActivity);
           Loaders.successSnackbar(
-              title: "Success", message: "ShiftMarket activity sent to API successfully!");
+              title: "Success",
+              message: "ShiftMarket activity sent to API successfully!");
         } catch (e) {
           print('❌ DEBUG: API call failed: $e');
           // If online submission fails, save locally as fallback
           await repository.saveActivityLocally(activityData);
           activities.add(shiftMarketActivity);
           Loaders.errorSnackbar(
-              title: "Network Error", 
+              title: "Network Error",
               message: "Failed to send to API. Saved locally for sync.");
         }
       } else {
@@ -173,13 +217,15 @@ class ShiftMarketController extends GetxController {
         activities.add(shiftMarketActivity);
         Loaders.successSnackbar(
             title: "Offline",
-            message: "ShiftMarket activity saved locally. Will sync when online.");
+            message:
+                "ShiftMarket activity saved locally. Will sync when online.");
       }
 
       filterActivities();
       clearForm();
     } catch (e) {
-      Loaders.errorSnackbar(title: "Error", message: "Failed to submit activity");
+      Loaders.errorSnackbar(
+          title: "Error", message: "Failed to submit activity");
     } finally {
       isSubmitting.value = false;
       Navigator.pop(Get.context!); // Close the modal bottom sheet
@@ -188,26 +234,50 @@ class ShiftMarketController extends GetxController {
 
   /// Filter activities based on search and filter criteria
   void filterActivities() {
-    var filtered = activities.where((activity) {
-      bool matchesSearch = searchQuery.value.isEmpty ||
-          activity.facilityName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          activity.inspectorName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          activity.personName.toLowerCase().contains(searchQuery.value.toLowerCase());
+    // Get current user info
+    final authController =
+        Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
+    final isAdmin = authController?.isAdmin ?? false;
+    final userDisplayName = authController?.userDisplayName ?? '';
 
-      bool matchesRegion = filterRegion.value.isEmpty ||
-          activity.region == filterRegion.value;
+    var filtered = activities.where((activity) {
+      // Role-based filter: If not admin, only show activities created by this user
+      // Match by inspectorName since ShiftMarketModel doesn't have inspectorId
+      if (!isAdmin && userDisplayName.isNotEmpty) {
+        if (activity.inspectorName.toLowerCase() !=
+            userDisplayName.toLowerCase()) {
+          return false;
+        }
+      }
+
+      bool matchesSearch = searchQuery.value.isEmpty ||
+          activity.facilityName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          activity.inspectorName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          activity.personFoundAtFacility
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase());
+
+      bool matchesRegion =
+          filterRegion.value.isEmpty || activity.region == filterRegion.value;
 
       bool matchesDistrict = filterDistrict.value.isEmpty ||
           activity.district == filterDistrict.value;
 
-      bool matchesFacilityStatus = filterFacilityStatus.value.isEmpty ||
-          activity.facilityStatus == filterFacilityStatus.value;
+      // Remove facilityStatus filter since field no longer exists
+      // bool matchesFacilityStatus = filterFacilityStatus.value.isEmpty ||
+      //     activity.facilityStatus == filterFacilityStatus.value;
 
       bool matchesCategory = filterCategoryOfPremises.value.isEmpty ||
           activity.categoryOfPremises == filterCategoryOfPremises.value;
 
-      return matchesSearch && matchesRegion && matchesDistrict && 
-             matchesFacilityStatus && matchesCategory;
+      return matchesSearch &&
+          matchesRegion &&
+          matchesDistrict &&
+          matchesCategory;
     }).toList();
 
     // Sort by creation date (latest first)
@@ -221,23 +291,23 @@ class ShiftMarketController extends GetxController {
     filteredActivities.value = filtered;
   }
 
-
   void clearForm() {
     inspectionDateController.clear();
     inspectionTimeController.clear();
     inspectorNameController.clear();
     facilityNameController.clear();
-    personNameController.clear();
-    contactController.clear();
-    qualificationsController.clear();
     regulatoryActionTakenController.clear();
     selectedRegulatoryAction.value = '';
     consignmentsImpoundedController.clear();
+    licenseNoController.clear();
+    licenseExpiryController.clear();
+    selectedLicenseStatus.value = '';
+    selectedFacilityStatus.value = '';
     selectedRegion.value = '';
     selectedDistrict.value = '';
-    selectedFacilityStatus.value = '';
+    selectedPersonFoundAtFacility.value = '';
     selectedCategoryOfPremises.value = '';
-    
+
     // Re-initialize with current values
     _initializeForm();
   }

@@ -8,6 +8,7 @@ import 'package:pmis/utils/popups/loaders.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
 class GppController extends GetxController {
   var activities = <GppActivity>[].obs;
@@ -33,6 +34,7 @@ class GppController extends GetxController {
   final gpsLocationController =
       TextEditingController(); // auto-load current location
   final licenseNoController = TextEditingController();
+  final licenseExpiryDateController = TextEditingController();
 
   // Section: Region Details
   var selectedRegion = ''.obs;
@@ -70,12 +72,10 @@ class GppController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadActivities();
+    // Defer activity loading to avoid blocking main thread during initialization
+    Future.microtask(() => loadActivities());
     getCurrentLocation(); // Get current location on init
-    // Set current date/time
-    inspectionDateController.text =
-        DateTime.now().toLocal().toString().split(' ')[0];
-    inspectionTimeController.text = TimeOfDay.now().format(Get.context!);
+    _autoFillDefaults(); // Prepopulate inspector info
 
     // Initialize filtered activities
     ever(activities, (_) => filterActivities());
@@ -84,6 +84,20 @@ class GppController extends GetxController {
     ever(filterFacilityStatus, (_) => filterActivities());
     ever(filterLicenseStatus, (_) => filterActivities());
     ever(filterCategoryOfDrugs, (_) => filterActivities());
+  }
+
+  void _autoFillDefaults() {
+    // Set current date/time
+    inspectionDateController.text =
+        DateTime.now().toLocal().toString().split(' ')[0];
+    inspectionTimeController.text = TimeOfDay.now().format(Get.context!);
+    
+    // Prepopulate inspector name and ID from logged-in user
+    if (Get.isRegistered<AuthController>()) {
+      final authController = Get.find<AuthController>();
+      inspectorNameController.text = authController.userDisplayName;
+      inspectorIdController.text = authController.userId;
+    }
   }
 
   Future<void> loadActivities() async {
@@ -102,7 +116,21 @@ class GppController extends GetxController {
 
   /// Filter activities based on search query and selected filters
   void filterActivities() {
+    // Get current user info
+    final authController = Get.isRegistered<AuthController>() 
+        ? Get.find<AuthController>() 
+        : null;
+    final isAdmin = authController?.isAdmin ?? false;
+    final userId = authController?.userId ?? '';
+
     var filtered = activities.where((activity) {
+      // Role-based filter: If not admin, only show activities created by this user
+      if (!isAdmin && userId.isNotEmpty && activity.inspectorId != null) {
+        if (activity.inspectorId != userId) {
+          return false;
+        }
+      }
+
       // Search query filter
       bool matchesSearch = searchQuery.value.isEmpty ||
           activity.facilityName
@@ -182,6 +210,9 @@ class GppController extends GetxController {
         if (selectedLicensedStatus.value.isEmpty) {
           emptyFields.add("Licensed Status");
         }
+        if (selectedLicensedStatus.value == "Licensed" && licenseExpiryDateController.text.isEmpty) {
+          emptyFields.add("License Expiry Date");
+        }
         if (selectedCategoryOfDrugs.value.isEmpty) {
           emptyFields.add("Category of Drugs");
         }
@@ -227,6 +258,7 @@ class GppController extends GetxController {
         latitude: currentLatitude.value,
         longitude: currentLongitude.value,
         licenseNo: selectedLicensedStatus.value == "Licensed" ? licenseNoController.text : null,
+        licenseExpiryDate: selectedLicensedStatus.value == "Licensed" ? licenseExpiryDateController.text : null,
       );
 
       // Here, check for connectivity (this is a dummy flag).
@@ -283,6 +315,7 @@ class GppController extends GetxController {
     inspectorNameController.clear();
     inspectorIdController.clear();
     licenseNoController.clear();
+    licenseExpiryDateController.clear();
     // gpsLocationController remains as it is auto-filled.
     facilityNameController.clear();
     personFoundController.value = '';
@@ -337,20 +370,32 @@ class GppController extends GetxController {
 
   int _getCategoryOfPremises(String category) {
     switch (category) {
+      case "Wholesale Pharmacy":
+        return 1;
       case "Retail Pharmacy":
-        return 1;
-      case "Drug Shop":
         return 2;
-      case "Hospital":
+      case "Drug Shop":
         return 3;
-      case "HCIV":
+      case "External Stores":
         return 4;
-      case "HCIII":
+      case "Hospital":
         return 5;
-      case "Clinic":
+      case "HCIV":
         return 6;
+      case "HCIII":
+        return 7;
+      case "Clinic":
+        return 8;
+      case "Herbal Selling Outlet":
+        return 9;
+      case "Shift Market":
+        return 10;
+      case "Pharmaceutical/Medical Device Manufacturing Premise":
+        return 11;
+      case "Others":
+        return 12;
       default:
-        return 1;
+        return 2; // Default to Retail Pharmacy
     }
   }
 
@@ -408,9 +453,9 @@ class GppController extends GetxController {
 
   int _getRecommendedForGpp(String recommendation) {
     switch (recommendation) {
-      case "GPP certification":
+      case "Recommended for GPP":
         return 1;
-      case "Not recommended for GPP certification":
+      case "Not recommended for GPP":
         return 0;
       default:
         return 1;

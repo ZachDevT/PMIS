@@ -12,13 +12,8 @@ class ThemeController extends GetxController {
 
   // Getters
   bool get isDarkMode => _storage.read(_darkModeKey) ?? false;
-  Color get primaryColor => Color(_storage.read(_primaryColorKey) ?? 0xFF2196F3);
-
-  @override
-  void onInit() {
-    super.onInit();
-    // Don't change theme during initialization to avoid build conflicts
-  }
+  Color get primaryColor =>
+      Color(_storage.read(_primaryColorKey) ?? 0xFF2196F3);
 
   // Toggle theme
   void toggleTheme() {

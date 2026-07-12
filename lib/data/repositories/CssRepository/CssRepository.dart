@@ -1,13 +1,63 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:pmis/data/services/css/CssService.dart';
+import 'package:pmis/utils/helpers/networkmanager.dart';
+import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'dart:io';
 
 class CssRepository extends GetxController {
   final CssService _service = Get.find<CssService>();
   final box = GetStorage();
 
   Future<List<Map<String, dynamic>>> getCssData() async {
-    return await _service.getCssData();
+    try {
+      // Check connectivity before making API call
+      final networkManager = Get.find<NetworkManager>();
+      final isOnline = await networkManager.isconnected();
+      
+      if (!isOnline) {
+        print('No internet connection, returning empty list');
+        return [];
+      }
+      
+      // Try to fetch from API - wrap in additional try-catch for SocketException
+      try {
+        return await _service.getCssData();
+      } on TimeoutException catch (e) {
+        print('TimeoutException in CSS service: ${e.message}');
+        return [];
+      } on SocketException catch (e) {
+        print('SocketException in CSS service: ${e.message}');
+        return [];
+      } on HttpException catch (e) {
+        print('HttpException in CSS service: ${e.message}');
+        return [];
+      }
+    } on TimeoutException catch (e) {
+      // Handle timeout errors gracefully
+      print('Timeout error fetching CSS data: ${e.message}');
+      return [];
+    } on SocketException catch (e) {
+      // Handle network errors gracefully
+      print('Network error fetching CSS data: ${e.message}');
+      return [];
+    } on NetworkException catch (e) {
+      // Handle network exceptions gracefully
+      print('Network exception: ${e.message}');
+      return [];
+    } catch (e) {
+      // Handle any other errors gracefully, including TimeoutException that might not be caught above
+      if (e.toString().contains('TimeoutException') || 
+          e.toString().contains('Future not completed') ||
+          e.toString().contains('SocketException') || 
+          e.toString().contains('Failed host lookup') ||
+          e.toString().contains('No address associated')) {
+        print('Error (detected in catch): ${e.toString()}');
+        return [];
+      }
+      print('Error fetching CSS data: $e');
+      return [];
+    }
   }
 
   Future<Map<String, dynamic>> postCssData(Map<String, dynamic> data) async {

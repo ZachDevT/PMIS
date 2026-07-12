@@ -10,7 +10,7 @@ import 'package:pmis/utils/constants/sizes.dart';
 import 'package:pmis/utils/validators/validators.dart';
 
 class LoginForm extends StatefulWidget {
-  LoginForm({Key? key}) : super(key: key);
+  const LoginForm({super.key});
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -21,6 +21,7 @@ class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final _userTEC = TextEditingController();
   final _passTEC = TextEditingController();
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +97,7 @@ class _LoginFormState extends State<LoginForm> {
               Obx(() => TextFormField(
                     controller: _passTEC,
                     onChanged: (value) => authC.updatePassword(value),
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     validator: (value) =>
                         TValidator.validatePlainText("Password", value),
                     decoration: InputDecoration(
@@ -106,8 +107,14 @@ class _LoginFormState extends State<LoginForm> {
                           ? null
                           : "Password is required",
                       suffixIcon: IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Iconsax.eye),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                        icon: Icon(
+                          _obscurePassword ? Iconsax.eye_slash : Iconsax.eye,
+                        ),
                       ),
                     ),
                   )),
@@ -190,7 +197,6 @@ class _LoginFormState extends State<LoginForm> {
       authC.login();
     }
   }
-
 
   @override
   void dispose() {

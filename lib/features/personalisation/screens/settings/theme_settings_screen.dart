@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:pmis/utils/constants/colors.dart';
 import 'package:pmis/utils/constants/sizes.dart';
 import 'package:pmis/utils/helpers/helpers_functions.dart';
 import 'package:pmis/features/personalisation/controllers/theme_controller.dart';
+import 'package:pmis/utils/popups/loaders.dart';
 
 class ThemeSettingsScreen extends StatelessWidget {
   const ThemeSettingsScreen({super.key});
@@ -290,12 +290,9 @@ class ThemeSettingsScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         themeController.setPrimaryColor(color);
-        Get.snackbar(
-          'Color Changed',
-          'Accent color updated successfully',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: color,
-          colorText: Colors.white,
+        Loaders.successSnackbar(
+          title: 'Color Changed',
+          message: 'Accent color updated successfully',
         );
       },
       child: Container(

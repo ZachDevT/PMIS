@@ -9,7 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 class GppActivityCard extends StatelessWidget {
   final GppActivity activity;
 
-  GppActivityCard({super.key, required this.activity});
+  const GppActivityCard({super.key, required this.activity});
 
   Color _getStatusColor(int status) {
     switch (status) {
@@ -282,8 +282,10 @@ class GppActivityCard extends StatelessWidget {
                             activity.gps ?? 'Not provided', Iconsax.location),
                         _buildModernDetailRow('Region',
                             _getRegionName(activity.intRegion), Iconsax.map),
-                        _buildModernDetailRow('District ID',
-                            activity.districtId.toString(), Iconsax.building),
+                        _buildModernDetailRow(
+                            'District',
+                            _getDistrictName(activity.districtId),
+                            Iconsax.building),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -297,64 +299,73 @@ class GppActivityCard extends StatelessWidget {
                             'Facility Status',
                             _getStatusText(activity.facilityStatus),
                             Iconsax.info_circle),
-                        _buildModernDetailRow(
-                            'Facility Type',
-                            _getFacilityTypeText(activity.facilityType),
-                            Iconsax.category),
-                        _buildModernDetailRow(
-                            'Category of Premises',
-                            _getCategoryText(activity.categoryOfpremises),
-                            Iconsax.building),
-                        _buildModernDetailRow(
-                            'License Status',
-                            _getLicenseStatusText(activity.licenseStatus),
-                            Iconsax.shield_tick),
-                        _buildModernDetailRow(
-                            'License Number',
-                            activity.licenseNo ?? 'Not provided',
-                            Iconsax.document),
+                        // Only show these details if facility is not Closed
+                        if (activity.facilityStatus != 0) ...[
+                          _buildModernDetailRow(
+                              'Facility Type',
+                              _getFacilityTypeText(activity.facilityType),
+                              Iconsax.category),
+                          _buildModernDetailRow(
+                              'Category of Premises',
+                              _getCategoryText(activity.categoryOfpremises),
+                              Iconsax.building),
+                          _buildModernDetailRow(
+                              'License Status',
+                              _getLicenseStatusText(activity.licenseStatus),
+                              Iconsax.shield_tick),
+                          _buildModernDetailRow(
+                              'License Number',
+                              activity.licenseNo ?? 'Not provided',
+                              Iconsax.document),
+                        ],
                       ],
                     ),
-                    const SizedBox(height: 24),
-                    _buildModernDetailSection(
-                      'Personnel Information',
-                      Iconsax.profile_2user,
-                      [
-                        _buildModernDetailRow(
-                            'Person Name', activity.personName, Iconsax.user),
-                        _buildModernDetailRow(
-                            'Contact', activity.contact, Iconsax.call),
-                        _buildModernDetailRow('Qualifications',
-                            activity.qualifications, Iconsax.book),
-                        _buildModernDetailRow(
-                            'Person Type',
-                            _getPersonTypeText(activity.facilityPersonType),
-                            Iconsax.user_tag),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    _buildModernDetailSection(
-                      'Certification & Recommendations',
-                      Iconsax.verify,
-                      [
-                        _buildModernDetailRow(
-                            'Certification Status',
-                            _getCertStatusText(activity.certStatus),
-                            Iconsax.shield_tick),
-                        _buildModernDetailRow(
-                            'Category Status',
-                            _getCategoryStatusText(activity.categoryStatus),
-                            Iconsax.category_2),
-                        _buildModernDetailRow(
-                            'Recommended for GPP',
-                            _getRecommendedText(activity.recommendedforGPP),
-                            Iconsax.like),
-                        _buildModernDetailRow(
-                            'Inspector ID',
-                            activity.inspectorId ?? 'Not assigned',
-                            Iconsax.user_square),
-                      ],
-                    ),
+                    // Only show Personnel Information if facility is not Closed
+                    if (activity.facilityStatus != 0) ...[
+                      const SizedBox(height: 24),
+                      _buildModernDetailSection(
+                        'Personnel Information',
+                        Iconsax.profile_2user,
+                        [
+                          _buildModernDetailRow(
+                              'Person Name', activity.personName, Iconsax.user),
+                          _buildModernDetailRow(
+                              'Contact', activity.contact, Iconsax.call),
+                          _buildModernDetailRow('Qualifications',
+                              activity.qualifications, Iconsax.book),
+                          _buildModernDetailRow(
+                              'Person Type',
+                              _getPersonTypeText(activity.facilityPersonType),
+                              Iconsax.user_tag),
+                        ],
+                      ),
+                    ],
+                    // Only show Certification & Recommendations if facility is not Closed
+                    if (activity.facilityStatus != 0) ...[
+                      const SizedBox(height: 24),
+                      _buildModernDetailSection(
+                        'Certification & Recommendations',
+                        Iconsax.verify,
+                        [
+                          _buildModernDetailRow(
+                              'Certification Status',
+                              _getCertStatusText(activity.certStatus),
+                              Iconsax.shield_tick),
+                          _buildModernDetailRow(
+                              'Category Status',
+                              _getCategoryStatusText(activity.categoryStatus),
+                              Iconsax.category_2),
+                          _buildModernDetailRow(
+                              'Recommended for GPP',
+                              _getRecommendedText(activity.recommendedforGPP),
+                              Iconsax.like),
+                          _buildModernDetailRow(
+                              'Inspector ID',
+                              activity.inspectorId ?? 'Not assigned',
+                              Iconsax.user_square),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     _buildModernDetailSection(
                       'Location Coordinates',

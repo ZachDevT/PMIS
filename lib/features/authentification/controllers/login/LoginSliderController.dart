@@ -6,7 +6,7 @@ import 'package:pmis/utils/constants/images_strings.dart';
 class LoginSliderController extends GetxController {
   late final PageController pageController;
   Timer? autoSlideTimer;
-  
+
   // Reactive state
   final RxInt currentIndex = 0.obs;
 

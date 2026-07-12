@@ -60,6 +60,16 @@ class EnforcementForm extends StatelessWidget {
               ),
               const SizedBox(height: Tsizes.spaceBtwInputFields),
 
+              // Inspector Name
+              _buildTextField(
+                controller: controller.inspectorNameController,
+                label: "Inspector Name",
+                prefixIcon: Iconsax.user,
+                readOnly: true,
+                validator: (value) => value!.isEmpty ? "Required" : null,
+              ),
+              const SizedBox(height: Tsizes.spaceBtwInputFields),
+
               // GPS
               _buildTextField(
                 controller: controller.gpsController,
@@ -116,76 +126,138 @@ class EnforcementForm extends StatelessWidget {
               ),
               const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-              // Person Found at Facility
-              _buildDropdown(
-                label: "Person Found at Facility",
-                items: ["In-charge", "Attendant/Operator"],
-                selectedItem: controller.selectedPersonFoundAtFacility,
-                prefixIcon: Iconsax.user,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
+              // Conditionally show fields only when facility is Open
+              if (controller.selectedFacilityStatus.value != "Closed") ...[
+                // Person Found at Facility
+                _buildDropdown(
+                  label: "Person Found at Facility",
+                  items: ["In-charge", "Attendant/Operator"],
+                  selectedItem: controller.selectedPersonFoundAtFacility,
+                  prefixIcon: Iconsax.user,
+                  validator: (value) => value!.isEmpty ? "Required" : null,
+                ),
+                const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-              // Person Name
-              _buildTextField(
-                controller: controller.personNameController,
-                label: "Person Name",
-                prefixIcon: Iconsax.user,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
+                // Person Name
+                _buildTextField(
+                  controller: controller.personNameController,
+                  label: "Person Name",
+                  prefixIcon: Iconsax.user,
+                  validator: (value) => value!.isEmpty ? "Required" : null,
+                ),
+                const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-              // Contact
-              _buildTextField(
-                controller: controller.contactController,
-                label: "Contact",
-                prefixIcon: Iconsax.call,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
+                // Contact
+                _buildTextField(
+                  controller: controller.contactController,
+                  label: "Contact",
+                  prefixIcon: Iconsax.call,
+                  validator: (value) => value!.isEmpty ? "Required" : null,
+                ),
+                const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-              // Qualifications
-              _buildTextField(
-                controller: controller.qualificationsController,
-                label: "Qualifications",
-                prefixIcon: Icons.school,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwSections / 2),
+                // Qualifications
+                _buildTextField(
+                  controller: controller.qualificationsController,
+                  label: "Qualifications",
+                  prefixIcon: Icons.school,
+                  validator: (value) => value!.isEmpty ? "Required" : null,
+                ),
+                const SizedBox(height: Tsizes.spaceBtwSections / 2),
 
-              // Category and Licensing Section
-              _buildSectionHeader("Category and Licensing", dark),
-              const SizedBox(height: Tsizes.spaceBtwItems / 2),
+                // Category and Licensing Section
+                _buildSectionHeader("Category and Licensing", dark),
+                const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
-              // Category of Premises
-              _buildDropdown(
-                label: "Category of Premises",
-                items: controller.categoryOfPremisesOptions,
-                selectedItem: controller.selectedCategoryOfPremises,
-                prefixIcon: Iconsax.category,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
+                // Category of Premises
+                _buildDropdown(
+                  label: "Category of Premises",
+                  items: controller.categoryOfPremisesOptions,
+                  selectedItem: controller.selectedCategoryOfPremises,
+                  prefixIcon: Iconsax.category,
+                  validator: (value) => value!.isEmpty ? "Required" : null,
+                ),
+                const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-              // License Status
-              _buildDropdown(
-                label: "License Status",
-                items: ["Licensed", "Un-Licensed", "Not-Applicable"],
-                selectedItem: controller.selectedLicenseStatus,
-                prefixIcon: Iconsax.shield_tick,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
+                // License Status
+                _buildDropdown(
+                  label: "License Status",
+                  items: ["Licensed", "Un-Licensed", "Not-Applicable"],
+                  selectedItem: controller.selectedLicenseStatus,
+                  prefixIcon: Iconsax.shield_tick,
+                  validator: (value) => value!.isEmpty ? "Required" : null,
+                ),
+                const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-              // Category Status
-              _buildDropdown(
-                label: "Category Status",
-                items: ["Medical Device", "Pharmaceutical", "Other"],
-                selectedItem: controller.selectedCategoryStatus,
-                prefixIcon: Iconsax.tag,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwSections / 2),
+                // Show License No & Expiry when Licensed
+                Obx(() {
+                  if (controller.selectedLicenseStatus.value == 'Licensed') {
+                    return Column(
+                      children: [
+                        _buildTextField(
+                          controller: controller.licenseNoController,
+                          label: "License No.",
+                          prefixIcon: Iconsax.crown,
+                          validator: (value) =>
+                              value!.isEmpty ? "Required" : null,
+                        ),
+                        const SizedBox(height: Tsizes.spaceBtwInputFields),
+                        TextFormField(
+                          controller: controller.licenseExpiryController,
+                          readOnly: true,
+                          validator: (value) => value == null || value.isEmpty
+                              ? "Required"
+                              : null,
+                          decoration: InputDecoration(
+                            labelText: 'License Expiry Date',
+                            prefixIcon: const Icon(Iconsax.calendar),
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(Tsizes.borderRadiusLg),
+                            ),
+                            filled: true,
+                            fillColor: THelperFunctions.isDarkMode(Get.context!)
+                                ? Tcolors.darkGrey
+                                : Colors.white,
+                          ),
+                          onTap: () async {
+                            DateTime? picked = await showDatePicker(
+                              context: Get.context!,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (picked != null) {
+                              controller.licenseExpiryController.text =
+                                  picked.toIso8601String().split('T').first;
+                            }
+                          },
+                        ),
+                        const SizedBox(height: Tsizes.spaceBtwInputFields),
+                      ],
+                    );
+                  }
+
+                  return const SizedBox.shrink();
+                }),
+                const SizedBox(height: Tsizes.spaceBtwInputFields),
+
+                // Category of Drugs
+                _buildDropdown(
+                  label: "Category of Drugs",
+                  items: [
+                    "Medical Device",
+                    "Veterinary drugs",
+                    "Human drugs",
+                    "Public Healthcare products",
+                    "Herbal drugs"
+                  ],
+                  selectedItem: controller.selectedCategoryStatus,
+                  prefixIcon: Iconsax.tag,
+                  validator: (value) => value!.isEmpty ? "Required" : null,
+                ),
+                const SizedBox(height: Tsizes.spaceBtwSections / 2),
+              ],
 
               // Enforcement Actions Section
               _buildSectionHeader("Enforcement Actions", dark),
@@ -289,7 +361,7 @@ class EnforcementForm extends StatelessWidget {
     final dark = THelperFunctions.isDarkMode(Get.context!);
 
     return Obx(() => DropdownButtonFormField<String>(
-          value: selectedItem.value.isEmpty ? null : selectedItem.value,
+          initialValue: selectedItem.value.isEmpty ? null : selectedItem.value,
           decoration: InputDecoration(
             labelText: label,
             prefixIcon: Icon(prefixIcon),

@@ -1,0 +1,479 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:pmis/features/pmis/sensitizationmeeting/widgets/SensitizationMeetingActivityCard.dart';
+import 'package:pmis/features/pmis/sensitizationmeeting/widgets/SensitizationMeetingForm.dart';
+import 'package:pmis/features/pmis/sensitizationmeeting/controllers/SensitizationMeetingController.dart';
+import 'package:pmis/utils/constants/colors.dart';
+import 'package:pmis/utils/constants/images_strings.dart';
+import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
+
+class SensitizationMeetingScreen extends StatelessWidget {
+  final SensitizationMeetingController controller = Get.find<SensitizationMeetingController>();
+
+  SensitizationMeetingScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: _buildAppBar(context),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const _QuickActionsSection(),
+            const SizedBox(height: 16),
+            _ActivityListSection(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: Tcolors.primary,
+      elevation: 0,
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Tcolors.primary,
+              Tcolors.primary.withOpacity(0.8),
+            ],
+          ),
+        ),
+      ),
+      title: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              image: const DecorationImage(
+                image: AssetImage(TImagestring.nda),
+                fit: BoxFit.contain,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+          ),
+          const Spacer(),
+          _UserProfileWidget(),
+        ],
+      ),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: _SearchBarWidget(),
+      ),
+    );
+  }
+
+  void _showCreateNewModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 24,
+        ),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SensitizationMeetingForm(),
+      ),
+    );
+  }
+}
+
+class _QuickActionsSection extends StatelessWidget {
+  const _QuickActionsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: _ActionButton(
+              icon: Iconsax.add,
+              label: "Create Meeting",
+              onTap: () => SensitizationMeetingScreen()._showCreateNewModal(context),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _ActionButton(
+              icon: Iconsax.refresh,
+              label: "Refresh",
+              onTap: () {
+                final controller = Get.find<SensitizationMeetingController>();
+                controller.loadActivities();
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Material(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          decoration: BoxDecoration(
+            color: Tcolors.primary,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 20, color: Tcolors.white),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      color: Tcolors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchBarWidget extends StatelessWidget {
+  final SensitizationMeetingController controller = Get.find<SensitizationMeetingController>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Obx(() => TextField(
+            onChanged: (value) => controller.searchQuery.value = value,
+            decoration: InputDecoration(
+              hintText: "Search meetings...",
+              prefixIcon: const Icon(Iconsax.search_normal, size: 20),
+              suffixIcon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (controller.searchQuery.value.isNotEmpty)
+                    IconButton(
+                      icon: const Icon(Iconsax.close_circle, size: 20),
+                      onPressed: () => controller.searchQuery.value = '',
+                    ),
+                  IconButton(
+                    icon: const Icon(Iconsax.filter, size: 20),
+                    onPressed: () => _showFilterDialog(context),
+                  ),
+                ],
+              ),
+              filled: true,
+              fillColor: Theme.of(context).colorScheme.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            ),
+          )),
+    );
+  }
+
+  void _showFilterDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 24,
+        ),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: _FilterDialog(),
+      ),
+    );
+  }
+}
+
+class _FilterDialog extends StatelessWidget {
+  final SensitizationMeetingController controller = Get.find<SensitizationMeetingController>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        Row(
+          children: [
+            Text(
+              "Filter Meetings",
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const Spacer(),
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Iconsax.close_circle),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+
+        // Filter options
+        Obx(() => Column(
+              children: [
+                _FilterDropdown(
+                  label: "Region",
+                  value: controller.filterRegion.value,
+                  items: const [
+                    "Central Region",
+                    "Eastern Region",
+                    "Northern Region",
+                    "Western Region"
+                  ],
+                  onChanged: (value) =>
+                      controller.filterRegion.value = value ?? '',
+                ),
+              ],
+            )),
+
+        const SizedBox(height: 24),
+
+        // Action buttons
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () {
+                  controller.clearFilters();
+                  Navigator.pop(context);
+                },
+                child: const Text("Clear All"),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Apply Filters"),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+}
+
+class _FilterDropdown extends StatelessWidget {
+  final String label;
+  final String value;
+  final List<String> items;
+  final ValueChanged<String?> onChanged;
+
+  const _FilterDropdown({
+    required this.label,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          initialValue: value.isEmpty ? null : value,
+          decoration: InputDecoration(
+            hintText: "Select $label",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          ),
+          items: [
+            DropdownMenuItem<String>(
+              value: '',
+              child: Text("All $label"),
+            ),
+            ...items.map((item) => DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item),
+                )),
+          ],
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+}
+
+class _UserProfileWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final authController = Get.isRegistered<AuthController>() 
+        ? Get.find<AuthController>() 
+        : null;
+    
+    return Obx(() {
+      final displayName = authController?.userDisplayName ?? 'Guest';
+      
+      return InkWell(
+        onTap: () => Get.toNamed('/user-menu'),
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text("Welcome ", style: Theme.of(context).textTheme.bodyMedium),
+                  Text(
+                    displayName,
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                          color: Tcolors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+              const SizedBox(width: 8),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
+                    child: const Icon(HugeIcons.strokeRoundedUser, size: 30),
+                  ),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class _ActivityListSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<SensitizationMeetingController>();
+    return Obx(() {
+      final activities = controller.filteredActivities;
+      if (activities.isEmpty && controller.searchQuery.value.isNotEmpty) {
+        return Container(
+          padding: const EdgeInsets.all(32),
+          child: const Center(
+            child: Text("No meetings found matching your search"),
+          ),
+        );
+      }
+      if (activities.isEmpty) {
+        return Container(
+          padding: const EdgeInsets.all(32),
+          child: const Center(
+            child: Text("No meetings recorded yet"),
+          ),
+        );
+      }
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: activities.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: SensitizationMeetingActivityCard(
+              activity: activities[index],
+            ),
+          );
+        },
+      );
+    });
+  }
+}
+

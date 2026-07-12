@@ -474,11 +474,15 @@ class CssActivityCard extends StatelessWidget {
                               Iconsax.shield_tick),
                           _buildModernDetailRow(
                               'License Number',
-                              activity.licenseNo.isNotEmpty ? activity.licenseNo : 'Not provided',
+                              activity.licenseNo.isNotEmpty
+                                  ? activity.licenseNo
+                                  : 'Not provided',
                               Iconsax.document),
                           _buildModernDetailRow(
                               'License Expiry Date',
-                              activity.licenseExpiryDate.isNotEmpty ? activity.licenseExpiryDate : 'Not provided',
+                              activity.licenseExpiryDate.isNotEmpty
+                                  ? activity.licenseExpiryDate
+                                  : 'Not provided',
                               Iconsax.calendar),
                         ],
                       ],
@@ -492,8 +496,10 @@ class CssActivityCard extends StatelessWidget {
                         [
                           _buildModernDetailRow(
                               'Person Name', activity.personName, Iconsax.user),
-                          _buildModernDetailRow('Contact', activity.contact, Iconsax.call),
-                          _buildModernDetailRow('Qualifications', activity.qualifications, Iconsax.book),
+                          _buildModernDetailRow(
+                              'Contact', activity.contact, Iconsax.call),
+                          _buildModernDetailRow('Qualifications',
+                              activity.qualifications, Iconsax.book),
                           _buildModernDetailRow(
                               'Person Type',
                               _getPersonTypeText(activity.facilityPersonType),
@@ -525,10 +531,8 @@ class CssActivityCard extends StatelessWidget {
                               'Action Taken',
                               _getActionText(activity.action),
                               Iconsax.warning_2),
-                          _buildModernDetailRow(
-                              'Inspector ID',
-                              activity.inspectorId,
-                              Iconsax.user_square),
+                          _buildModernDetailRow('Inspector ID',
+                              activity.inspectorId, Iconsax.user_square),
                         ],
                       ),
                     ],

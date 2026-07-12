@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'package:pmis/utils/config.dart';
 
 class CssService {
   static const _baseUrl = 'http://pmis.nda.or.ug/api';
@@ -21,7 +23,9 @@ class CssService {
         },
       ).timeout(_timeoutDuration);
 
-      return _handleResponse(response);
+      return await _handleResponse(response);
+    } on TimeoutException {
+      throw const TimeoutException('Request timeout. Please try again.');
     } on SocketException {
       throw const NetworkException(
           'No internet connection. Please check your network.');
@@ -31,21 +35,47 @@ class CssService {
       throw const ServerException('Invalid response format from server.');
     } catch (e) {
       if (e is ApiException) rethrow;
+      // Check if it's a timeout error
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
+        throw const TimeoutException('Request timeout. Please try again.');
+      }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
     }
   }
 
+// Top-level parser for compute() to run in background isolate
+  List<Map<String, dynamic>> _parseJsonList(String body) {
+    final List<dynamic> dataList = jsonDecode(body) as List<dynamic>;
+    final List<Map<String, dynamic>> cssData =
+        dataList.map((item) => item as Map<String, dynamic>).toList();
+    return cssData;
+  }
+
   /// Handle HTTP response and return parsed data
-  List<Map<String, dynamic>> _handleResponse(http.Response response) {
+  Future<List<Map<String, dynamic>>> _handleResponse(
+      http.Response response) async {
     switch (response.statusCode) {
       case 200:
         try {
-          final List<dynamic> dataList =
-              jsonDecode(response.body) as List<dynamic>;
-
-          // Convert to List<Map<String, dynamic>>
+          // Offload JSON parsing to background isolate to avoid UI jank
           final List<Map<String, dynamic>> cssData =
-              dataList.map((item) => item as Map<String, dynamic>).toList();
+              await compute(_parseJsonList, response.body);
+
+          // Debug: Print raw API response only when debugLogging enabled
+          if (AppConfig.debugLogging) {
+            print('=== CSS API Response Debug ===');
+            print('Total records: ${cssData.length}');
+            if (cssData.isNotEmpty) {
+              print('First record keys: ${cssData.first.keys.toList()}');
+              print('First record data: ${cssData.first}');
+              print(
+                  'Inspector Name from API: ${cssData.first['inspectorName'] ?? cssData.first['InspectorName'] ?? 'NOT FOUND'}');
+              print(
+                  'Inspector ID from API: ${cssData.first['inspectorId'] ?? cssData.first['InspectorId'] ?? 'NOT FOUND'}');
+            }
+            print('=== End CSS API Debug ===');
+          }
 
           return cssData;
         } catch (e) {
@@ -119,7 +149,7 @@ class CssService {
           pascalKey = 'InspectorName';
           break;
         case 'inspectorId':
-          pascalKey = 'InspectorId';
+          pascalKey = 'inspectorId';
           break;
         case 'intRegion':
           pascalKey = 'IntRegion';
@@ -156,6 +186,9 @@ class CssService {
           break;
         case 'licenseNo':
           pascalKey = 'LicenseNo';
+          break;
+        case 'licenseExpiryDate':
+          pascalKey = 'LicenseExpiryDate';
           break;
         case 'unlicensed':
           pascalKey = 'Unlicensed';
@@ -206,7 +239,8 @@ class CssService {
 
       // Convert camelCase to PascalCase for API
       final Map<String, dynamic> apiData = _convertToPascalCase(cssData);
-      print('Converted CSS API data: $apiData'); // Debug log
+      if (AppConfig.debugLogging)
+        print('Converted CSS API data: $apiData'); // Debug log (conditional)
 
       final response = await http
           .post(
@@ -220,6 +254,8 @@ class CssService {
           .timeout(_timeoutDuration);
 
       return _handlePostResponse(response);
+    } on TimeoutException {
+      throw const TimeoutException('Request timeout. Please try again.');
     } on SocketException {
       throw const NetworkException(
           'No internet connection. Please check your network.');
@@ -229,6 +265,11 @@ class CssService {
       throw const ServerException('Invalid response format from server.');
     } catch (e) {
       if (e is ApiException) rethrow;
+      // Check if it's a timeout error
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
+        throw const TimeoutException('Request timeout. Please try again.');
+      }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
     }
   }

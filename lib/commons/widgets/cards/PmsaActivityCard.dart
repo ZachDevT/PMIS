@@ -9,7 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 class PmsaActivityCard extends StatelessWidget {
   final PmsModel activity;
 
-  PmsaActivityCard({super.key, required this.activity});
+  const PmsaActivityCard({super.key, required this.activity});
 
   Color _getStatusColor(int status) {
     switch (status) {
@@ -42,58 +42,87 @@ class PmsaActivityCard extends StatelessWidget {
   String _getDistrictName(int? districtId) {
     if (districtId == null) return 'Unknown';
     switch (districtId) {
-      case 1: return 'Kampala';
-      case 2: return 'Masaka';
-      case 3: return 'Kabale';
-      case 4: return 'Fortportal';
-      default: return 'Unknown';
+      case 1:
+        return 'Kampala';
+      case 2:
+        return 'Masaka';
+      case 3:
+        return 'Kabale';
+      case 4:
+        return 'Fortportal';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getFacilityStatusText(int status) {
     switch (status) {
-      case 1: return 'Open';
-      case 0: return 'Closed';
-      default: return 'Unknown';
+      case 1:
+        return 'Open';
+      case 0:
+        return 'Closed';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getLicenseStatusText(int status) {
     switch (status) {
-      case 1: return 'Licensed';
-      case 2: return 'Un-Licensed';
-      case 3: return 'Not-Applicable';
-      default: return 'Unknown';
+      case 1:
+        return 'Licensed';
+      case 2:
+        return 'Un-Licensed';
+      case 3:
+        return 'Not-Applicable';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getCategoryOfPremisesText(int category) {
     switch (category) {
-      case 1: return 'Retail Pharmacy';
-      case 2: return 'Drug Shop';
-      case 3: return 'Hospital';
-      case 4: return 'HCIV';
-      case 5: return 'HCIII';
-      case 6: return 'Clinic';
-      default: return 'Unknown';
+      case 1:
+        return 'Retail Pharmacy';
+      case 2:
+        return 'Drug Shop';
+      case 3:
+        return 'Hospital';
+      case 4:
+        return 'HCIV';
+      case 5:
+        return 'HCIII';
+      case 6:
+        return 'Clinic';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getPmsActivityText(int activity) {
     switch (activity) {
-      case 1: return 'Product Sampling';
-      case 2: return 'Follow-up';
-      case 3: return 'Complaint Investigation';
-      case 4: return 'Other';
-      default: return 'Unknown';
+      case 1:
+        return 'Sampling';
+      case 2:
+        return 'Follow-up on Recall';
+      case 3:
+        return 'Complaint investigation';
+      case 4:
+        return 'Others';
+      case 0:
+        return 'None';
+      default:
+        return 'None';
     }
   }
 
   String _getPersonTypeText(int type) {
     switch (type) {
-      case 1: return 'In-charge';
-      case 2: return 'Attendant/Operator';
-      default: return 'Unknown';
+      case 1:
+        return 'In-charge';
+      case 2:
+        return 'Attendant/Operator';
+      default:
+        return 'Unknown';
     }
   }
 
@@ -131,7 +160,8 @@ class PmsaActivityCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(activity.licenseStatus).withOpacity(0.1),
+                    color: _getStatusColor(activity.licenseStatus)
+                        .withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -146,11 +176,12 @@ class PmsaActivityCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                    activity.facilityName,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: dark ? Colors.white : Colors.black87,
-                            ),
+                        activity.facilityName,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: dark ? Colors.white : Colors.black87,
+                                ),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -196,7 +227,8 @@ class PmsaActivityCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Tcolors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
@@ -338,6 +370,18 @@ class PmsaActivityCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
+                    // Debug: Print activity data
+                    Builder(
+                      builder: (context) {
+                        print('=== PMSA Activity Card Debug ===');
+                        print(
+                            'Activity inspectorName: ${activity.inspectorName}');
+                        print('Activity inspectorId: ${activity.inspectorId}');
+                        print('Activity keys: ${activity.toString()}');
+                        print('=== End PMSA Activity Card Debug ===');
+                        return const SizedBox.shrink();
+                      },
+                    ),
                     _buildModernDetailSection(
                       'Inspection Information',
                       Iconsax.calendar_1,
@@ -348,12 +392,16 @@ class PmsaActivityCard extends StatelessWidget {
                             Iconsax.calendar),
                         _buildModernDetailRow('Inspector Name',
                             activity.inspectorName, Iconsax.user),
-                        _buildModernDetailRow('GPS Location',
-                            '${activity.latitude}, ${activity.longitude}', Iconsax.location),
+                        _buildModernDetailRow(
+                            'GPS Location',
+                            '${activity.latitude}, ${activity.longitude}',
+                            Iconsax.location),
                         _buildModernDetailRow('Region',
                             _getRegionName(activity.intRegion), Iconsax.map),
-                        _buildModernDetailRow('District ID',
-                            activity.districtId.toString(), Iconsax.building),
+                        _buildModernDetailRow(
+                            'District',
+                            _getDistrictName(activity.districtId),
+                            Iconsax.building),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -367,76 +415,98 @@ class PmsaActivityCard extends StatelessWidget {
                             'Facility Status',
                             _getFacilityStatusText(activity.facilityStatus),
                             Iconsax.info_circle),
-                        _buildModernDetailRow(
-                            'Category of Premises',
-                            _getCategoryOfPremisesText(activity.categoryOfpremises),
-                            Iconsax.building),
-                        _buildModernDetailRow(
-                            'License Status',
-                            _getLicenseStatusText(activity.licenseStatus),
-                            Iconsax.shield_tick),
-                        _buildModernDetailRow(
-                            'License Number',
-                            activity.licenseNo ?? 'Not provided',
-                            Iconsax.document),
+                        // Only show these details if facility is not Closed
+                        if (activity.facilityStatus != 0) ...[
+                          _buildModernDetailRow(
+                              'Category of Premises',
+                              _getCategoryOfPremisesText(
+                                  activity.categoryOfpremises),
+                              Iconsax.building),
+                          _buildModernDetailRow(
+                              'License Status',
+                              _getLicenseStatusText(activity.licenseStatus),
+                              Iconsax.shield_tick),
+                          _buildModernDetailRow(
+                              'License Number',
+                              activity.licenseNo ?? 'Not provided',
+                              Iconsax.document),
+                        ],
                       ],
                     ),
-                    const SizedBox(height: 24),
-                    _buildModernDetailSection(
-                      'Personnel Information',
-                      Iconsax.profile_2user,
-                      [
-                        _buildModernDetailRow(
-                            'Person Name', activity.personName, Iconsax.user),
-                        _buildModernDetailRow(
-                            'Contact', activity.contact ?? 'Not provided', Iconsax.call),
-                        _buildModernDetailRow('Qualifications',
-                            activity.qualifications ?? 'Not provided', Iconsax.book),
-                        _buildModernDetailRow(
-                            'Person Type',
-                            _getPersonTypeText(activity.facilityPersonType),
-                            Iconsax.user_tag),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    _buildModernDetailSection(
-                      'PMSA Specific Details',
-                      Iconsax.activity,
-                      [
-                        _buildModernDetailRow(
-                            'PMS Activity',
-                            _getPmsActivityText(activity.pmsActivity),
-                            Iconsax.activity),
-                        _buildModernDetailRow(
-                            'Sample Product Name',
-                            activity.sampleProductName.isNotEmpty ? activity.sampleProductName : 'Not provided',
-                            Iconsax.box),
-                        _buildModernDetailRow(
-                            'Sample Number',
-                            activity.sampleNo.toString(),
-                            Iconsax.document_text),
-                        _buildModernDetailRow(
-                            'Sample Batch',
-                            activity.sampleBatch.isNotEmpty ? activity.sampleBatch : 'Not provided',
-                            Iconsax.tag),
-                        _buildModernDetailRow(
-                            'Follow-up Comment',
-                            activity.followupComment.isNotEmpty ? activity.followupComment : 'Not provided',
-                            Iconsax.message_text),
-                        _buildModernDetailRow(
-                            'Complaint Product',
-                            activity.complaintProduct.isNotEmpty ? activity.complaintProduct : 'Not provided',
-                            Iconsax.warning_2),
-                        _buildModernDetailRow(
-                            'Other Activity',
-                            activity.otherActivity.isNotEmpty ? activity.otherActivity : 'Not provided',
-                            Iconsax.more),
-                        _buildModernDetailRow(
-                            'Inspector ID',
-                            activity.inspectorId ?? 'Not assigned',
-                            Iconsax.user_square),
-                      ],
-                    ),
+                    // Only show Personnel Information if facility is not Closed
+                    if (activity.facilityStatus != 0) ...[
+                      const SizedBox(height: 24),
+                      _buildModernDetailSection(
+                        'Personnel Information',
+                        Iconsax.profile_2user,
+                        [
+                          _buildModernDetailRow(
+                              'Person Name', activity.personName, Iconsax.user),
+                          _buildModernDetailRow('Contact',
+                              activity.contact ?? 'Not provided', Iconsax.call),
+                          _buildModernDetailRow(
+                              'Qualifications',
+                              activity.qualifications ?? 'Not provided',
+                              Iconsax.book),
+                          _buildModernDetailRow(
+                              'Person Type',
+                              _getPersonTypeText(activity.facilityPersonType),
+                              Iconsax.user_tag),
+                        ],
+                      ),
+                    ],
+                    // Only show PMSA Specific Details if facility is not Closed
+                    if (activity.facilityStatus != 0) ...[
+                      const SizedBox(height: 24),
+                      _buildModernDetailSection(
+                        'PMSA Specific Details',
+                        Iconsax.activity,
+                        [
+                          _buildModernDetailRow(
+                              'PMS Activity',
+                              _getPmsActivityText(activity.pmsActivity),
+                              Iconsax.activity),
+                          _buildModernDetailRow(
+                              'Sample Product Name',
+                              activity.sampleProductName.isNotEmpty
+                                  ? activity.sampleProductName
+                                  : 'Not provided',
+                              Iconsax.box),
+                          _buildModernDetailRow(
+                              'Sample Number',
+                              activity.sampleNo.toString(),
+                              Iconsax.document_text),
+                          _buildModernDetailRow(
+                              'Sample Batch',
+                              activity.sampleBatch.isNotEmpty
+                                  ? activity.sampleBatch
+                                  : 'Not provided',
+                              Iconsax.tag),
+                          _buildModernDetailRow(
+                              'Follow-up Comment',
+                              activity.followupComment.isNotEmpty
+                                  ? activity.followupComment
+                                  : 'Not provided',
+                              Iconsax.message_text),
+                          _buildModernDetailRow(
+                              'Complaint Product',
+                              activity.complaintProduct.isNotEmpty
+                                  ? activity.complaintProduct
+                                  : 'Not provided',
+                              Iconsax.warning_2),
+                          _buildModernDetailRow(
+                              'Other Activity',
+                              activity.otherActivity.isNotEmpty
+                                  ? activity.otherActivity
+                                  : 'Not provided',
+                              Iconsax.more),
+                          _buildModernDetailRow(
+                              'Inspector ID',
+                              activity.inspectorId ?? 'Not assigned',
+                              Iconsax.user_square),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     _buildModernDetailSection(
                       'Location Coordinates',
@@ -557,8 +627,8 @@ class PmsaActivityCard extends StatelessWidget {
             width: 1,
           ),
         ),
-      child: Row(
-        children: [
+        child: Row(
+          children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -571,11 +641,11 @@ class PmsaActivityCard extends StatelessWidget {
                 size: 16,
               ),
             ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
                     label,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -642,18 +712,25 @@ class PmsaActivityCard extends StatelessWidget {
 
   Color _getLicenseStatusColor(int status) {
     switch (status) {
-      case 1: return Colors.green; // Licensed
-      case 2: return Colors.orange; // Un-Licensed
-      case 3: return Colors.grey; // Not-Applicable
-      default: return Colors.grey;
+      case 1:
+        return Colors.green; // Licensed
+      case 2:
+        return Colors.orange; // Un-Licensed
+      case 3:
+        return Colors.grey; // Not-Applicable
+      default:
+        return Colors.grey;
     }
   }
 
   Color _getFacilityStatusColor(int status) {
     switch (status) {
-      case 1: return Colors.green; // Open
-      case 0: return Colors.red; // Closed
-      default: return Colors.grey;
+      case 1:
+        return Colors.green; // Open
+      case 0:
+        return Colors.red; // Closed
+      default:
+        return Colors.grey;
     }
   }
 
@@ -729,7 +806,7 @@ class PmsaActivityCard extends StatelessWidget {
   Future<void> _openMapView(BuildContext context) async {
     // Check location permission before opening map
     PermissionStatus status = await Permission.location.status;
-    
+
     if (status.isGranted) {
       // Permission already granted, open map
       Navigator.push(
@@ -739,14 +816,15 @@ class PmsaActivityCard extends StatelessWidget {
             latitude: activity.latitude,
             longitude: activity.longitude,
             facilityName: activity.facilityName,
-            address: '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
+            address:
+                '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
           ),
         ),
       );
     } else {
       // Request permission first
       PermissionStatus newStatus = await Permission.location.request();
-      
+
       if (newStatus.isGranted) {
         // Permission granted, open map
         Navigator.push(
@@ -756,7 +834,8 @@ class PmsaActivityCard extends StatelessWidget {
               latitude: activity.latitude,
               longitude: activity.longitude,
               facilityName: activity.facilityName,
-              address: '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
+              address:
+                  '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
             ),
           ),
         );
@@ -767,7 +846,8 @@ class PmsaActivityCard extends StatelessWidget {
         // Permission denied, show message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Location permission is required to view the map'),
+            content:
+                const Text('Location permission is required to view the map'),
             backgroundColor: Colors.orange,
             action: SnackBarAction(
               label: 'Settings',

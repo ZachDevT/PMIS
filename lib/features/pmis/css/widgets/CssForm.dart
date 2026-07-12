@@ -225,12 +225,14 @@ class CssForm extends StatelessWidget {
                       selectedItem: controller.selectedCategoryOfFacility,
                       prefixIcon: Icons.category,
                     ),
-                    if (controller.selectedCategoryOfFacility.value == "Others") ...[
+                    if (controller.selectedCategoryOfFacility.value ==
+                        "Others") ...[
                       buildTextField(
                         controller: controller.otherCategoryPremiseController,
                         label: "State the other type of facility",
                         prefixIcon: Icons.edit,
-                        validator: (value) => value!.isEmpty ? "Required" : null,
+                        validator: (value) =>
+                            value!.isEmpty ? "Required" : null,
                       ),
                     ],
                     buildDropdown(
@@ -239,12 +241,14 @@ class CssForm extends StatelessWidget {
                       selectedItem: controller.selectedLicensedStatus,
                       prefixIcon: Icons.verified_user,
                     ),
-                    if (controller.selectedLicensedStatus.value == "Licensed") ...[
+                    if (controller.selectedLicensedStatus.value ==
+                        "Licensed") ...[
                       buildTextField(
                         controller: controller.licenseNoController,
                         label: "License No.",
                         prefixIcon: Icons.badge,
-                        validator: (value) => value!.isEmpty ? "Required" : null,
+                        validator: (value) =>
+                            value!.isEmpty ? "Required" : null,
                       ),
                       buildTextField(
                         controller: controller.licenseExpiryDateController,
@@ -263,10 +267,14 @@ class CssForm extends StatelessWidget {
                                 picked.toLocal().toString().split(' ')[0];
                           }
                         },
-                        validator: (value) => value!.isEmpty ? "Required" : null,
+                        validator: (value) =>
+                            value!.isEmpty ? "Required" : null,
                       ),
                     ],
-                    if (controller.selectedLicensedStatus.value == "Un-Licensed" || controller.selectedLicensedStatus.value == "Unlicensed") ...[
+                    if (controller.selectedLicensedStatus.value ==
+                            "Un-Licensed" ||
+                        controller.selectedLicensedStatus.value ==
+                            "Unlicensed") ...[
                       buildDropdown(
                         label: "Previously Licensed or Illegal Outlet",
                         items: ["Previously Licensed", "Illegal Outlet"],
@@ -298,12 +306,15 @@ class CssForm extends StatelessWidget {
                       selectedItem: controller.selectedUnregisteredDrugs,
                       prefixIcon: Icons.warning,
                     ),
-                    if (controller.selectedUnregisteredDrugs.value == "Present") ...[
+                    if (controller.selectedUnregisteredDrugs.value ==
+                        "Present") ...[
                       buildTextField(
                         controller: controller.unRegDrugQtyController,
-                        label: "State the name and quantities of unregistered drug",
+                        label:
+                            "State the name and quantities of unregistered drug",
                         prefixIcon: Icons.medication,
-                        validator: (value) => value!.isEmpty ? "Required" : null,
+                        validator: (value) =>
+                            value!.isEmpty ? "Required" : null,
                       ),
                     ],
                     buildDropdown(

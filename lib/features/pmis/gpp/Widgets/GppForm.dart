@@ -145,7 +145,7 @@ class GppForm extends StatelessWidget {
                   ),
                   buildTextField(
                     controller: controller.inspectorNameController,
-                    label: "Name of Inspector",
+                    label: "Inspector Name",
                     prefixIcon: Icons.person,
                     validator: (value) => value!.isEmpty ? "Required" : null,
                   ),
@@ -229,12 +229,18 @@ class GppForm extends StatelessWidget {
                         buildDropdown(
                           label: "Category of Facility",
                           items: [
+                            "Wholesale Pharmacy",
                             "Retail Pharmacy",
                             "Drug Shop",
+                            "External Stores",
                             "Hospital",
                             "HCIV",
                             "HCIII",
-                            "Clinic"
+                            "Clinic",
+                            "Herbal Selling Outlet",
+                            "Shift Market",
+                            "Pharmaceutical/Medical Device Manufacturing Premise",
+                            "Others"
                           ],
                           selectedItem: controller.selectedCategoryOfFacility,
                           prefixIcon: Icons.category,
@@ -245,6 +251,33 @@ class GppForm extends StatelessWidget {
                           selectedItem: controller.selectedLicensedStatus,
                           prefixIcon: Icons.verified_user,
                         ),
+                        if (controller.selectedLicensedStatus.value == "Licensed") ...[
+                          buildTextField(
+                            controller: controller.licenseNoController,
+                            label: "License No.",
+                            prefixIcon: Icons.badge,
+                            validator: (value) => value!.isEmpty ? "Required" : null,
+                          ),
+                          buildTextField(
+                            controller: controller.licenseExpiryDateController,
+                            label: "License Expiry Date",
+                            prefixIcon: Icons.date_range,
+                            readOnly: true,
+                            onTap: () async {
+                              DateTime? picked = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
+                              if (picked != null) {
+                                controller.licenseExpiryDateController.text =
+                                    picked.toLocal().toString().split(' ')[0];
+                              }
+                            },
+                            validator: (value) => value!.isEmpty ? "Required" : null,
+                          ),
+                        ],
                         // SECTION: Drugs & GPP Details
                         const Text("Drugs & GPP Details",
                             style: TextStyle(
@@ -276,8 +309,8 @@ class GppForm extends StatelessWidget {
                         buildDropdown(
                           label: "Recommended for GPP",
                           items: [
-                            "GPP certification",
-                            "Not recommended for GPP certification"
+                            "Recommended for GPP",
+                            "Not recommended for GPP"
                           ],
                           selectedItem: controller.recommendedForGpp,
                           prefixIcon: Icons.recommend,

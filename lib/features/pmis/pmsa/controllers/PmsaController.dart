@@ -7,6 +7,7 @@ import 'package:pmis/utils/popups/loaders.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
 class PmsaController extends GetxController {
   // List of PMS activities.
@@ -28,6 +29,7 @@ class PmsaController extends GetxController {
   final inspectionDateController = TextEditingController();
   final inspectionTimeController = TextEditingController();
   final inspectorNameController = TextEditingController();
+  final inspectorIdController = TextEditingController();
   final gpsLocationController =
       TextEditingController(); // auto-load current location
 
@@ -49,6 +51,7 @@ class PmsaController extends GetxController {
   var selectedCategoryOfFacility = ''.obs;
   var licensedStatus = ''.obs;
   final licenseNoController = TextEditingController();
+  final licenseExpiryDateController = TextEditingController();
 
   // Section: PMSA Activity
   var pmsaActivityCarriesOut = ''.obs;
@@ -64,6 +67,7 @@ class PmsaController extends GetxController {
   final productBeingFollowedUpController = TextEditingController();
   final commentOnOverallFollowUpController = TextEditingController();
   final productComplaintInvestigatedController = TextEditingController();
+  final postMarketComplaintNotedController = TextEditingController();
   final specifyActivityController = TextEditingController();
 
   // Location variables
@@ -74,12 +78,10 @@ class PmsaController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadActivities();
+    // Defer activity loading to avoid blocking main thread during initialization
+    Future.microtask(() => loadActivities());
     getCurrentLocation(); // Get current location on init
-    // Set current date/time
-    inspectionDateController.text =
-        DateTime.now().toLocal().toString().split(' ')[0];
-    inspectionTimeController.text = TimeOfDay.now().format(Get.context!);
+    _autoFillDefaults(); // Prepopulate inspector info
     
     // Initialize filtered activities
     ever(activities, (_) => filterActivities());
@@ -90,13 +92,40 @@ class PmsaController extends GetxController {
     ever(filterPmsActivity, (_) => filterActivities());
   }
 
+  void _autoFillDefaults() {
+    // Set current date/time
+    inspectionDateController.text =
+        DateTime.now().toLocal().toString().split(' ')[0];
+    inspectionTimeController.text = TimeOfDay.now().format(Get.context!);
+    numberOfSamplesCollectedController.text = "0";
+    
+    // Prepopulate inspector name and ID from logged-in user
+    if (Get.isRegistered<AuthController>()) {
+      final authController = Get.find<AuthController>();
+      inspectorNameController.text = authController.userDisplayName;
+      inspectorIdController.text = authController.userId;
+    }
+  }
+
   Future<void> loadActivities() async {
     try {
+      print('=== PMSA Controller: Loading Activities ===');
       var data = await repository.getPmsData();
+      print('PMSA Controller: Raw data received: ${data.length} records');
+      if (data.isNotEmpty) {
+        print('PMSA Controller: First record: ${data.first}');
+      }
       var pmsActivities =
           data.map((item) => PmsModel.fromJson(item)).toList();
+      print('PMSA Controller: Parsed activities: ${pmsActivities.length}');
+      if (pmsActivities.isNotEmpty) {
+        print('PMSA Controller: First parsed activity inspectorName: ${pmsActivities.first.inspectorName}');
+        print('PMSA Controller: First parsed activity inspectorId: ${pmsActivities.first.inspectorId}');
+      }
       activities.assignAll(pmsActivities);
+      print('=== End PMSA Controller: Loading Activities ===');
     } catch (e) {
+      print('PMSA Controller Error: $e');
       Loaders.errorSnackbar(
           title: "Error", message: "Failed to load PMS data: ${e.toString()}");
     }
@@ -104,7 +133,21 @@ class PmsaController extends GetxController {
 
   /// Filter activities based on search query and selected filters
   void filterActivities() {
+    // Get current user info
+    final authController = Get.isRegistered<AuthController>() 
+        ? Get.find<AuthController>() 
+        : null;
+    final isAdmin = authController?.isAdmin ?? false;
+    final userId = authController?.userId ?? '';
+
     var filtered = activities.where((activity) {
+      // Role-based filter: If not admin, only show activities created by this user
+      if (!isAdmin && userId.isNotEmpty) {
+        if (activity.inspectorId != userId) {
+          return false;
+        }
+      }
+
       // Search query filter
       bool matchesSearch = searchQuery.value.isEmpty ||
           activity.facilityName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
@@ -178,12 +221,6 @@ class PmsaController extends GetxController {
         if (pmsaActivityCarriesOut.value.isEmpty) {
           emptyFields.add("PMSA Activity");
         }
-        if (selectedCategoryOfDrugs.value.isEmpty) {
-          emptyFields.add("Category of Drugs");
-        }
-        if (selectedCategoryOfProductSamples.value.isEmpty) {
-          emptyFields.add("Category of Product Samples");
-        }
       }
       // If facility is not closed, require additional details.
       if (selectedFacilityStatus.value != "Closed") {
@@ -200,19 +237,42 @@ class PmsaController extends GetxController {
           emptyFields.add("Qualifications");
         }
       }
-      // Follow-up & complaint details are only required if facility is Open
-      if (selectedFacilityStatus.value != "Closed") {
-        if (productBeingFollowedUpController.text.isEmpty) {
-          emptyFields.add("Product Being Followed Up");
+      // Activity-specific validations (only if facility is not closed and activity is not "None")
+      if (selectedFacilityStatus.value != "Closed" && pmsaActivityCarriesOut.value != "None") {
+        String activity = pmsaActivityCarriesOut.value;
+        
+        // Common fields for Sampling, Complaint investigation, and Follow-up on Recall
+        if (activity == "Sampling" || activity == "Complaint investigation" || activity == "Follow-up on Recall") {
+          if (productSampledNameController.text.isEmpty) {
+            emptyFields.add("Name of Product");
+          }
+          if (numberOfSamplesCollectedController.text.isEmpty || numberOfSamplesCollectedController.text == "0") {
+            emptyFields.add("Quantity");
+          }
+          if (batchNumberOfSampleController.text.isEmpty) {
+            emptyFields.add("Batch Number");
+          }
         }
-        if (commentOnOverallFollowUpController.text.isEmpty) {
-          emptyFields.add("Comment on Overall Follow Up");
+        
+        // Specific fields for Complaint investigation
+        if (activity == "Complaint investigation") {
+          if (postMarketComplaintNotedController.text.isEmpty) {
+            emptyFields.add("State any post market complaint noted");
+          }
         }
-        if (productComplaintInvestigatedController.text.isEmpty) {
-          emptyFields.add("Product Complaint Investigated");
+        
+        // Specific fields for Follow-up on Recall
+        if (activity == "Follow-up on Recall") {
+          if (commentOnOverallFollowUpController.text.isEmpty) {
+            emptyFields.add("Comment on Over all Follow up");
+          }
         }
-        if (specifyActivityController.text.isEmpty) {
-          emptyFields.add("Specify Activity");
+        
+        // Specific field for Others
+        if (activity == "Others") {
+          if (specifyActivityController.text.isEmpty) {
+            emptyFields.add("Specify Activity");
+          }
         }
       }
 
@@ -230,7 +290,7 @@ class PmsaController extends GetxController {
         id: 0, // Will be set by API
         inspectionDate: DateTime.parse(inspectionDateController.text),
         inspectorName: inspectorNameController.text,
-        inspectorId: "INSP001", // Default inspector ID
+        inspectorId: inspectorIdController.text,
         latitude: currentLatitude.value,
         longitude: currentLongitude.value,
         intRegion: _getRegionGuid(selectedRegion.value),
@@ -243,16 +303,19 @@ class PmsaController extends GetxController {
         qualifications: qualificationsController.text,
         categoryOfpremises:
             _getCategoryOfPremises(selectedCategoryOfFacility.value),
-        otherCategoryPremise: selectedCategoryOfFacility.value == "Other" ? "Other category" : "",
+        otherCategoryPremise: selectedCategoryOfFacility.value == "Others" ? "Other category" : "",
         licenseStatus: _getLicenseStatus(licensedStatus.value),
         licenseNo: licensedStatus.value == "Licensed" ? licenseNoController.text : "",
+        licenseExpiryDate: licensedStatus.value == "Licensed" ? licenseExpiryDateController.text : "",
         unlicensed: licensedStatus.value == "Un-Licensed" ? 1 : 0,
         pmsActivity: _getPmsActivity(pmsaActivityCarriesOut.value),
         sampleProductName: productSampledNameController.text,
         sampleNo: int.tryParse(numberOfSamplesCollectedController.text) ?? 0,
         sampleBatch: batchNumberOfSampleController.text,
         followupComment: commentOnOverallFollowUpController.text,
-        complaintProduct: productComplaintInvestigatedController.text,
+        complaintProduct: postMarketComplaintNotedController.text.isNotEmpty 
+            ? postMarketComplaintNotedController.text 
+            : productComplaintInvestigatedController.text,
         otherActivity: specifyActivityController.text,
       );
 
@@ -297,7 +360,9 @@ class PmsaController extends GetxController {
     inspectionDateController.clear();
     inspectionTimeController.clear();
     inspectorNameController.clear();
+    inspectorIdController.clear();
     licenseNoController.clear();
+    licenseExpiryDateController.clear();
     // gpsLocationController remains auto-filled.
     facilityNameController.clear();
     personFoundAtFacility.value = '';
@@ -313,11 +378,12 @@ class PmsaController extends GetxController {
     selectedCategoryOfDrugs.value = '';
     selectedCategoryOfProductSamples.value = '';
     productSampledNameController.clear();
-    numberOfSamplesCollectedController.clear();
+    numberOfSamplesCollectedController.text = "0";
     batchNumberOfSampleController.clear();
     productBeingFollowedUpController.clear();
     commentOnOverallFollowUpController.clear();
     productComplaintInvestigatedController.clear();
+    postMarketComplaintNotedController.clear();
     specifyActivityController.clear();
   }
 
@@ -354,20 +420,32 @@ class PmsaController extends GetxController {
 
   int _getCategoryOfPremises(String category) {
     switch (category) {
+      case "Wholesale Pharmacy":
+        return 1;
       case "Retail Pharmacy":
-        return 1;
-      case "Drug Shop":
         return 2;
-      case "Hospital":
+      case "Drug Shop":
         return 3;
-      case "HCIV":
+      case "External Stores":
         return 4;
-      case "HCIII":
+      case "Hospital":
         return 5;
-      case "Clinic":
+      case "HCIV":
         return 6;
+      case "HCIII":
+        return 7;
+      case "Clinic":
+        return 8;
+      case "Herbal Selling Outlet":
+        return 9;
+      case "Shift Market":
+        return 10;
+      case "Pharmaceutical/Medical Device Manufacturing Premise":
+        return 11;
+      case "Others":
+        return 12;
       default:
-        return 1;
+        return 2; // Default to Retail Pharmacy
     }
   }
 
@@ -403,16 +481,18 @@ class PmsaController extends GetxController {
 
   int _getPmsActivity(String activity) {
     switch (activity) {
-      case "Product Sampling":
+      case "Sampling":
         return 1;
-      case "Follow-up":
+      case "Follow-up on Recall":
         return 2;
-      case "Complaint Investigation":
+      case "Complaint investigation":
         return 3;
-      case "Other":
+      case "Others":
         return 4;
+      case "None":
+        return 0;
       default:
-        return 1;
+        return 0;
     }
   }
 
@@ -436,11 +516,12 @@ class PmsaController extends GetxController {
 
   String _getPmsActivityText(int activity) {
     switch (activity) {
-      case 1: return "Product Sampling";
-      case 2: return "Follow-up";
-      case 3: return "Complaint Investigation";
-      case 4: return "Other";
-      default: return "Product Sampling";
+      case 1: return "Sampling";
+      case 2: return "Follow-up on Recall";
+      case 3: return "Complaint investigation";
+      case 4: return "Others";
+      case 0: return "None";
+      default: return "None";
     }
   }
 

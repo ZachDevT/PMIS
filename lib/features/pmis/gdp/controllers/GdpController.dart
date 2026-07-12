@@ -7,6 +7,7 @@ import 'package:pmis/utils/popups/loaders.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
 class GdpController extends GetxController {
   // List of GDP inspection activities.
@@ -28,6 +29,7 @@ class GdpController extends GetxController {
   final inspectionDateController = TextEditingController();
   final inspectionTimeController = TextEditingController();
   final inspectorNameController = TextEditingController();
+  final inspectorIdController = TextEditingController();
   final gpsLocationController =
       TextEditingController(); // auto-load current location
 
@@ -45,12 +47,16 @@ class GdpController extends GetxController {
 
   // Section: Facility Status & In-Charge
   var selectedFacilityStatus = ''.obs;
+  var personFoundController = ''.obs; // Add person found dropdown
 
   // Section: Category of Facility
   var selectedCategoryOfFacility = ''.obs;
 
   // Section: Licensed/Unlicensed & Certification (in GDP, certification status applies)
+  var selectedLicenseStatus = ''.obs;
   var selectedCertificationStatus = ''.obs;
+  final licenseNoController = TextEditingController();
+  final licenseExpiryDateController = TextEditingController();
 
   // Section: Category of Drugs
   var selectedCategoryOfDrugs = ''.obs;
@@ -58,6 +64,9 @@ class GdpController extends GetxController {
   // Section: Additional GDP Details
   var selectedFacilityType = ''.obs;
   var recommendedForGpp = ''.obs;
+
+  // Contact controller for phone/email
+  final contactController = TextEditingController();
 
   // Location variables
   var currentLatitude = 0.0.obs;
@@ -67,28 +76,66 @@ class GdpController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadActivities();
-    getCurrentLocation(); // Get current location on init
-    // Set current date/time
-    inspectionDateController.text =
-        DateTime.now().toLocal().toString().split(' ')[0];
-    inspectionTimeController.text = TimeOfDay.now().format(Get.context!);
-
-    // Initialize filtered activities
+    // Register listeners BEFORE loading so initial data propagates to filtered list
     ever(activities, (_) => filterActivities());
     ever(searchQuery, (_) => filterActivities());
     ever(filterRegion, (_) => filterActivities());
     ever(filterFacilityStatus, (_) => filterActivities());
     ever(filterCertificationStatus, (_) => filterActivities());
     ever(filterCategoryOfDrugs, (_) => filterActivities());
+
+    // Defer activity loading to avoid blocking main thread during initialization
+    Future.microtask(() => loadActivities());
+    getCurrentLocation(); // Get current location on init
+    _autoFillDefaults(); // Prepopulate inspector info
+
+    // Initialize filtered activities if repo is empty
+    if (activities.isEmpty) {
+      filterActivities();
+    }
+  }
+
+  void _autoFillDefaults() {
+    // Set current date/time
+    inspectionDateController.text =
+        DateTime.now().toLocal().toString().split(' ')[0];
+    final now = TimeOfDay.now();
+    inspectionTimeController.text =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+
+    // Prepopulate inspector name and ID from logged-in user
+    if (Get.isRegistered<AuthController>()) {
+      final authController = Get.find<AuthController>();
+      inspectorNameController.text = authController.userDisplayName;
+      inspectorIdController.text = authController.userId;
+    }
+
+    // Default license status to Licensed so fields show by default
+    selectedLicenseStatus.value = 'Licensed';
   }
 
   Future<void> loadActivities() async {
     try {
+      print('=== GDP Controller: Loading Activities ===');
       var data = await repository.fetchActivities();
+      print('GDP Controller: Raw data received: ${data.length} records');
+      if (data.isNotEmpty) {
+        print('GDP Controller: First record: ${data.first}');
+      }
       var gdpActivities = data.map((item) => GdpModel.fromJson(item)).toList();
+      print('GDP Controller: Parsed activities: ${gdpActivities.length}');
+      if (gdpActivities.isNotEmpty) {
+        print(
+            'GDP Controller: First parsed activity inspectorName: ${gdpActivities.first.inspectorName}');
+        print(
+            'GDP Controller: First parsed activity inspectorId: ${gdpActivities.first.inspectorId}');
+      }
       activities.assignAll(gdpActivities);
+      // Ensure UI reflects initial load immediately
+      filterActivities();
+      print('=== End GDP Controller: Loading Activities ===');
     } catch (e) {
+      print('GDP Controller Error: $e');
       Loaders.errorSnackbar(
           title: "Error", message: "Failed to load GDP data: ${e.toString()}");
     }
@@ -96,7 +143,20 @@ class GdpController extends GetxController {
 
   /// Filter activities based on search query and selected filters
   void filterActivities() {
+    // Get current user info
+    final authController =
+        Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
+    final isAdmin = authController?.isAdmin ?? false;
+    final userId = authController?.userId ?? '';
+
     var filtered = activities.where((activity) {
+      // Role-based filter: If not admin, only show activities created by this user
+      if (!isAdmin && userId.isNotEmpty) {
+        if (activity.inspectorId != userId) {
+          return false;
+        }
+      }
+
       // Search query filter
       bool matchesSearch = searchQuery.value.isEmpty ||
           activity.facilityName
@@ -176,6 +236,13 @@ class GdpController extends GetxController {
         if (selectedCertificationStatus.value.isEmpty) {
           emptyFields.add("Certification Status");
         }
+        if (selectedLicenseStatus.value.isEmpty) {
+          emptyFields.add("License Status");
+        }
+        if (selectedLicenseStatus.value == "Licensed" &&
+            licenseExpiryDateController.text.isEmpty) {
+          emptyFields.add("License Expiry Date");
+        }
         if (selectedCategoryOfDrugs.value.isEmpty) {
           emptyFields.add("Category of Drugs");
         }
@@ -206,20 +273,48 @@ class GdpController extends GetxController {
         districtId: _getDistrictId(selectedDistrict.value),
         facilityName: facilityNameController.text,
         facilityStatus: _getFacilityStatus(selectedFacilityStatus.value),
-        facilityPersonType: selectedFacilityStatus.value == "Closed" ? 0 : _getPersonType("In-charge"),
-        personName: selectedFacilityStatus.value == "Closed" ? "" : nameController.text,
-        contact: selectedFacilityStatus.value == "Closed" ? "" : contactQualificationsController.text,
-        qualifications: selectedFacilityStatus.value == "Closed" ? "" : qualificationsController.text,
-        categoryOfpremises: selectedFacilityStatus.value == "Closed" ? 0 : _getCategoryOfPremises(selectedCategoryOfFacility.value),
-        licenseStatus: selectedFacilityStatus.value == "Closed" ? 0 : _getLicenseStatus("Licensed"),
-        categoryStatus: selectedFacilityStatus.value == "Closed" ? 0 : _getCategoryStatus(selectedCategoryOfDrugs.value),
-        facilityType: selectedFacilityStatus.value == "Closed" ? 0 : _getFacilityType(selectedFacilityType.value),
-        certStatus: selectedFacilityStatus.value == "Closed" ? 0 : _getCertStatus(selectedCertificationStatus.value),
-        recommendedforGDP: selectedFacilityStatus.value == "Closed" ? 0 : _getRecommendedForGdp(recommendedForGpp.value),
-        inspectorId: "INSP001",
+        facilityPersonType: selectedFacilityStatus.value == "Closed"
+            ? 0
+            : _getPersonType("In-charge"),
+        personName:
+            selectedFacilityStatus.value == "Closed" ? "" : nameController.text,
+        contact: selectedFacilityStatus.value == "Closed"
+            ? ""
+            : contactQualificationsController.text,
+        qualifications: selectedFacilityStatus.value == "Closed"
+            ? ""
+            : qualificationsController.text,
+        categoryOfpremises: selectedFacilityStatus.value == "Closed"
+            ? 0
+            : _getCategoryOfPremises(selectedCategoryOfFacility.value),
+        licenseStatus: selectedFacilityStatus.value == "Closed"
+            ? 0
+            : _getLicenseStatus(selectedLicenseStatus.value),
+        categoryStatus: selectedFacilityStatus.value == "Closed"
+            ? 0
+            : _getCategoryStatus(selectedCategoryOfDrugs.value),
+        facilityType: selectedFacilityStatus.value == "Closed"
+            ? 0
+            : _getFacilityType(selectedFacilityType.value),
+        certStatus: selectedFacilityStatus.value == "Closed"
+            ? 0
+            : _getCertStatus(selectedCertificationStatus.value),
+        recommendedforGDP: selectedFacilityStatus.value == "Closed"
+            ? 0
+            : _getRecommendedForGdp(recommendedForGpp.value),
+        inspectorId: inspectorIdController.text,
         latitude: currentLatitude.value,
         longitude: currentLongitude.value,
-        licenseNo: "",
+        licenseNo: selectedFacilityStatus.value == "Closed"
+            ? ""
+            : (selectedLicenseStatus.value == "Licensed"
+                ? licenseNoController.text
+                : ""),
+        licenseExpiryDate: selectedFacilityStatus.value == "Closed"
+            ? ""
+            : (selectedLicenseStatus.value == "Licensed"
+                ? licenseExpiryDateController.text
+                : ""),
       );
 
       // Check connectivity status.
@@ -264,18 +359,24 @@ class GdpController extends GetxController {
     inspectionDateController.clear();
     inspectionTimeController.clear();
     inspectorNameController.clear();
+    inspectorIdController.clear();
     // gpsLocationController remains auto-filled.
     facilityNameController.clear();
     contactQualificationsController.clear();
     qualificationsController.clear();
+    contactController.clear();
     selectedRegion.value = '';
     selectedDistrict.value = '';
     selectedFacilityStatus.value = '';
+    personFoundController.value = '';
     selectedCategoryOfFacility.value = '';
+    selectedLicenseStatus.value = '';
     selectedCertificationStatus.value = '';
     selectedCategoryOfDrugs.value = '';
     selectedFacilityType.value = '';
     recommendedForGpp.value = '';
+    licenseNoController.clear();
+    licenseExpiryDateController.clear();
     nameController.clear();
   }
 
@@ -312,20 +413,32 @@ class GdpController extends GetxController {
 
   int _getCategoryOfPremises(String category) {
     switch (category) {
+      case "Wholesale Pharmacy":
+        return 1;
       case "Retail Pharmacy":
-        return 1;
-      case "Drug Shop":
         return 2;
-      case "Hospital":
+      case "Drug Shop":
         return 3;
-      case "HCIV":
+      case "External Stores":
         return 4;
-      case "HCIII":
+      case "Hospital":
         return 5;
-      case "Clinic":
+      case "HCIV":
         return 6;
+      case "HCIII":
+        return 7;
+      case "Clinic":
+        return 8;
+      case "Herbal Selling Outlet":
+        return 9;
+      case "Shift Market":
+        return 10;
+      case "Pharmaceutical/Medical Device Manufacturing Premise":
+        return 11;
+      case "Others":
+        return 12;
       default:
-        return 1;
+        return 2; // Default to Retail Pharmacy
     }
   }
 

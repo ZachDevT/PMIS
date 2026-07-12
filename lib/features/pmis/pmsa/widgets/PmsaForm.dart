@@ -62,6 +62,7 @@ class PmsaForm extends StatelessWidget {
     bool readOnly = false,
     VoidCallback? onTap,
     TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -70,6 +71,7 @@ class PmsaForm extends StatelessWidget {
         readOnly: readOnly,
         onTap: onTap,
         keyboardType: keyboardType,
+        maxLines: maxLines,
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(prefixIcon),
@@ -148,7 +150,7 @@ class PmsaForm extends StatelessWidget {
                   ),
                   buildTextField(
                     controller: controller.inspectorNameController,
-                    label: "Name of Inspector",
+                    label: "Inspector Name",
                     prefixIcon: Icons.person,
                     validator: (value) =>
                         value!.isEmpty ? "Required" : null,
@@ -264,6 +266,25 @@ class PmsaForm extends StatelessWidget {
                             prefixIcon: Icons.badge,
                             validator: (value) => value!.isEmpty ? "Required" : null,
                           ),
+                          buildTextField(
+                            controller: controller.licenseExpiryDateController,
+                            label: "License Expiry Date",
+                            prefixIcon: Icons.date_range,
+                            readOnly: true,
+                            onTap: () async {
+                              DateTime? picked = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
+                              if (picked != null) {
+                                controller.licenseExpiryDateController.text =
+                                    picked.toLocal().toString().split(' ')[0];
+                              }
+                            },
+                            validator: (value) => value!.isEmpty ? "Required" : null,
+                          ),
                         ],
                         // SECTION: PMSA Activity Carried Out
                         const Text("PMSA Activity Carried Out",
@@ -273,7 +294,7 @@ class PmsaForm extends StatelessWidget {
                           label: "Activity",
                           items: [
                             "Sampling",
-                            "Follow-up on recall",
+                            "Follow-up on Recall",
                             "Complaint investigation",
                             "Others",
                             "None"
@@ -281,89 +302,65 @@ class PmsaForm extends StatelessWidget {
                           selectedItem: controller.pmsaActivityCarriesOut,
                           prefixIcon: Icons.build,
                         ),
-                        // SECTION: Drugs & Product Sampling Details
-                        const Text("Drugs & Product Sampling Details",
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.w500)),
-                        buildDropdown(
-                          label: "Category of Drugs",
-                          items: [
-                            "Medical Device",
-                            "Veterinary drugs",
-                            "Human drugs",
-                            "Public Healthcare products",
-                            "Herbal drugs"
-                          ],
-                          selectedItem: controller.selectedCategoryOfDrugs,
-                          prefixIcon: Icons.medical_services,
-                        ),
-                        buildDropdown(
-                          label: "Category of Product Samples",
-                          items: [
-                            "Medical Device",
-                            "Veterinary drugs",
-                            "Human drugs",
-                            "Public Healthcare products",
-                            "Herbal drugs"
-                          ],
-                          selectedItem:
-                              controller.selectedCategoryOfProductSamples,
-                          prefixIcon: Icons.document_scanner,
-                        ),
-                        buildTextField(
-                          controller: controller.productSampledNameController,
-                          label: "Name of Product Sampled",
-                          prefixIcon: Icons.production_quantity_limits,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
-                        ),
-                        buildTextField(
-                          controller: controller.numberOfSamplesCollectedController,
-                          label: "Number of Samples Collected",
-                          prefixIcon: Icons.numbers,
-                          keyboardType: TextInputType.number,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
-                        ),
-                        buildTextField(
-                          controller: controller.batchNumberOfSampleController,
-                          label: "Batch Number of Sample",
-                          prefixIcon: Icons.confirmation_number,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
-                        ),
-                        // SECTION: Follow-up & Complaint Details
-                        const Text("Follow-up & Complaint Details",
-                            style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.w500)),
-                        buildTextField(
-                          controller: controller.productBeingFollowedUpController,
-                          label: "Product Being Followed Up",
-                          prefixIcon: Icons.update,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
-                        ),
-                        buildTextField(
-                          controller: controller.commentOnOverallFollowUpController,
-                          label: "Comment on Overall Follow Up",
-                          prefixIcon: Icons.comment,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
-                        ),
-                        buildTextField(
-                          controller: controller.productComplaintInvestigatedController,
-                          label: "Product Complaint Investigated",
-                          prefixIcon: Icons.report_problem,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
-                        ),
-                        buildTextField(
-                          controller: controller.specifyActivityController,
-                          label: "Specify Activity (if Others)",
-                          prefixIcon: Icons.edit,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
-                        ),
+                        // Conditional fields based on selected activity
+                        if (controller.pmsaActivityCarriesOut.value == "Sampling" ||
+                            controller.pmsaActivityCarriesOut.value == "Complaint investigation" ||
+                            controller.pmsaActivityCarriesOut.value == "Follow-up on Recall") ...[
+                          buildTextField(
+                            controller: controller.productSampledNameController,
+                            label: "Name of Product",
+                            prefixIcon: Icons.production_quantity_limits,
+                            validator: (value) =>
+                                value!.isEmpty ? "Required" : null,
+                          ),
+                          buildTextField(
+                            controller: controller.numberOfSamplesCollectedController,
+                            label: "Quantity",
+                            prefixIcon: Icons.numbers,
+                            keyboardType: TextInputType.number,
+                            validator: (value) =>
+                                (value!.isEmpty || value == "0") ? "Required" : null,
+                          ),
+                          buildTextField(
+                            controller: controller.batchNumberOfSampleController,
+                            label: "Batch Number",
+                            prefixIcon: Icons.confirmation_number,
+                            validator: (value) =>
+                                value!.isEmpty ? "Required" : null,
+                          ),
+                        ],
+                        // Specific field for Complaint investigation
+                        if (controller.pmsaActivityCarriesOut.value == "Complaint investigation") ...[
+                          buildTextField(
+                            controller: controller.postMarketComplaintNotedController,
+                            label: "State any post market complaint noted",
+                            prefixIcon: Icons.note,
+                            maxLines: 3,
+                            validator: (value) =>
+                                value!.isEmpty ? "Required" : null,
+                          ),
+                        ],
+                        // Specific field for Follow-up on Recall
+                        if (controller.pmsaActivityCarriesOut.value == "Follow-up on Recall") ...[
+                          buildTextField(
+                            controller: controller.commentOnOverallFollowUpController,
+                            label: "Comment on Over all Follow up",
+                            prefixIcon: Icons.comment,
+                            maxLines: 3,
+                            validator: (value) =>
+                                value!.isEmpty ? "Required" : null,
+                          ),
+                        ],
+                        // Specific field for Others
+                        if (controller.pmsaActivityCarriesOut.value == "Others") ...[
+                          buildTextField(
+                            controller: controller.specifyActivityController,
+                            label: "Specify Activity",
+                            prefixIcon: Icons.edit,
+                            validator: (value) =>
+                                value!.isEmpty ? "Required" : null,
+                          ),
+                        ],
                       ],
                     ),
                   const SizedBox(height: 14),

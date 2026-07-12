@@ -7,6 +7,7 @@ import 'package:pmis/utils/popups/loaders.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
 class EnforcementController extends GetxController {
   // List of Enforcement activities
@@ -37,6 +38,8 @@ class EnforcementController extends GetxController {
   // Section: Basic Information
   final inspectionDateController = TextEditingController();
   final gpsController = TextEditingController();
+  final inspectorNameController = TextEditingController();
+  final inspectorIdController = TextEditingController();
 
   // Section: Location Details
   var selectedRegion = ''.obs;
@@ -54,6 +57,8 @@ class EnforcementController extends GetxController {
   var selectedCategoryOfPremises = ''.obs;
   var selectedLicenseStatus = ''.obs;
   var selectedCategoryStatus = ''.obs;
+  final licenseNoController = TextEditingController();
+  final licenseExpiryController = TextEditingController();
 
   // Section: Enforcement Actions
   var selectedEnforcementActionTaken = ''.obs;
@@ -95,12 +100,36 @@ class EnforcementController extends GetxController {
   void onInit() {
     super.onInit();
     _initializeForm();
-    loadActivities();
+    // Defer activity loading to avoid blocking main thread during initialization
+    Future.microtask(() => loadActivities());
+    // Clear dependent fields when facility status changes to Closed
+    ever(selectedFacilityStatus, (String _) {
+      if (selectedFacilityStatus.value == 'Closed') {
+        personNameController.clear();
+        contactController.clear();
+        qualificationsController.clear();
+        selectedCategoryOfPremises.value = '';
+        selectedLicenseStatus.value = '';
+        licenseNoController.clear();
+        licenseExpiryController.clear();
+        selectedCategoryStatus.value = '';
+      }
+    });
   }
 
   void _initializeForm() {
     // Set default values
     inspectionDateController.text = DateTime.now().toString();
+
+    // Default license status to Licensed so fields show by default
+    selectedLicenseStatus.value = 'Licensed';
+
+    // Auto-fill inspector details from AuthController
+    if (Get.isRegistered<AuthController>()) {
+      final authController = Get.find<AuthController>();
+      inspectorNameController.text = authController.userDisplayName;
+      inspectorIdController.text = authController.userId;
+    }
 
     // Initialize with current location
     getCurrentLocation();
@@ -140,7 +169,7 @@ class EnforcementController extends GetxController {
       isSubmitting.value = true;
 
       // Create Enforcement model
-      final enforcementActivity = EnforcementModel(
+        final enforcementActivity = EnforcementModel(
         inspectionDate: inspectionDateController.text,
         gps: "${currentLatitude.value}, ${currentLongitude.value}",
         region: selectedRegion.value,
@@ -148,17 +177,39 @@ class EnforcementController extends GetxController {
         facilityName: facilityNameController.text,
         facilityStatus: selectedFacilityStatus.value,
         personFoundAtFacility: selectedPersonFoundAtFacility.value,
-        personName: personNameController.text,
-        contact: contactController.text,
-        qualifications: qualificationsController.text,
-        categoryOfPremises: selectedCategoryOfPremises.value,
-        licenseStatus: selectedLicenseStatus.value,
-        categoryStatus: selectedCategoryStatus.value,
+        // When facility is Closed, clear person/contact/qualifications and
+        // related category/license fields to mirror GPP/GDP behavior.
+        personName: selectedFacilityStatus.value == "Closed"
+          ? ""
+          : personNameController.text,
+        contact: selectedFacilityStatus.value == "Closed"
+          ? ""
+          : contactController.text,
+        qualifications: selectedFacilityStatus.value == "Closed"
+          ? ""
+          : qualificationsController.text,
+        categoryOfPremises: selectedFacilityStatus.value == "Closed"
+          ? ""
+          : selectedCategoryOfPremises.value,
+        licenseStatus: selectedFacilityStatus.value == "Closed"
+          ? ""
+          : selectedLicenseStatus.value,
+        licenseNo: selectedFacilityStatus.value == "Closed"
+          ? ""
+          : licenseNoController.text,
+        licenseExpiryDate: selectedFacilityStatus.value == "Closed"
+          ? ""
+          : licenseExpiryController.text,
+        categoryStatus: selectedFacilityStatus.value == "Closed"
+          ? ""
+          : selectedCategoryStatus.value,
         enforcementActionTaken: selectedEnforcementActionTaken.value,
         comments: commentsController.text,
         createdAt: DateTime.now(),
+        inspectorName: inspectorNameController.text,
+        inspectorId: inspectorIdController.text,
         isSynced: false,
-      );
+        );
 
       bool online = await NetworkManager.instance.isconnected();
       var activityData = enforcementActivity.toJson();
@@ -255,11 +306,15 @@ class EnforcementController extends GetxController {
   void clearForm() {
     inspectionDateController.clear();
     gpsController.clear();
+    inspectorNameController.clear();
+    inspectorIdController.clear();
     facilityNameController.clear();
     personNameController.clear();
     contactController.clear();
     qualificationsController.clear();
     commentsController.clear();
+    licenseNoController.clear();
+    licenseExpiryController.clear();
     selectedRegion.value = '';
     selectedDistrict.value = '';
     selectedFacilityStatus.value = '';

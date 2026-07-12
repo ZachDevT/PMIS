@@ -35,6 +35,8 @@ class AuthService {
       ).timeout(_timeoutDuration);
 
       return _handleResponse(response);
+    } on TimeoutException {
+      throw const TimeoutException('Request timeout. Please try again.');
     } on SocketException {
       throw const NetworkException(
           'No internet connection. Please check your network.');
@@ -44,6 +46,10 @@ class AuthService {
       throw const ServerException('Invalid response format from server.');
     } catch (e) {
       if (e is ApiException) rethrow;
+      // Check if it's a timeout error
+      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+        throw const TimeoutException('Request timeout. Please try again.');
+      }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
     }
   }
@@ -61,9 +67,13 @@ class AuthService {
             throw const ServerException('Empty response from server');
           }
 
+          // Accept any valid JSON response
+
           return data;
         } catch (e) {
           if (e is FormatException) {
+            print('JSON parsing error: ${e.toString()}');
+            print('Response body: ${response.body}');
             throw const ServerException('Invalid JSON response from server');
           }
           rethrow;

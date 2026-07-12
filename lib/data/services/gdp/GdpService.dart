@@ -22,6 +22,8 @@ class GdpService {
       ).timeout(_timeoutDuration);
 
       return _handleResponse(response);
+    } on TimeoutException {
+      throw const TimeoutException('Request timeout. Please try again.');
     } on SocketException {
       throw const NetworkException(
           'No internet connection. Please check your network.');
@@ -31,6 +33,10 @@ class GdpService {
       throw const ServerException('Invalid response format from server.');
     } catch (e) {
       if (e is ApiException) rethrow;
+      // Check if it's a timeout error
+      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+        throw const TimeoutException('Request timeout. Please try again.');
+      }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
     }
   }
@@ -46,6 +52,17 @@ class GdpService {
           // Convert to List<Map<String, dynamic>>
           final List<Map<String, dynamic>> gdpData =
               dataList.map((item) => item as Map<String, dynamic>).toList();
+
+          // Debug: Print raw API response
+          print('=== GDP API Response Debug ===');
+          print('Total records: ${gdpData.length}');
+          if (gdpData.isNotEmpty) {
+            print('First record keys: ${gdpData.first.keys.toList()}');
+            print('First record data: ${gdpData.first}');
+            print('Inspector Name from API: ${gdpData.first['inspectorName'] ?? gdpData.first['InspectorName'] ?? 'NOT FOUND'}');
+            print('Inspector ID from API: ${gdpData.first['inspectorId'] ?? gdpData.first['InspectorId'] ?? 'NOT FOUND'}');
+          }
+          print('=== End GDP API Debug ===');
 
           return gdpData;
         } catch (e) {
@@ -148,6 +165,12 @@ class GdpService {
         case 'licenseStatus':
           pascalKey = 'LicenseStatus';
           break;
+        case 'licenseNo':
+          pascalKey = 'LicenseNo';
+          break;
+        case 'licenseExpiryDate':
+          pascalKey = 'LicenseExpiryDate';
+          break;
         case 'categoryStatus':
           pascalKey = 'CategoryStatus';
           break;
@@ -161,16 +184,13 @@ class GdpService {
           pascalKey = 'RecommendedforGDP';
           break;
         case 'inspectorId':
-          pascalKey = 'InspectorId';
+          pascalKey = 'inspectorId';
           break;
         case 'latitude':
           pascalKey = 'Latitude';
           break;
         case 'longitude':
           pascalKey = 'Longitude';
-          break;
-        case 'licenseNo':
-          pascalKey = 'LicenseNo';
           break;
         case 'gps':
           pascalKey = 'Gps';
@@ -208,6 +228,8 @@ class GdpService {
           .timeout(_timeoutDuration);
 
       return _handlePostResponse(response);
+    } on TimeoutException {
+      throw const TimeoutException('Request timeout. Please try again.');
     } on SocketException {
       throw const NetworkException(
           'No internet connection. Please check your network.');
@@ -217,6 +239,10 @@ class GdpService {
       throw const ServerException('Invalid response format from server.');
     } catch (e) {
       if (e is ApiException) rethrow;
+      // Check if it's a timeout error
+      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+        throw const TimeoutException('Request timeout. Please try again.');
+      }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
     }
   }

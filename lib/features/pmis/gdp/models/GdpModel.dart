@@ -21,6 +21,7 @@ class GdpModel {
   final double latitude;
   final double longitude;
   final String licenseNo;
+  final String licenseExpiryDate;
 
   GdpModel({
     required this.id,
@@ -45,17 +46,33 @@ class GdpModel {
     required this.latitude,
     required this.longitude,
     required this.licenseNo,
+    required this.licenseExpiryDate,
   });
 
   factory GdpModel.fromJson(Map<String, dynamic> json) {
+    // Debug: Print what we're receiving
+    print('=== GDP Model fromJson Debug ===');
+    print('JSON keys: ${json.keys.toList()}');
+    print('Raw inspectorName: ${json['inspectorName']}');
+    print('Raw InspectorName: ${json['InspectorName']}');
+    print('Raw inspectorId: ${json['inspectorId']}');
+    print('Raw InspectorId: ${json['InspectorId']}');
+    
+    final inspectorName = json['inspectorName'] ?? json['InspectorName'] ?? '';
+    final inspectorId = json['inspectorId'] ?? json['InspectorId'] ?? '';
+    
+    print('Final inspectorName: $inspectorName');
+    print('Final inspectorId: $inspectorId');
+    print('=== End GDP Model Debug ===');
+    
     return GdpModel(
       id: json['id'] ?? 0,
-      inspectionDate: DateTime.parse(json['inspectionDate'] ?? DateTime.now().toIso8601String()),
-      inspectorName: json['inspectorName'] ?? '',
-      gps: json['gps'] ?? '',
-      intRegion: json['intRegion'] ?? '',
-      districtId: json['districtId'] ?? 0,
-      facilityName: json['facilityName'] ?? '',
+      inspectionDate: DateTime.parse(json['inspectionDate'] ?? json['InspectionDate'] ?? DateTime.now().toIso8601String()),
+      inspectorName: inspectorName,
+      gps: json['gps'] ?? json['Gps'] ?? '',
+      intRegion: json['intRegion'] ?? json['IntRegion'] ?? '',
+      districtId: json['districtId'] ?? json['DistrictId'] ?? 0,
+      facilityName: json['facilityName'] ?? json['FacilityName'] ?? '',
       facilityStatus: json['facilityStatus'] ?? 0,
       facilityPersonType: json['facilityPersonType'] ?? 0,
       personName: json['personName'] ?? '',
@@ -67,10 +84,11 @@ class GdpModel {
       facilityType: json['facilityType'] ?? 0,
       certStatus: json['certStatus'] ?? 0,
       recommendedforGDP: json['recommendedforGDP'] ?? 0,
-      inspectorId: json['inspectorId'] ?? '',
-      latitude: (json['latitude'] ?? 0).toDouble(),
-      longitude: (json['longitude'] ?? 0).toDouble(),
+      inspectorId: json['inspectorId'] ?? json['InspectorId'] ?? '',
+      latitude: (json['latitude'] ?? json['Latitude'] ?? 0).toDouble(),
+      longitude: (json['longitude'] ?? json['Longitude'] ?? 0).toDouble(),
       licenseNo: json['licenseNo'] ?? '',
+      licenseExpiryDate: json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? '',
     );
   }
 
@@ -98,6 +116,7 @@ class GdpModel {
       'latitude': latitude,
       'longitude': longitude,
       'licenseNo': licenseNo,
+      'licenseExpiryDate': licenseExpiryDate,
     };
   }
 
@@ -197,6 +216,7 @@ class GdpModel {
     double? latitude,
     double? longitude,
     String? licenseNo,
+    String? licenseExpiryDate,
   }) {
     return GdpModel(
       id: id ?? this.id,
@@ -221,6 +241,7 @@ class GdpModel {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       licenseNo: licenseNo ?? this.licenseNo,
+      licenseExpiryDate: licenseExpiryDate ?? this.licenseExpiryDate,
     );
   }
 }

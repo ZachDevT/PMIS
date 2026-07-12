@@ -1,5 +1,6 @@
 /// RTS (Radio Talk Show) Model for PMIS
 /// Represents radio talk show activities and data structure
+library;
 
 class RtsModel {
   final String? id;
@@ -68,8 +69,10 @@ class RtsModel {
       topicOfDiscussion: json['topic'] ?? '',
       numberOfParticipants: json['numberOfParticipants'] ?? 0,
       radioCompanyName: json['radioCompanyName'],
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      createdAt:
+          json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      updatedAt:
+          json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
       isSynced: json['isSynced'] ?? false,
     );
   }

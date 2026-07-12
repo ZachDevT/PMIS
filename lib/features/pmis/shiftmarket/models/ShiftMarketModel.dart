@@ -1,20 +1,23 @@
 /// Shift Market Model for PMIS
 /// Represents shift market inspection activities and data structure
+library;
 
 class ShiftMarketModel {
   final String? id;
   final String inspectionDate;
   final String inspectorName;
+  final String facilityStatus;
   final double latitude;
   final double longitude;
   final String region;
   final String district;
   final String facilityName;
-  final String facilityStatus;
-  final String personName;
-  final String contact;
-  final String qualifications;
+  final String
+      personFoundAtFacility; // Replaces facilityStatus, personName, contact, qualifications
   final String categoryOfPremises;
+  final String licenseStatus;
+  final String? licenseNo;
+  final String? licenseExpiryDate;
   final String regulatoryActionTaken;
   final String consignmentsImpounded;
   final DateTime? createdAt;
@@ -30,11 +33,12 @@ class ShiftMarketModel {
     required this.region,
     required this.district,
     required this.facilityName,
-    required this.facilityStatus,
-    required this.personName,
-    required this.contact,
-    required this.qualifications,
+    required this.personFoundAtFacility,
+    this.facilityStatus = 'OPEN',
     required this.categoryOfPremises,
+    this.licenseStatus = 'Licensed',
+    this.licenseNo,
+    this.licenseExpiryDate,
     required this.regulatoryActionTaken,
     required this.consignmentsImpounded,
     this.createdAt,
@@ -53,11 +57,12 @@ class ShiftMarketModel {
       'region': region,
       'district': district,
       'facilityName': facilityName,
+      'personFoundAtFacility': personFoundAtFacility,
       'facilityStatus': facilityStatus,
-      'personName': personName,
-      'contact': contact,
-      'qualifications': qualifications,
       'categoryOfPremises': categoryOfPremises,
+      'licenseStatus': licenseStatus,
+      'licenseNo': licenseNo,
+      'licenseExpiryDate': licenseExpiryDate,
       'regulatoryActionTaken': regulatoryActionTaken,
       'consignmentsImpounded': consignmentsImpounded,
       'createdAt': createdAt?.toIso8601String(),
@@ -77,15 +82,23 @@ class ShiftMarketModel {
       region: _getRegionName(json['intRegion']),
       district: _getDistrictName(json['districtId']),
       facilityName: json['facilityName'] ?? '',
-      facilityStatus: _getFacilityStatusName(json['facilityStatus']),
-      personName: json['personName'] ?? '',
-      contact: json['contact'] ?? '',
-      qualifications: json['qualifications'] ?? '',
+      personFoundAtFacility: json['personFoundAtFacility'] ?? '',
+      facilityStatus: json['facilityStatus'] != null
+          ? _getFacilityStatusName(json['facilityStatus'])
+          : 'OPEN',
       categoryOfPremises: _getCategoryName(json['categoryOfpremises']),
+      licenseStatus: json['licenseStatus']?.toString() ??
+          json['LicenseStatus']?.toString() ??
+          '1',
+      licenseNo: json['licenseNo'] ?? json['LicenseNo'] ?? '',
+      licenseExpiryDate:
+          json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? '',
       regulatoryActionTaken: json['regulatoryAction'] ?? '',
-      consignmentsImpounded: json['consignment'] ?? '',
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      consignmentsImpounded: json['consignmentsImpounded'] ?? '',
+      createdAt:
+          json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      updatedAt:
+          json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
       isSynced: json['isSynced'] ?? false,
     );
   }
@@ -127,16 +140,24 @@ class ShiftMarketModel {
   }
 
   /// Convert facility status code to name
-  static String _getFacilityStatusName(int? status) {
-    if (status == null) return '';
-    switch (status) {
-      case 1:
-        return 'OPEN';
-      case 0:
-        return 'CLOSED';
-      default:
-        return 'OPEN';
+  static String _getFacilityStatusName(dynamic status) {
+    if (status == null) return 'OPEN';
+    if (status is int) {
+      switch (status) {
+        case 1:
+          return 'OPEN';
+        case 0:
+          return 'CLOSED';
+        default:
+          return 'OPEN';
+      }
     }
+    if (status is String) {
+      final s = status.toUpperCase();
+      if (s == 'CLOSED' || s == '0') return 'CLOSED';
+      return 'OPEN';
+    }
+    return 'OPEN';
   }
 
   /// Convert category code to name
@@ -186,11 +207,12 @@ class ShiftMarketModel {
     String? region,
     String? district,
     String? facilityName,
+    String? personFoundAtFacility,
     String? facilityStatus,
-    String? personName,
-    String? contact,
-    String? qualifications,
     String? categoryOfPremises,
+    String? licenseStatus,
+    String? licenseNo,
+    String? licenseExpiryDate,
     String? regulatoryActionTaken,
     String? consignmentsImpounded,
     DateTime? createdAt,
@@ -206,13 +228,17 @@ class ShiftMarketModel {
       region: region ?? this.region,
       district: district ?? this.district,
       facilityName: facilityName ?? this.facilityName,
-      facilityStatus: facilityStatus ?? this.facilityStatus,
-      personName: personName ?? this.personName,
-      contact: contact ?? this.contact,
-      qualifications: qualifications ?? this.qualifications,
+        personFoundAtFacility:
+          personFoundAtFacility ?? this.personFoundAtFacility,
+        facilityStatus: facilityStatus ?? this.facilityStatus,
       categoryOfPremises: categoryOfPremises ?? this.categoryOfPremises,
-      regulatoryActionTaken: regulatoryActionTaken ?? this.regulatoryActionTaken,
-      consignmentsImpounded: consignmentsImpounded ?? this.consignmentsImpounded,
+      licenseStatus: licenseStatus ?? this.licenseStatus,
+      licenseNo: licenseNo ?? this.licenseNo,
+      licenseExpiryDate: licenseExpiryDate ?? this.licenseExpiryDate,
+      regulatoryActionTaken:
+          regulatoryActionTaken ?? this.regulatoryActionTaken,
+      consignmentsImpounded:
+          consignmentsImpounded ?? this.consignmentsImpounded,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isSynced: isSynced ?? this.isSynced,

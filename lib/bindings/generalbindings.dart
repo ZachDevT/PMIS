@@ -18,6 +18,8 @@ import 'package:pmis/data/services/shiftmarket/ShiftMarketService.dart';
 import 'package:pmis/data/repositories/ShiftMarketRepository/ShiftMarketRepository.dart';
 import 'package:pmis/data/services/enforcement/EnforcementService.dart';
 import 'package:pmis/data/repositories/EnforcementRepository/EnforcementRepository.dart';
+import 'package:pmis/data/services/sensitizationmeeting/SensitizationMeetingService.dart';
+import 'package:pmis/data/repositories/SensitizationMeetingRepository/SensitizationMeetingRepository.dart';
 import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 import 'package:pmis/features/authentification/controllers/login/LoginSliderController.dart';
 import 'package:pmis/navigationbar.dart';
@@ -28,6 +30,7 @@ import 'package:pmis/features/pmis/pmsa/controllers/PmsaController.dart';
 import 'package:pmis/features/pmis/rts/controllers/RtsController.dart';
 import 'package:pmis/features/pmis/shiftmarket/controllers/ShiftMarketController.dart';
 import 'package:pmis/features/pmis/enforcement/controllers/EnforcementController.dart';
+import 'package:pmis/features/pmis/sensitizationmeeting/controllers/SensitizationMeetingController.dart';
 import 'package:pmis/features/personalisation/controllers/theme_controller.dart';
 import 'package:get/get.dart';
 
@@ -72,6 +75,10 @@ class GeneralBindings extends Bindings {
     Get.lazyPut<EnforcementService>(() => EnforcementService());
     Get.lazyPut<EnforcementRepository>(() => EnforcementRepository());
 
+    // Sensitization Meeting services
+    Get.lazyPut<SensitizationMeetingService>(() => SensitizationMeetingService());
+    Get.lazyPut<SensitizationMeetingRepository>(() => SensitizationMeetingRepository());
+
     // Sync Manager
     Get.lazyPut<SyncManager>(() => SyncManager());
 
@@ -92,5 +99,6 @@ class GeneralBindings extends Bindings {
     Get.lazyPut<RtsController>(() => RtsController());
     Get.lazyPut<ShiftMarketController>(() => ShiftMarketController());
     Get.lazyPut<EnforcementController>(() => EnforcementController());
+    Get.lazyPut<SensitizationMeetingController>(() => SensitizationMeetingController());
   }
 }

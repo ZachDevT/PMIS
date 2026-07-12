@@ -22,6 +22,8 @@ class GppService {
       ).timeout(_timeoutDuration);
 
       return _handleResponse(response);
+    } on TimeoutException {
+      throw const TimeoutException('Request timeout. Please try again.');
     } on SocketException {
       throw const NetworkException(
           'No internet connection. Please check your network.');
@@ -31,6 +33,10 @@ class GppService {
       throw const ServerException('Invalid response format from server.');
     } catch (e) {
       if (e is ApiException) rethrow;
+      // Check if it's a timeout error
+      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+        throw const TimeoutException('Request timeout. Please try again.');
+      }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
     }
   }
@@ -161,7 +167,7 @@ class GppService {
           pascalKey = 'RecommendedforGPP';
           break;
         case 'inspectorId':
-          pascalKey = 'InspectorId';
+          pascalKey = 'inspectorId';
           break;
         case 'latitude':
           pascalKey = 'Latitude';
@@ -171,6 +177,9 @@ class GppService {
           break;
         case 'licenseNo':
           pascalKey = 'LicenseNo';
+          break;
+        case 'licenseExpiryDate':
+          pascalKey = 'LicenseExpiryDate';
           break;
         case 'gps':
           pascalKey = 'Gps';
@@ -211,6 +220,8 @@ class GppService {
           .timeout(_timeoutDuration);
 
       return _handlePostResponse(response);
+    } on TimeoutException {
+      throw const TimeoutException('Request timeout. Please try again.');
     } on SocketException {
       throw const NetworkException(
           'No internet connection. Please check your network.');
@@ -220,6 +231,10 @@ class GppService {
       throw const ServerException('Invalid response format from server.');
     } catch (e) {
       if (e is ApiException) rethrow;
+      // Check if it's a timeout error
+      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+        throw const TimeoutException('Request timeout. Please try again.');
+      }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
     }
   }

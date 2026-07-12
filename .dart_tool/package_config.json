@@ -63,7 +63,7 @@
     },
     {
       "name": "characters",
-      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/characters-1.4.0",
+      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/characters-1.4.1",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -233,7 +233,7 @@
       "name": "flutter",
       "rootUri": "file:///Users/mac/Development/flutter/packages/flutter",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.10"
     },
     {
       "name": "flutter_cache_manager",
@@ -275,13 +275,13 @@
       "name": "flutter_test",
       "rootUri": "file:///Users/mac/Development/flutter/packages/flutter_test",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.10"
     },
     {
       "name": "flutter_web_plugins",
       "rootUri": "file:///Users/mac/Development/flutter/packages/flutter_web_plugins",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.10"
     },
     {
       "name": "geocoding",
@@ -422,6 +422,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "iconsax_flutter",
+      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/iconsax_flutter-1.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "image",
       "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/image-4.5.3",
       "packageUri": "lib/",
@@ -531,21 +537,21 @@
     },
     {
       "name": "matcher",
-      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/matcher-0.12.17",
+      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/matcher-0.12.20",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.10"
     },
     {
       "name": "material_color_utilities",
-      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/material_color_utilities-0.11.1",
+      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/material_color_utilities-0.13.0",
       "packageUri": "lib/",
-      "languageVersion": "2.17"
+      "languageVersion": "3.5"
     },
     {
       "name": "meta",
-      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/meta-1.16.0",
+      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/meta-1.19.0",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.5"
     },
     {
       "name": "mime",
@@ -564,6 +570,18 @@
       "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/octo_image-2.1.0",
       "packageUri": "lib/",
       "languageVersion": "3.0"
+    },
+    {
+      "name": "package_info_plus",
+      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/package_info_plus-9.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "package_info_plus_platform_interface",
+      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/package_info_plus_platform_interface-3.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
     },
     {
       "name": "path",
@@ -606,6 +624,12 @@
       "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/path_provider_windows-2.3.0",
       "packageUri": "lib/",
       "languageVersion": "3.2"
+    },
+    {
+      "name": "pausable_timer",
+      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/pausable_timer-3.1.0+3",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "permission_handler",
@@ -695,7 +719,7 @@
       "name": "sky_engine",
       "rootUri": "file:///Users/mac/Development/flutter/bin/cache/pkg/sky_engine",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.10"
     },
     {
       "name": "smooth_page_indicator",
@@ -783,9 +807,15 @@
     },
     {
       "name": "test_api",
-      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/test_api-0.7.6",
+      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/test_api-0.7.12",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.10"
+    },
+    {
+      "name": "toastification",
+      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/toastification-3.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
     },
     {
       "name": "typed_data",
@@ -855,9 +885,9 @@
     },
     {
       "name": "vector_math",
-      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/vector_math-2.2.0",
+      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/vector_math-2.4.0",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.10"
     },
     {
       "name": "vm_service",
@@ -870,6 +900,12 @@
       "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/web-0.5.1",
       "packageUri": "lib/",
       "languageVersion": "3.3"
+    },
+    {
+      "name": "win32",
+      "rootUri": "file:///Users/mac/.pub-cache/hosted/pub.dev/win32-5.13.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
     },
     {
       "name": "xdg_directories",
@@ -897,8 +933,8 @@
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.9.2",
+  "generatorVersion": "3.13.0-167.1.beta",
   "flutterRoot": "file:///Users/mac/Development/flutter",
-  "flutterVersion": "3.35.6",
+  "flutterVersion": "3.46.0-0.3.pre",
   "pubCache": "file:///Users/mac/.pub-cache"
 }

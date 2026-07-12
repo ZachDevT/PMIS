@@ -8,6 +8,8 @@ import 'package:pmis/features/pmis/gpp/Widgets/GppForm.dart';
 import 'package:pmis/features/pmis/gpp/controllers/GppController.dart';
 import 'package:pmis/features/pmis/gpp/models/GppModel.dart';
 import 'package:pmis/utils/constants/colors.dart';
+import 'package:pmis/utils/constants/images_strings.dart';
+import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
 class GppScreen extends StatelessWidget {
   final GppController controller = Get.find<GppController>();
@@ -21,7 +23,7 @@ class GppScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _DashboardSection(),
+            const SizedBox(height: 16),
             _QuickActionsSection(context),
             const SizedBox(height: 16),
             _ActivityListSection(),
@@ -56,6 +58,10 @@ class GppScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
+              image: const DecorationImage(
+                image: AssetImage(TImagestring.nda),
+                fit: BoxFit.contain,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
@@ -63,15 +69,6 @@ class GppScreen extends StatelessWidget {
                   offset: const Offset(0, 2),
                 ),
               ],
-            ),
-            child: Center(
-              child: Text(
-                "P",
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: Tcolors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
             ),
           ),
           const Spacer(),
@@ -104,123 +101,6 @@ class GppScreen extends StatelessWidget {
         child: GppForm(),
       ),
     );
-  }
-}
-
-// Reusable Components Section
-class _DashboardSection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final GppController gppController = Get.find<GppController>();
-
-    return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-          color: dark ? Tcolors.darkerGrey : Tcolors.grey.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: dark ? Tcolors.darkerGrey : Tcolors.grey.withOpacity(0.8),
-          )),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Activities Overview",
-              style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 15),
-          Obx(() {
-            final activities = gppController.activities;
-            final chartData = _generateChartData(activities);
-
-            return SizedBox(
-              height: 170,
-              child: LineChart(
-                LineChartData(
-                  gridData: const FlGridData(show: false),
-                  titlesData: FlTitlesData(
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) => Text(
-                          [
-                            'Jan',
-                            'Feb',
-                            'Mar',
-                            'Apr',
-                            'May',
-                            'Jun'
-                          ][value.toInt()],
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ),
-                    ),
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) => Text(
-                          value.toInt().toString(),
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ),
-                    ),
-                  ),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: chartData,
-                      isCurved: true,
-                      gradient: LinearGradient(
-                        colors: [Tcolors.primary, Tcolors.primaryDark],
-                      ),
-                      barWidth: 2,
-                      belowBarData: BarAreaData(
-                        show: true,
-                        gradient: LinearGradient(
-                          colors: [
-                            Tcolors.primary.withOpacity(0.3),
-                            Colors.transparent
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  List<FlSpot> _generateChartData(List<GppActivity> activities) {
-    if (activities.isEmpty) {
-      return [
-        const FlSpot(0, 0),
-        const FlSpot(1, 0),
-        const FlSpot(2, 0),
-        const FlSpot(3, 0),
-        const FlSpot(4, 0),
-        const FlSpot(5, 0),
-      ];
-    }
-
-    // Group activities by month
-    Map<int, int> monthlyCount = {};
-    for (var activity in activities) {
-      final month = activity.inspectionDate.month;
-      monthlyCount[month] = (monthlyCount[month] ?? 0) + 1;
-    }
-
-    // Generate chart data for last 6 months
-    List<FlSpot> spots = [];
-    for (int i = 0; i < 6; i++) {
-      final month = DateTime.now().month - 5 + i;
-      final count = monthlyCount[month] ?? 0;
-      spots.add(FlSpot(i.toDouble(), count.toDouble()));
-    }
-
-    return spots;
   }
 }
 
@@ -299,7 +179,7 @@ class _ActivityListSection extends StatelessWidget {
 
       return ListView.builder(
         shrinkWrap: true,
-        reverse: true,
+        reverse: false,
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 10),
         itemCount: activities.length,
@@ -451,7 +331,7 @@ class _FilterDialog extends StatelessWidget {
                 _FilterDropdown(
                   label: "Region",
                   value: controller.filterRegion.value,
-                  items: [
+                  items: const [
                     "Central Region",
                     "Eastern Region",
                     "Northern Region",
@@ -464,7 +344,7 @@ class _FilterDialog extends StatelessWidget {
                 _FilterDropdown(
                   label: "Facility Status",
                   value: controller.filterFacilityStatus.value,
-                  items: ["Open", "Closed"],
+                  items: const ["Open", "Closed"],
                   onChanged: (value) =>
                       controller.filterFacilityStatus.value = value ?? '',
                 ),
@@ -472,7 +352,7 @@ class _FilterDialog extends StatelessWidget {
                 _FilterDropdown(
                   label: "License Status",
                   value: controller.filterLicenseStatus.value,
-                  items: ["Licensed", "Un-Licensed", "Not-Applicable"],
+                  items: const ["Licensed", "Un-Licensed", "Not-Applicable"],
                   onChanged: (value) =>
                       controller.filterLicenseStatus.value = value ?? '',
                 ),
@@ -480,7 +360,7 @@ class _FilterDialog extends StatelessWidget {
                 _FilterDropdown(
                   label: "Category of Drugs",
                   value: controller.filterCategoryOfDrugs.value,
-                  items: [
+                  items: const [
                     "Medical Device",
                     "Veterinary drugs",
                     "Human drugs",
@@ -548,7 +428,7 @@ class _FilterDropdown extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: value.isEmpty ? null : value,
+          initialValue: value.isEmpty ? null : value,
           decoration: InputDecoration(
             hintText: "Select $label",
             border: OutlineInputBorder(
@@ -577,55 +457,67 @@ class _FilterDropdown extends StatelessWidget {
 class _UserProfileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => Get.toNamed('/user-menu'),
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Row(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text("Welcome ", style: Theme.of(context).textTheme.bodyMedium),
-                Text("Admin",
+    final authController =
+        Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
+
+    return Obx(() {
+      final displayName = authController?.userDisplayName ?? 'Guest';
+
+      return InkWell(
+        onTap: () => Get.toNamed('/user-menu'),
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text("Welcome ",
+                      style: Theme.of(context).textTheme.bodyMedium),
+                  Text(
+                    displayName,
                     style: Theme.of(context).textTheme.titleLarge!.copyWith(
                           color: Tcolors.white,
                           fontWeight: FontWeight.w700,
-                        )),
-              ],
-            ),
-            const SizedBox(width: 8),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Theme.of(context).colorScheme.surface,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  child: const Icon(HugeIcons.strokeRoundedUser, size: 30),
-                ),
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: 12,
-                    height: 12,
+                ],
+              ),
+              const SizedBox(width: 8),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.green,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
+                    child: const Icon(HugeIcons.strokeRoundedUser, size: 30),
+                  ),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

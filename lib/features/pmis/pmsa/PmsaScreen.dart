@@ -6,6 +6,8 @@ import 'package:pmis/commons/widgets/cards/PmsaActivityCard.dart';
 import 'package:pmis/features/pmis/pmsa/widgets/PmsaForm.dart';
 import 'package:pmis/features/pmis/pmsa/controllers/PmsaController.dart';
 import 'package:pmis/utils/constants/colors.dart';
+import 'package:pmis/utils/constants/images_strings.dart';
+import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
 class PmsaScreen extends StatelessWidget {
   final PmsaController controller = Get.find<PmsaController>();
@@ -53,6 +55,10 @@ class PmsaScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
+              image: const DecorationImage(
+                image: AssetImage(TImagestring.nda),
+                fit: BoxFit.contain,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
@@ -60,15 +66,6 @@ class PmsaScreen extends StatelessWidget {
                   offset: const Offset(0, 2),
                 ),
               ],
-            ),
-            child: Center(
-              child: Text(
-                "P",
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: Tcolors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
             ),
           ),
           const Spacer(),
@@ -105,7 +102,7 @@ class PmsaScreen extends StatelessWidget {
 }
 
 class _QuickActionsSection extends StatelessWidget {
-  const _QuickActionsSection({super.key});
+  const _QuickActionsSection();
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +173,7 @@ class _ActivityListSection extends StatelessWidget {
 
       return ListView.builder(
         shrinkWrap: true,
-        reverse: true,
+        reverse: false,
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 10),
         itemCount: activities.length,
@@ -199,7 +196,6 @@ class _ActionButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
-    super.key,
   });
 
   @override
@@ -331,7 +327,7 @@ class _FilterDialog extends StatelessWidget {
                 _FilterDropdown(
                   label: "Region",
                   value: controller.filterRegion.value,
-                  items: [
+                  items: const [
                     "Central Region",
                     "Eastern Region",
                     "Northern Region",
@@ -344,7 +340,7 @@ class _FilterDialog extends StatelessWidget {
                 _FilterDropdown(
                   label: "Facility Status",
                   value: controller.filterFacilityStatus.value,
-                  items: ["Open", "Closed"],
+                  items: const ["Open", "Closed"],
                   onChanged: (value) =>
                       controller.filterFacilityStatus.value = value ?? '',
                 ),
@@ -352,7 +348,7 @@ class _FilterDialog extends StatelessWidget {
                 _FilterDropdown(
                   label: "License Status",
                   value: controller.filterLicenseStatus.value,
-                  items: ["Licensed", "Un-Licensed", "Not-Applicable"],
+                  items: const ["Licensed", "Un-Licensed", "Not-Applicable"],
                   onChanged: (value) =>
                       controller.filterLicenseStatus.value = value ?? '',
                 ),
@@ -360,11 +356,12 @@ class _FilterDialog extends StatelessWidget {
                 _FilterDropdown(
                   label: "PMS Activity",
                   value: controller.filterPmsActivity.value,
-                  items: [
-                    "Product Sampling",
-                    "Follow-up",
-                    "Complaint Investigation",
-                    "Other"
+                  items: const [
+                    "Sampling",
+                    "Follow-up on Recall",
+                    "Complaint investigation",
+                    "Others",
+                    "None"
                   ],
                   onChanged: (value) =>
                       controller.filterPmsActivity.value = value ?? '',
@@ -427,7 +424,7 @@ class _FilterDropdown extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: value.isEmpty ? null : value,
+          initialValue: value.isEmpty ? null : value,
           decoration: InputDecoration(
             hintText: "Select $label",
             border: OutlineInputBorder(
@@ -456,57 +453,67 @@ class _FilterDropdown extends StatelessWidget {
 class _UserProfileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => Get.toNamed('/user-menu'),
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Row(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text("Welcome ", style: Theme.of(context).textTheme.bodyMedium),
-                Text(
-                  "Admin",
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                        color: Tcolors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 8),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Theme.of(context).colorScheme.surface,
+    final authController = Get.isRegistered<AuthController>() 
+        ? Get.find<AuthController>() 
+        : null;
+    
+    return Obx(() {
+      final displayName = authController?.userDisplayName ?? 'Guest';
+      
+      return InkWell(
+        onTap: () => Get.toNamed('/user-menu'),
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text("Welcome ", style: Theme.of(context).textTheme.bodyMedium),
+                  Text(
+                    displayName,
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                          color: Tcolors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  child: const Icon(HugeIcons.strokeRoundedUser, size: 30),
-                ),
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: 12,
-                    height: 12,
+                ],
+              ),
+              const SizedBox(width: 8),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.green,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
+                    child: const Icon(HugeIcons.strokeRoundedUser, size: 30),
+                  ),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

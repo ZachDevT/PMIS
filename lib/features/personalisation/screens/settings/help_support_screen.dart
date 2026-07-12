@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:pmis/utils/constants/colors.dart';
 import 'package:pmis/utils/constants/sizes.dart';
 import 'package:pmis/utils/helpers/helpers_functions.dart';

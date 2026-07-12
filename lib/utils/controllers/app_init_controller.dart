@@ -27,9 +27,21 @@ class AppInitController extends GetxController with WidgetsBindingObserver {
       // Wait for bindings to be ready
       await Future.delayed(const Duration(milliseconds: 100));
       
-      // Initialize SyncManager for automatic synchronization
-      final syncManager = Get.find<SyncManager>();
-      syncManager.initialize();
+      // Initialize SyncManager AFTER first frame so Overlay/Navigator are available
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        try {
+          final syncManager = Get.find<SyncManager>();
+          syncManager.initialize();
+        } catch (e) {
+          // If initialization fails here, retry shortly after
+          Future.delayed(const Duration(milliseconds: 300), () {
+            try {
+              final syncManager = Get.find<SyncManager>();
+              syncManager.initialize();
+            } catch (_) {}
+          });
+        }
+      });
       
       // Initialize NetworkManager for connectivity monitoring
       if (!Get.isRegistered<NetworkManager>()) {

@@ -1,3 +1,8 @@
 {
-    "cmake.sourceDirectory": "C:/Users/Josh/Desktop/Flutter/PMIS/linux"
+  "cmake.sourceDirectory": "C:/Users/Josh/Desktop/Flutter/PMIS/linux",
+  "chat.tools.terminal.autoApprove": {
+    "git remote": true,
+    "git add": true,
+    "git commit": true
+  }
 }

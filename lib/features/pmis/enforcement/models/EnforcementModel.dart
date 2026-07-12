@@ -1,5 +1,6 @@
 /// Enforcement Model for PMIS
 /// Represents enforcement activities and data structure
+library;
 
 class EnforcementModel {
   final String? id;
@@ -15,11 +16,15 @@ class EnforcementModel {
   final String qualifications;
   final String categoryOfPremises;
   final String licenseStatus;
+  final String? licenseNo;
+  final String? licenseExpiryDate;
   final String categoryStatus;
   final String enforcementActionTaken;
   final String comments;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String? inspectorName;
+  final String? inspectorId;
   final bool isSynced;
 
   EnforcementModel({
@@ -36,11 +41,15 @@ class EnforcementModel {
     required this.qualifications,
     required this.categoryOfPremises,
     required this.licenseStatus,
+    this.licenseNo,
+    this.licenseExpiryDate,
     required this.categoryStatus,
     required this.enforcementActionTaken,
     required this.comments,
     this.createdAt,
     this.updatedAt,
+    this.inspectorName,
+    this.inspectorId,
     this.isSynced = false,
   });
 
@@ -60,11 +69,15 @@ class EnforcementModel {
       'qualifications': qualifications,
       'categoryOfPremises': categoryOfPremises,
       'licenseStatus': licenseStatus,
+      'licenseNo': licenseNo,
+      'licenseExpiryDate': licenseExpiryDate,
       'categoryStatus': categoryStatus,
       'enforcementActionTaken': enforcementActionTaken,
       'comments': comments,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'inspectorName': inspectorName,
+      'inspectorId': inspectorId,
       'isSynced': isSynced,
     };
   }
@@ -85,11 +98,18 @@ class EnforcementModel {
       qualifications: json['qualifications'] ?? '',
       categoryOfPremises: _getCategoryName(json['categoryOfpremises']),
       licenseStatus: _getLicenseStatusName(json['licenseStatus']),
+      licenseNo: json['licenseNo'] ?? json['LicenseNo'] ?? '',
+      licenseExpiryDate:
+          json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? '',
       categoryStatus: _getCategoryStatusName(json['categoryStatus']),
       enforcementActionTaken: _getEnforcementActionName(json['enfAction']),
       comments: json['comments'] ?? '',
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      createdAt:
+          json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      updatedAt:
+          json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      inspectorName: json['inspectorName'] ?? json['InspectorName'],
+      inspectorId: json['inspectorId'] ?? json['InspectorId'],
       isSynced: json['isSynced'] ?? false,
     );
   }
@@ -250,29 +270,39 @@ class EnforcementModel {
     String? qualifications,
     String? categoryOfPremises,
     String? licenseStatus,
+    String? licenseNo,
+    String? licenseExpiryDate,
     String? categoryStatus,
     String? enforcementActionTaken,
     String? comments,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? inspectorName,
+    String? inspectorId,
     bool? isSynced,
   }) {
     return EnforcementModel(
       id: id ?? this.id,
+      inspectorName: inspectorName ?? this.inspectorName,
+      inspectorId: inspectorId ?? this.inspectorId,
       inspectionDate: inspectionDate ?? this.inspectionDate,
       gps: gps ?? this.gps,
       region: region ?? this.region,
       district: district ?? this.district,
       facilityName: facilityName ?? this.facilityName,
       facilityStatus: facilityStatus ?? this.facilityStatus,
-      personFoundAtFacility: personFoundAtFacility ?? this.personFoundAtFacility,
+      personFoundAtFacility:
+          personFoundAtFacility ?? this.personFoundAtFacility,
       personName: personName ?? this.personName,
       contact: contact ?? this.contact,
       qualifications: qualifications ?? this.qualifications,
       categoryOfPremises: categoryOfPremises ?? this.categoryOfPremises,
       licenseStatus: licenseStatus ?? this.licenseStatus,
+      licenseNo: licenseNo ?? this.licenseNo,
+      licenseExpiryDate: licenseExpiryDate ?? this.licenseExpiryDate,
       categoryStatus: categoryStatus ?? this.categoryStatus,
-      enforcementActionTaken: enforcementActionTaken ?? this.enforcementActionTaken,
+      enforcementActionTaken:
+          enforcementActionTaken ?? this.enforcementActionTaken,
       comments: comments ?? this.comments,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

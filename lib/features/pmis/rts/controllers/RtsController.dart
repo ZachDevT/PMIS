@@ -7,6 +7,7 @@ import 'package:pmis/utils/popups/loaders.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
 class RtsController extends GetxController {
   // List of RTS activities
@@ -39,12 +40,12 @@ class RtsController extends GetxController {
   // Section: Location Details
   var selectedRegion = ''.obs;
   var selectedDistrict = ''.obs;
-  final venueLocationController = TextEditingController();
 
-  // Section: RTS Specific Information
-  final topicOfDiscussionController = TextEditingController();
+  // Section: RTS Specific Details
+  final venueLocationController = TextEditingController();
   final numberOfParticipantsController = TextEditingController();
   final radioCompanyNameController = TextEditingController();
+  final topicOfDiscussionController = TextEditingController();
 
   // GPS Location controller (auto-filled)
   final gpsLocationController = TextEditingController();
@@ -53,17 +54,23 @@ class RtsController extends GetxController {
   void onInit() {
     super.onInit();
     _initializeForm();
-    loadActivities();
+    // Defer activity loading to avoid blocking main thread during initialization
+    Future.microtask(() => loadActivities());
   }
 
   void _initializeForm() {
     // Set default values
     inspectionDateController.text = DateTime.now().toString();
     inspectionTimeController.text = DateTime.now().toString();
-    numberOfParticipantsController.text = "0";
     
     // Initialize with current location
     getCurrentLocation();
+
+    // Auto-fill inspector name
+    if (Get.isRegistered<AuthController>()) {
+      final authController = Get.find<AuthController>();
+      inspectorNameController.text = authController.userDisplayName;
+    }
   }
 
   /// Load activities from local storage or API
@@ -98,7 +105,6 @@ class RtsController extends GetxController {
       if (inspectorNameController.text.isEmpty) emptyFields.add("Inspector Name");
       if (venueLocationController.text.isEmpty) emptyFields.add("Venue Location");
       if (topicOfDiscussionController.text.isEmpty) emptyFields.add("Topic of Discussion");
-      if (numberOfParticipantsController.text.isEmpty) emptyFields.add("Number of Participants");
 
       if (emptyFields.isNotEmpty) {
         Loaders.errorSnackbar(
@@ -174,7 +180,22 @@ class RtsController extends GetxController {
 
   /// Filter activities based on search and filter criteria
   void filterActivities() {
+    // Get current user info
+    final authController = Get.isRegistered<AuthController>() 
+        ? Get.find<AuthController>() 
+        : null;
+    final isAdmin = authController?.isAdmin ?? false;
+    final userDisplayName = authController?.userDisplayName ?? '';
+
     var filtered = activities.where((activity) {
+      // Role-based filter: If not admin, only show activities created by this user
+      // Match by inspectorName since RtsModel doesn't have inspectorId
+      if (!isAdmin && userDisplayName.isNotEmpty) {
+        if (activity.inspectorName.toLowerCase() != userDisplayName.toLowerCase()) {
+          return false;
+        }
+      }
+
       bool matchesSearch = searchQuery.value.isEmpty ||
           activity.topicOfDiscussion.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
           activity.inspectorName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||

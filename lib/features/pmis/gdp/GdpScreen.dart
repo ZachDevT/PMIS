@@ -6,6 +6,8 @@ import 'package:pmis/commons/widgets/cards/GdpActivityCard.dart';
 import 'package:pmis/features/pmis/gdp/widgets/GdpForm.dart';
 import 'package:pmis/features/pmis/gdp/controllers/GdpController.dart';
 import 'package:pmis/utils/constants/colors.dart';
+import 'package:pmis/utils/constants/images_strings.dart';
+import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
 class GdpScreen extends StatelessWidget {
   final GdpController controller = Get.find<GdpController>();
@@ -53,6 +55,10 @@ class GdpScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
+              image: const DecorationImage(
+                image: AssetImage(TImagestring.nda),
+                fit: BoxFit.contain,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
@@ -60,15 +66,6 @@ class GdpScreen extends StatelessWidget {
                   offset: const Offset(0, 2),
                 ),
               ],
-            ),
-            child: Center(
-              child: Text(
-                "P",
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: Tcolors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
             ),
           ),
           const Spacer(),
@@ -105,24 +102,24 @@ class GdpScreen extends StatelessWidget {
 }
 
 class _QuickActionsSection extends StatelessWidget {
-  const _QuickActionsSection({super.key});
+  const _QuickActionsSection();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: const EdgeInsets.only(top: 15),
-        padding: const EdgeInsets.symmetric(horizontal:10),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: _ActionButton(
-                icon: Iconsax.add,
-                label: "Create new GDP",
-                onTap: () => GdpScreen()._showCreateNewModal(context),
-              ),
+      margin: const EdgeInsets.only(top: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: _ActionButton(
+              icon: Iconsax.add,
+              label: "Create new GDP",
+              onTap: () => GdpScreen()._showCreateNewModal(context),
             ),
-            const SizedBox(width: 10),
+          ),
+          const SizedBox(width: 10),
           Expanded(
             child: _ActionButton(
               icon: Iconsax.refresh,
@@ -133,9 +130,8 @@ class _QuickActionsSection extends StatelessWidget {
               },
             ),
           ),
-          ],
-        ),
-      
+        ],
+      ),
     );
   }
 }
@@ -160,24 +156,24 @@ class _ActivityListSection extends StatelessWidget {
               Text(
                 "No activities found",
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                      color: Colors.grey[600],
+                    ),
               ),
               const SizedBox(height: 8),
               Text(
                 "Try adjusting your search or filters",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[500],
-                ),
+                      color: Colors.grey[500],
+                    ),
               ),
             ],
           ),
         );
       }
-      
+
       return ListView.builder(
         shrinkWrap: true,
-        reverse: true,
+        reverse: false,
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 10),
         itemCount: activities.length,
@@ -200,7 +196,6 @@ class _ActionButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
-    super.key,
   });
 
   @override
@@ -247,33 +242,33 @@ class _SearchBarWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Obx(() => TextField(
-        onChanged: (value) => controller.updateSearchQuery(value),
-        decoration: InputDecoration(
-          hintText: "Search activities...",
-          prefixIcon: const Icon(Iconsax.search_normal, size: 20),
-          suffixIcon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (controller.searchQuery.value.isNotEmpty)
-                IconButton(
-                  icon: const Icon(Iconsax.close_circle, size: 20),
-                  onPressed: () => controller.updateSearchQuery(''),
-                ),
-              IconButton(
-                icon: const Icon(Iconsax.filter, size: 20),
-                onPressed: () => _showFilterDialog(context),
+            onChanged: (value) => controller.updateSearchQuery(value),
+            decoration: InputDecoration(
+              hintText: "Search activities...",
+              prefixIcon: const Icon(Iconsax.search_normal, size: 20),
+              suffixIcon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (controller.searchQuery.value.isNotEmpty)
+                    IconButton(
+                      icon: const Icon(Iconsax.close_circle, size: 20),
+                      onPressed: () => controller.updateSearchQuery(''),
+                    ),
+                  IconButton(
+                    icon: const Icon(Iconsax.filter, size: 20),
+                    onPressed: () => _showFilterDialog(context),
+                  ),
+                ],
               ),
-            ],
-          ),
-          filled: true,
-          fillColor: Theme.of(context).colorScheme.surface,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        ),
-      )),
+              filled: true,
+              fillColor: Theme.of(context).colorScheme.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            ),
+          )),
     );
   }
 
@@ -314,8 +309,8 @@ class _FilterDialog extends StatelessWidget {
             Text(
               "Filter Activities",
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
             const Spacer(),
             IconButton(
@@ -328,36 +323,51 @@ class _FilterDialog extends StatelessWidget {
 
         // Filter options
         Obx(() => Column(
-          children: [
-            _FilterDropdown(
-              label: "Region",
-              value: controller.filterRegion.value,
-              items: ["Central Region", "Eastern Region", "Northern Region", "Western Region"],
-              onChanged: (value) => controller.filterRegion.value = value ?? '',
-            ),
-            const SizedBox(height: 16),
-            _FilterDropdown(
-              label: "Facility Status",
-              value: controller.filterFacilityStatus.value,
-              items: ["Open", "Closed"],
-              onChanged: (value) => controller.filterFacilityStatus.value = value ?? '',
-            ),
-            const SizedBox(height: 16),
-            _FilterDropdown(
-              label: "Certification Status",
-              value: controller.filterCertificationStatus.value,
-              items: ["Certified", "Not certified"],
-              onChanged: (value) => controller.filterCertificationStatus.value = value ?? '',
-            ),
-            const SizedBox(height: 16),
-            _FilterDropdown(
-              label: "Category of Drugs",
-              value: controller.filterCategoryOfDrugs.value,
-              items: ["Medical Device", "Veterinary drugs", "Human drugs", "Public Healthcare products", "Herbal drugs"],
-              onChanged: (value) => controller.filterCategoryOfDrugs.value = value ?? '',
-            ),
-          ],
-        )),
+              children: [
+                _FilterDropdown(
+                  label: "Region",
+                  value: controller.filterRegion.value,
+                  items: const [
+                    "Central Region",
+                    "Eastern Region",
+                    "Northern Region",
+                    "Western Region"
+                  ],
+                  onChanged: (value) =>
+                      controller.filterRegion.value = value ?? '',
+                ),
+                const SizedBox(height: 16),
+                _FilterDropdown(
+                  label: "Facility Status",
+                  value: controller.filterFacilityStatus.value,
+                  items: const ["Open", "Closed"],
+                  onChanged: (value) =>
+                      controller.filterFacilityStatus.value = value ?? '',
+                ),
+                const SizedBox(height: 16),
+                _FilterDropdown(
+                  label: "Certification Status",
+                  value: controller.filterCertificationStatus.value,
+                  items: const ["Certified", "Not certified"],
+                  onChanged: (value) =>
+                      controller.filterCertificationStatus.value = value ?? '',
+                ),
+                const SizedBox(height: 16),
+                _FilterDropdown(
+                  label: "Category of Drugs",
+                  value: controller.filterCategoryOfDrugs.value,
+                  items: const [
+                    "Medical Device",
+                    "Veterinary drugs",
+                    "Human drugs",
+                    "Public Healthcare products",
+                    "Herbal drugs"
+                  ],
+                  onChanged: (value) =>
+                      controller.filterCategoryOfDrugs.value = value ?? '',
+                ),
+              ],
+            )),
 
         const SizedBox(height: 24),
 
@@ -409,18 +419,19 @@ class _FilterDropdown extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+                fontWeight: FontWeight.w600,
+              ),
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: value.isEmpty ? null : value,
+          initialValue: value.isEmpty ? null : value,
           decoration: InputDecoration(
             hintText: "Select $label",
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           ),
           items: [
             DropdownMenuItem<String>(
@@ -428,9 +439,9 @@ class _FilterDropdown extends StatelessWidget {
               child: Text("All $label"),
             ),
             ...items.map((item) => DropdownMenuItem<String>(
-              value: item,
-              child: Text(item),
-            )),
+                  value: item,
+                  child: Text(item),
+                )),
           ],
           onChanged: onChanged,
         ),
@@ -442,57 +453,67 @@ class _FilterDropdown extends StatelessWidget {
 class _UserProfileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => Get.toNamed('/user-menu'),
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Row(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text("Welcome ", style: Theme.of(context).textTheme.bodyMedium),
-                Text(
-                  "Admin",
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                        color: Tcolors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 8),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Theme.of(context).colorScheme.surface,
+    final authController = Get.isRegistered<AuthController>() 
+        ? Get.find<AuthController>() 
+        : null;
+    
+    return Obx(() {
+      final displayName = authController?.userDisplayName ?? 'Guest';
+      
+      return InkWell(
+        onTap: () => Get.toNamed('/user-menu'),
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text("Welcome ", style: Theme.of(context).textTheme.bodyMedium),
+                  Text(
+                    displayName,
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                          color: Tcolors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  child: const Icon(HugeIcons.strokeRoundedUser, size: 30),
-                ),
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Container(
-                    width: 12,
-                    height: 12,
+                ],
+              ),
+              const SizedBox(width: 8),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
-                      color: Colors.green,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
+                    child: const Icon(HugeIcons.strokeRoundedUser, size: 30),
+                  ),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

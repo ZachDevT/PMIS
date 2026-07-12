@@ -1,24 +1,54 @@
 /// Dynamic constants for regions and districts across all PMIS modules
 /// This ensures consistency and maintainability across the application
+library;
 
 class RegionDistrictConstants {
   // Region constants
   static const List<String> regions = [
     "Head Office",
     "CENTRAL",
-    "EASTERN", 
+    "EASTERN",
     "SOUTHERN",
     "WESTERN",
     "NORTHERN"
   ];
 
-  // District constants
-  static const List<String> districts = [
+  // All districts
+  static const List<String> allDistricts = [
     "Kampala",
-    "Masaka", 
+    "Wakiso",
+    "Mukono",
+    "Masaka",
+    "Mbarara",
     "Kabale",
-    "Fortportal"
+    "Fortportal",
+    "Kasese",
+    "Mbale",
+    "Soroti",
+    "Gulu",
+    "Lira",
+    "Arua"
   ];
+
+  // Legacy - kept for backward compatibility
+  static List<String> get districts => allDistricts;
+
+  // District-to-Region mapping
+  static const Map<String, String> districtToRegion = {
+    "Kampala": "CENTRAL",
+    "Wakiso": "CENTRAL",
+    "Mukono": "CENTRAL",
+    "Masaka": "CENTRAL",
+    "Mbarara": "WESTERN",
+    "Kabale": "WESTERN",
+    "Fortportal": "WESTERN",
+    "Kasese": "WESTERN",
+    "Mbale": "EASTERN",
+    "Soroti": "EASTERN",
+    "Gulu": "NORTHERN",
+    "Lira": "NORTHERN",
+    "Arua": "NORTHERN",
+  };
 
   // Region GUID mapping for API integration
   static const Map<String, String> regionGuids = {
@@ -33,9 +63,18 @@ class RegionDistrictConstants {
   // District ID mapping for API integration
   static const Map<String, int> districtIds = {
     "Kampala": 1,
-    "Masaka": 2,
-    "Kabale": 3,
-    "Fortportal": 4
+    "Wakiso": 2,
+    "Mukono": 3,
+    "Masaka": 4,
+    "Mbarara": 5,
+    "Kabale": 6,
+    "Fortportal": 7,
+    "Kasese": 8,
+    "Mbale": 9,
+    "Soroti": 10,
+    "Gulu": 11,
+    "Lira": 12,
+    "Arua": 13,
   };
 
   // Helper methods
@@ -64,4 +103,34 @@ class RegionDistrictConstants {
     }
     return "Kampala";
   }
+
+  /// Get districts filtered by selected region
+  static List<String> getDistrictsByRegion(String region) {
+    if (region.isEmpty || region == "Head Office") {
+      return allDistricts; // Return all districts for Head Office
+    }
+    
+    return allDistricts.where((district) {
+      return districtToRegion[district] == region;
+    }).toList();
+  }
+
+  /// Get region for a specific district
+  static String getRegionForDistrict(String district) {
+    return districtToRegion[district] ?? "CENTRAL";
+  }
+
+  /// Qualification Master - Standard qualifications list
+  static const List<String> qualifications = [
+    "Pharmacist",
+    "Pharmacy Technician",
+    "Nursing Officer",
+    "Clinical Officer",
+    "Medical Doctor",
+    "Veterinary Doctor",
+    "Dispenser",
+    "Herbalist",
+    "Drug Shop Operator",
+    "Other"
+  ];
 }

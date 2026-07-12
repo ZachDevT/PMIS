@@ -32,6 +32,8 @@ class SyncManager extends GetxController {
   final RxInt _totalPendingItems = 0.obs;
   bool _isInitialized = false;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  int _connectivityRetryAttempts = 0;
+  static const int _maxRetryAttempts = 5;
 
   /// Get sync status
   bool get isSyncing => _isSyncing.value;
@@ -64,16 +66,10 @@ class SyncManager extends GetxController {
         try {
           final resolvedResult = _resolveConnectivityResult(results);
           if (resolvedResult != ConnectivityResult.none) {
-            // Connection restored, trigger automatic sync after a short delay
+            // Connection restored, trigger automatic sync with backoff
             print(
                 '🌐 Internet connection restored - checking for pending data...');
-            Future.delayed(const Duration(seconds: 2), () async {
-              try {
-                await performSync(showProgress: true);
-              } catch (e) {
-                print('Error during auto-sync: $e');
-              }
-            });
+            Future.microtask(() => _performSyncWithBackoff());
           }
         } catch (e) {
           print('Error handling connectivity change: $e');
@@ -94,7 +90,26 @@ class SyncManager extends GetxController {
     }
   }
 
-  ConnectivityResult _resolveConnectivityResult(List<ConnectivityResult> results) {
+  Future<void> _performSyncWithBackoff() async {
+    _connectivityRetryAttempts = 0;
+    while (_connectivityRetryAttempts < _maxRetryAttempts) {
+      try {
+        await performSync(showProgress: true);
+        // Success - reset attempts and break
+        _connectivityRetryAttempts = 0;
+        break;
+      } catch (e) {
+        _connectivityRetryAttempts++;
+        final backoffMs = (1000 * (1 << _connectivityRetryAttempts));
+        print(
+            'Auto-sync attempt $_connectivityRetryAttempts failed: $e. Retrying in ${backoffMs}ms');
+        await Future.delayed(Duration(milliseconds: backoffMs));
+      }
+    }
+  }
+
+  ConnectivityResult _resolveConnectivityResult(
+      List<ConnectivityResult> results) {
     if (results.isEmpty) return ConnectivityResult.none;
     if (results.any((item) => item != ConnectivityResult.none)) {
       return ConnectivityResult.wifi;
@@ -246,8 +261,14 @@ class SyncManager extends GetxController {
       // Update pending count
       _updatePendingCount();
 
-      // ⬇️ FIX: Reload all controller data so synced records appear in reports
-      await _reloadAllControllerData();
+      // Reload controller data but don't block main thread — schedule non-blocking refresh
+      Future.microtask(() async {
+        try {
+          await _reloadAllControllerData(nonBlocking: true);
+        } catch (e) {
+          print('Error reloading controllers after sync: $e');
+        }
+      });
 
       // Show success message
       if (showProgress) {
@@ -293,15 +314,26 @@ class SyncManager extends GetxController {
   }
 
   /// Reload all controller data after sync to show synced records immediately
-  Future<void> _reloadAllControllerData() async {
+  Future<void> _reloadAllControllerData({bool nonBlocking = false}) async {
     print('🔄 Reloading all controller data after sync...');
 
     // Reload CSS controller if registered
     try {
       if (Get.isRegistered<dynamic>(tag: 'CssController')) {
         final dynamic controller = Get.find(tag: 'CssController');
-        await controller.loadActivities();
-        print(' Reloaded CSS data');
+        if (nonBlocking) {
+          Future.microtask(() async {
+            try {
+              await controller.loadActivities();
+              print(' Reloaded CSS data');
+            } catch (e) {
+              print('Error reloading CSS data (non-blocking): $e');
+            }
+          });
+        } else {
+          await controller.loadActivities();
+          print(' Reloaded CSS data');
+        }
       }
     } catch (e) {
       print('CSS controller not registered or error reloading: $e');
@@ -311,8 +343,19 @@ class SyncManager extends GetxController {
     try {
       if (Get.isRegistered<dynamic>(tag: 'GppController')) {
         final dynamic controller = Get.find(tag: 'GppController');
-        await controller.loadActivities();
-        print('✓ Reloaded GPP data');
+        if (nonBlocking) {
+          Future.microtask(() async {
+            try {
+              await controller.loadActivities();
+              print('✓ Reloaded GPP data');
+            } catch (e) {
+              print('Error reloading GPP data (non-blocking): $e');
+            }
+          });
+        } else {
+          await controller.loadActivities();
+          print('✓ Reloaded GPP data');
+        }
       }
     } catch (e) {
       print('GPP controller not registered or error reloading: $e');
@@ -322,8 +365,19 @@ class SyncManager extends GetxController {
     try {
       if (Get.isRegistered<dynamic>(tag: 'GdpController')) {
         final dynamic controller = Get.find(tag: 'GdpController');
-        await controller.loadActivities();
-        print('✓ Reloaded GDP data');
+        if (nonBlocking) {
+          Future.microtask(() async {
+            try {
+              await controller.loadActivities();
+              print('✓ Reloaded GDP data');
+            } catch (e) {
+              print('Error reloading GDP data (non-blocking): $e');
+            }
+          });
+        } else {
+          await controller.loadActivities();
+          print('✓ Reloaded GDP data');
+        }
       }
     } catch (e) {
       print('GDP controller not registered or error reloading: $e');
@@ -333,8 +387,19 @@ class SyncManager extends GetxController {
     try {
       if (Get.isRegistered<dynamic>(tag: 'PmsaController')) {
         final dynamic controller = Get.find(tag: 'PmsaController');
-        await controller.loadActivities();
-        print('✓ Reloaded PMSA data');
+        if (nonBlocking) {
+          Future.microtask(() async {
+            try {
+              await controller.loadActivities();
+              print('✓ Reloaded PMSA data');
+            } catch (e) {
+              print('Error reloading PMSA data (non-blocking): $e');
+            }
+          });
+        } else {
+          await controller.loadActivities();
+          print('✓ Reloaded PMSA data');
+        }
       }
     } catch (e) {
       print('PMSA controller not registered or error reloading: $e');
@@ -344,8 +409,19 @@ class SyncManager extends GetxController {
     try {
       if (Get.isRegistered<dynamic>(tag: 'RtsController')) {
         final dynamic controller = Get.find(tag: 'RtsController');
-        await controller.loadActivities();
-        print('✓ Reloaded RTS data');
+        if (nonBlocking) {
+          Future.microtask(() async {
+            try {
+              await controller.loadActivities();
+              print('✓ Reloaded RTS data');
+            } catch (e) {
+              print('Error reloading RTS data (non-blocking): $e');
+            }
+          });
+        } else {
+          await controller.loadActivities();
+          print('✓ Reloaded RTS data');
+        }
       }
     } catch (e) {
       print('RTS controller not registered or error reloading: $e');
@@ -355,8 +431,19 @@ class SyncManager extends GetxController {
     try {
       if (Get.isRegistered<dynamic>(tag: 'ShiftMarketController')) {
         final dynamic controller = Get.find(tag: 'ShiftMarketController');
-        await controller.loadActivities();
-        print('✓ Reloaded Shift Market data');
+        if (nonBlocking) {
+          Future.microtask(() async {
+            try {
+              await controller.loadActivities();
+              print('✓ Reloaded Shift Market data');
+            } catch (e) {
+              print('Error reloading Shift Market data (non-blocking): $e');
+            }
+          });
+        } else {
+          await controller.loadActivities();
+          print('✓ Reloaded Shift Market data');
+        }
       }
     } catch (e) {
       print('Shift Market controller not registered or error reloading: $e');
@@ -366,8 +453,19 @@ class SyncManager extends GetxController {
     try {
       if (Get.isRegistered<dynamic>(tag: 'EnforcementController')) {
         final dynamic controller = Get.find(tag: 'EnforcementController');
-        await controller.loadActivities();
-        print('✓ Reloaded Enforcement data');
+        if (nonBlocking) {
+          Future.microtask(() async {
+            try {
+              await controller.loadActivities();
+              print('✓ Reloaded Enforcement data');
+            } catch (e) {
+              print('Error reloading Enforcement data (non-blocking): $e');
+            }
+          });
+        } else {
+          await controller.loadActivities();
+          print('✓ Reloaded Enforcement data');
+        }
       }
     } catch (e) {
       print('Enforcement controller not registered or error reloading: $e');
@@ -378,8 +476,20 @@ class SyncManager extends GetxController {
       if (Get.isRegistered<dynamic>(tag: 'SensitizationMeetingController')) {
         final dynamic controller =
             Get.find(tag: 'SensitizationMeetingController');
-        await controller.loadActivities();
-        print('✓ Reloaded Sensitization Meeting data');
+        if (nonBlocking) {
+          Future.microtask(() async {
+            try {
+              await controller.loadActivities();
+              print('✓ Reloaded Sensitization Meeting data');
+            } catch (e) {
+              print(
+                  'Error reloading Sensitization Meeting data (non-blocking): $e');
+            }
+          });
+        } else {
+          await controller.loadActivities();
+          print('✓ Reloaded Sensitization Meeting data');
+        }
       }
     } catch (e) {
       print(

@@ -8,6 +8,11 @@ class SyncIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check if SyncManager is registered before using it
+    if (!Get.isRegistered<SyncManager>()) {
+      return const SizedBox.shrink();
+    }
+    
     return GetBuilder<SyncManager>(
       builder: (syncManager) {
         if (syncManager.totalPendingItems > 0) {

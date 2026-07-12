@@ -65,7 +65,7 @@ class CssController extends GetxController {
     Future.microtask(() => loadActivities());
     getCurrentLocation(); // Get current location on init
     _autoFillDefaults();
-    
+
     // Initialize filtered activities
     ever(activities, (_) => filterActivities());
     ever(searchQuery, (_) => filterActivities());
@@ -80,7 +80,7 @@ class CssController extends GetxController {
         DateTime.now().toLocal().toString().split(' ')[0];
     inspectionTimeController.text = TimeOfDay.now().format(Get.context!);
     // GPS location will be set by getCurrentLocation()
-    
+
     // Prepopulate inspector name and ID from logged-in user
     if (Get.isRegistered<AuthController>()) {
       final authController = Get.find<AuthController>();
@@ -100,19 +100,26 @@ class CssController extends GetxController {
       var cssActivities = data.map((item) => CssModel.fromJson(item)).toList();
       print('CSS Controller: Parsed activities: ${cssActivities.length}');
       if (cssActivities.isNotEmpty) {
-        print('CSS Controller: First parsed activity inspectorName: ${cssActivities.first.inspectorName}');
-        print('CSS Controller: First parsed activity inspectorId: ${cssActivities.first.inspectorId}');
+        print(
+            'CSS Controller: First parsed activity inspectorName: ${cssActivities.first.inspectorName}');
+        print(
+            'CSS Controller: First parsed activity inspectorId: ${cssActivities.first.inspectorId}');
       }
       activities.assignAll(cssActivities);
       print('=== End CSS Controller: Loading Activities ===');
     } catch (e) {
       // Repository now handles network errors gracefully and returns empty list
       // Only show error for unexpected errors
-      if (!e.toString().contains('SocketException') && !e.toString().contains('NetworkException')) {
+      if (!e.toString().contains('SocketException') &&
+          !e.toString().contains('NetworkException')) {
         print('CSS Controller Error: $e');
-        Loaders.errorSnackbar(title: "Error", message: "Failed to load CSS data. Please check your connection and try again.");
+        Loaders.errorSnackbar(
+            title: "Error",
+            message:
+                "Failed to load CSS data. Please check your connection and try again.");
       } else {
-        print('CSS Controller: No network connection, loading from local storage if available');
+        print(
+            'CSS Controller: No network connection, loading from local storage if available');
       }
       // Ensure activities list is initialized even on error
       if (activities.isEmpty) {
@@ -124,9 +131,8 @@ class CssController extends GetxController {
   /// Filter activities based on search query and selected filters
   void filterActivities() {
     // Get current user info
-    final authController = Get.isRegistered<AuthController>() 
-        ? Get.find<AuthController>() 
-        : null;
+    final authController =
+        Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
     final isAdmin = authController?.isAdmin ?? false;
     final userId = authController?.userId ?? '';
 
@@ -140,9 +146,15 @@ class CssController extends GetxController {
 
       // Search query filter
       bool matchesSearch = searchQuery.value.isEmpty ||
-          activity.facilityName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          activity.personName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          _getRegionName(activity.intRegion).toLowerCase().contains(searchQuery.value.toLowerCase());
+          activity.facilityName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          activity.personName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          _getRegionName(activity.intRegion)
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase());
 
       // Region filter
       bool matchesRegion = filterRegion.value.isEmpty ||
@@ -150,15 +162,18 @@ class CssController extends GetxController {
 
       // Facility status filter
       bool matchesFacilityStatus = filterFacilityStatus.value.isEmpty ||
-          _getFacilityStatusText(activity.facilityStatus) == filterFacilityStatus.value;
+          _getFacilityStatusText(activity.facilityStatus) ==
+              filterFacilityStatus.value;
 
       // License status filter
       bool matchesLicenseStatus = filterLicenseStatus.value.isEmpty ||
-          _getLicenseStatusText(activity.licenseStatus) == filterLicenseStatus.value;
+          _getLicenseStatusText(activity.licenseStatus) ==
+              filterLicenseStatus.value;
 
       // Category of drugs filter
       bool matchesCategoryOfDrugs = filterCategoryOfDrugs.value.isEmpty ||
-          _getCategoryStatusText(activity.categoryStatus) == filterCategoryOfDrugs.value;
+          _getCategoryStatusText(activity.categoryStatus) ==
+              filterCategoryOfDrugs.value;
 
       return matchesSearch &&
           matchesRegion &&
@@ -216,7 +231,8 @@ class CssController extends GetxController {
         if (selectedCategoryOfDrugs.value.isEmpty) {
           emptyFields.add("Category of Drugs");
         }
-        if (selectedClassOfDrugs.value.isEmpty) emptyFields.add("Class of Drugs");
+        if (selectedClassOfDrugs.value.isEmpty)
+          emptyFields.add("Class of Drugs");
         if (selectedUnregisteredDrugs.value.isEmpty) {
           emptyFields.add("Unregistered Drugs");
         }
@@ -256,24 +272,35 @@ class CssController extends GetxController {
         personName: nameController.text,
         contact: contactController.text,
         qualifications: qualificationsController.text,
-        categoryOfpremises: _getCategoryOfPremises(selectedCategoryOfFacility.value),
-        otherCategoryPremise: selectedCategoryOfFacility.value == "Others" ? otherCategoryPremiseController.text : "",
+        categoryOfpremises:
+            _getCategoryOfPremises(selectedCategoryOfFacility.value),
+        otherCategoryPremise: selectedCategoryOfFacility.value == "Others"
+            ? otherCategoryPremiseController.text
+            : "",
         licenseStatus: _getLicenseStatus(selectedLicensedStatus.value),
-        licenseNo: selectedLicensedStatus.value == "Licensed" ? licenseNoController.text : "",
-        licenseExpiryDate: selectedLicensedStatus.value == "Licensed" ? licenseExpiryDateController.text : "",
+        licenseNo: selectedLicensedStatus.value == "Licensed"
+            ? licenseNoController.text
+            : "",
+        licenseExpiryDate: selectedLicensedStatus.value == "Licensed"
+            ? licenseExpiryDateController.text
+            : "",
         unlicensed: _getUnlicensedStatus(selectedLicensedStatus.value) ?? 0,
         categoryStatus: _getCategoryStatus(selectedCategoryOfDrugs.value),
-        premisesCondition: _getPremisesCondition(selectedConditionOfPremises.value),
+        premisesCondition:
+            _getPremisesCondition(selectedConditionOfPremises.value),
         recordKeeping: _getRecordKeeping(selectedRecordKeeping.value) ?? 0,
         classofDrugs: _getClassOfDrugs(selectedClassOfDrugs.value) ?? 0,
-        unRegisteredDrug: _getUnregisteredDrugs(selectedUnregisteredDrugs.value) ?? 0,
-        unRegDrugQty: selectedUnregisteredDrugs.value == "Present" ? unRegDrugQtyController.text : "",
+        unRegisteredDrug:
+            _getUnregisteredDrugs(selectedUnregisteredDrugs.value) ?? 0,
+        unRegDrugQty: selectedUnregisteredDrugs.value == "Present"
+            ? unRegDrugQtyController.text
+            : "",
         action: _getActionTaken(selectedActionTaken.value) ?? 0,
       );
 
       bool online = await NetworkManager.instance.isconnected();
       var activityData = newActivity.toJson();
-      
+
       if (online) {
         try {
           print('Sending CSS data: $activityData'); // Debug log
@@ -289,7 +316,7 @@ class CssController extends GetxController {
           await repository.saveActivityLocally(activityData);
           activities.add(newActivity);
           Loaders.errorSnackbar(
-              title: "Network Error", 
+              title: "Network Error",
               message: "Failed to send online. Saved locally for sync.");
           await Future.delayed(const Duration(milliseconds: 500));
         }
@@ -354,35 +381,54 @@ class CssController extends GetxController {
 
   int _getFacilityStatus(String status) {
     switch (status) {
-      case "Open": return 1;
-      case "Closed": return 0;
-      default: return 1;
+      case "Open":
+        return 1;
+      case "Closed":
+        return 0;
+      default:
+        return 1;
     }
   }
 
   int _getPersonType(String personType) {
     switch (personType) {
-      case "In-charge": return 1;
-      case "(Attendant/Operator)": return 2;
-      default: return 1;
+      case "In-charge":
+        return 1;
+      case "(Attendant/Operator)":
+        return 2;
+      default:
+        return 1;
     }
   }
 
   int _getCategoryOfPremises(String category) {
     switch (category) {
-      case "Wholesale Pharmacy": return 1;
-      case "Retail Pharmacy": return 2;
-      case "Drug Shop": return 3;
-      case "External Stores": return 4;
-      case "Hospital": return 5;
-      case "HCIV": return 6;
-      case "HCIII": return 7;
-      case "Clinic": return 8;
-      case "Herbal Selling Outlet": return 9;
-      case "Shift Market": return 10;
-      case "Pharmaceutical/Medical Device Manufacturing Premise": return 11;
-      case "Others": return 12;
-      default: return 2; // Default to Retail Pharmacy
+      case "Wholesale Pharmacy":
+        return 1;
+      case "Retail Pharmacy":
+        return 2;
+      case "Drug Shop":
+        return 3;
+      case "External Stores":
+        return 4;
+      case "Hospital":
+        return 5;
+      case "HCIV":
+        return 6;
+      case "HCIII":
+        return 7;
+      case "Clinic":
+        return 8;
+      case "Herbal Selling Outlet":
+        return 9;
+      case "Shift Market":
+        return 10;
+      case "Pharmaceutical/Medical Device Manufacturing Premise":
+        return 11;
+      case "Others":
+        return 12;
+      default:
+        return 2; // Default to Retail Pharmacy
     }
   }
 
@@ -418,87 +464,127 @@ class CssController extends GetxController {
 
   int _getCategoryStatus(String category) {
     switch (category) {
-      case "Medical Device": return 1;
-      case "Veterinary drugs": return 2;
-      case "Human drugs": return 3;
-      case "Public Healthcare products": return 4;
-      case "Herbal drugs": return 5;
-      default: return 1;
+      case "Medical Device":
+        return 1;
+      case "Veterinary drugs":
+        return 2;
+      case "Human drugs":
+        return 3;
+      case "Public Healthcare products":
+        return 4;
+      case "Herbal drugs":
+        return 5;
+      default:
+        return 1;
     }
   }
 
   int _getPremisesCondition(String condition) {
     switch (condition) {
-      case "Good": return 1;
-      case "Fair": return 2;
-      case "Poor": return 3;
-      default: return 1;
+      case "Good":
+        return 1;
+      case "Fair":
+        return 2;
+      case "Poor":
+        return 3;
+      default:
+        return 1;
     }
   }
 
   int? _getRecordKeeping(String keeping) {
     switch (keeping) {
-      case "Good": return 1;
-      case "Fair": return 2;
-      case "Poor": return 3;
-      default: return null;
+      case "Good":
+        return 1;
+      case "Fair":
+        return 2;
+      case "Poor":
+        return 3;
+      default:
+        return null;
     }
   }
 
   int? _getClassOfDrugs(String drugs) {
     switch (drugs) {
-      case "Class A": return 1;
-      case "Class B": return 2;
-      case "Class C": return 3;
-      default: return null;
+      case "Class A":
+        return 1;
+      case "Class B":
+        return 2;
+      case "Class C":
+        return 3;
+      default:
+        return null;
     }
   }
 
   int? _getUnregisteredDrugs(String drugs) {
     switch (drugs) {
-      case "Yes": return 1;
-      case "No": return 0;
-      default: return null;
+      case "Yes":
+        return 1;
+      case "No":
+        return 0;
+      default:
+        return null;
     }
   }
 
   int? _getActionTaken(String action) {
     switch (action) {
-      case "Closed": return 1;
-      case "Outlet abandoned by owner": return 2;
-      case "Impounded": return 3;
-      case "Suspect arrested": return 4;
-      case "No action taken": return 5;
-      default: return null;
+      case "Closed":
+        return 1;
+      case "Outlet abandoned by owner":
+        return 2;
+      case "Impounded":
+        return 3;
+      case "Suspect arrested":
+        return 4;
+      case "No action taken":
+        return 5;
+      default:
+        return null;
     }
   }
 
   // Helper methods for filter text conversion
   String _getFacilityStatusText(int status) {
     switch (status) {
-      case 1: return "Open";
-      case 0: return "Closed";
-      default: return "Open";
+      case 1:
+        return "Open";
+      case 0:
+        return "Closed";
+      default:
+        return "Open";
     }
   }
 
   String _getLicenseStatusText(int status) {
     switch (status) {
-      case 1: return "Licensed";
-      case 2: return "Un-Licensed";
-      case 3: return "Not-Applicable";
-      default: return "Licensed";
+      case 1:
+        return "Licensed";
+      case 2:
+        return "Un-Licensed";
+      case 3:
+        return "Not-Applicable";
+      default:
+        return "Licensed";
     }
   }
 
   String _getCategoryStatusText(int status) {
     switch (status) {
-      case 1: return "Medical Device";
-      case 2: return "Veterinary drugs";
-      case 3: return "Human drugs";
-      case 4: return "Public Healthcare products";
-      case 5: return "Herbal drugs";
-      default: return "Medical Device";
+      case 1:
+        return "Medical Device";
+      case 2:
+        return "Veterinary drugs";
+      case 3:
+        return "Human drugs";
+      case 4:
+        return "Public Healthcare products";
+      case 5:
+        return "Herbal drugs";
+      default:
+        return "Medical Device";
     }
   }
 
@@ -522,24 +608,24 @@ class CssController extends GetxController {
   Future<void> getCurrentLocation() async {
     try {
       isGettingLocation.value = true;
-      
+
       // Check location permission
       PermissionStatus status = await Permission.location.status;
       if (!status.isGranted) {
         status = await Permission.location.request();
       }
-      
+
       if (status.isGranted) {
         // Get current position
         Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high,
         );
-        
+
         currentLatitude.value = position.latitude;
         currentLongitude.value = position.longitude;
-        
+
         // Update GPS location controller
-        gpsLocationController.text = 
+        gpsLocationController.text =
             "Lat: ${position.latitude.toStringAsFixed(6)}, Lon: ${position.longitude.toStringAsFixed(6)}";
       } else {
         // Permission denied, use default values

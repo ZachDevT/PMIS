@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pmis/utils/constants/colors.dart';
 import 'package:pmis/utils/constants/sizes.dart';
 import 'package:pmis/utils/helpers/helpers_functions.dart';
@@ -60,6 +61,9 @@ class UserMenuScreen extends StatelessWidget {
   }
 
   Widget _buildUserProfileSection(BuildContext context, bool dark) {
+    final authController =
+        Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
+    
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(Tsizes.defaultSpace),
@@ -76,78 +80,93 @@ class UserMenuScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          // Profile Avatar
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Tcolors.primary.withValues(alpha: 0.1),
-              border: Border.all(
+      child: Obx(() {
+        final displayName = authController?.userDisplayName ?? 'Guest';
+        final email = authController?.userEmail ?? '';
+        final roleName = authController?.userRoleName ?? 'Unknown';
+        
+        return Column(
+          children: [
+            // Profile Avatar
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Tcolors.primary.withValues(alpha: 0.1),
+                border: Border.all(
+                  color: Tcolors.primary,
+                  width: 3,
+                ),
+              ),
+              child: Icon(
+                HugeIcons.strokeRoundedUser,
+                size: 40,
                 color: Tcolors.primary,
-                width: 3,
               ),
             ),
-            child: Icon(
-              HugeIcons.strokeRoundedUser,
-              size: 40,
-              color: Tcolors.primary,
-            ),
-          ),
-          const SizedBox(height: Tsizes.spaceBtwItems),
+            const SizedBox(height: Tsizes.spaceBtwItems),
 
-          // User Info
-          Text(
-            'Admin User',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: dark ? Colors.white : Tcolors.dark,
-                ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'admin@pmis.com',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: dark ? Colors.grey[400] : Colors.grey[600],
-                ),
-          ),
-          const SizedBox(height: Tsizes.spaceBtwItems),
+            // User Info
+            Text(
+              displayName,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: dark ? Colors.white : Tcolors.dark,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            if (email.isNotEmpty)
+              Text(
+                email,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: dark ? Colors.grey[400] : Colors.grey[600],
+                    ),
+              ),
+            if (email.isNotEmpty) const SizedBox(height: 4),
+            Text(
+              roleName,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: dark ? Colors.grey[500] : Colors.grey[500],
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+            const SizedBox(height: Tsizes.spaceBtwItems),
 
-          // Status Badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.green),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Colors.green,
-                    shape: BoxShape.circle,
+            // Status Badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.green),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'Active',
-                  style: TextStyle(
-                    color: Colors.green[700],
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                  const SizedBox(width: 6),
+                  Text(
+                    'Active',
+                    style: TextStyle(
+                      color: Colors.green[700],
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      }),
     );
   }
 
@@ -303,39 +322,173 @@ class UserMenuScreen extends StatelessWidget {
   }
 
   Widget _buildAppInfoSection(BuildContext context, bool dark) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(Tsizes.defaultSpace),
-      decoration: BoxDecoration(
-        color: dark ? Tcolors.darkerGrey : Colors.white,
-        borderRadius: BorderRadius.circular(Tsizes.borderRadiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: dark
-                ? Colors.black.withValues(alpha: 0.3)
-                : Colors.grey.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'App Information',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: dark ? Colors.white : Tcolors.dark,
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        // Show loading state
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(Tsizes.defaultSpace),
+            decoration: BoxDecoration(
+              color: dark ? Tcolors.darkerGrey : Colors.white,
+              borderRadius: BorderRadius.circular(Tsizes.borderRadiusLg),
+              boxShadow: [
+                BoxShadow(
+                  color: dark
+                      ? Colors.black.withValues(alpha: 0.3)
+                      : Colors.grey.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
                 ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'App Information',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: dark ? Colors.white : Tcolors.dark,
+                      ),
+                ),
+                const SizedBox(height: Tsizes.spaceBtwItems),
+                const Center(child: CircularProgressIndicator()),
+              ],
+            ),
+          );
+        }
+
+        // Handle error state with better error message
+        if (snapshot.hasError) {
+          print('Error loading package info: ${snapshot.error}');
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(Tsizes.defaultSpace),
+            decoration: BoxDecoration(
+              color: dark ? Tcolors.darkerGrey : Colors.white,
+              borderRadius: BorderRadius.circular(Tsizes.borderRadiusLg),
+              boxShadow: [
+                BoxShadow(
+                  color: dark
+                      ? Colors.black.withValues(alpha: 0.3)
+                      : Colors.grey.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'App Information',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: dark ? Colors.white : Tcolors.dark,
+                      ),
+                ),
+                const SizedBox(height: Tsizes.spaceBtwItems),
+                _buildInfoRow(context, dark, 'Version', '1.0.0'),
+                _buildInfoRow(context, dark, 'Build Number', '1'),
+                _buildInfoRow(context, dark, 'Current Date', _getCurrentDate()),
+                const SizedBox(height: 8),
+                Text(
+                  'Note: Package info unavailable. Showing default values.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Check if data is null
+        if (snapshot.data == null) {
+          print('Package info data is null');
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(Tsizes.defaultSpace),
+            decoration: BoxDecoration(
+              color: dark ? Tcolors.darkerGrey : Colors.white,
+              borderRadius: BorderRadius.circular(Tsizes.borderRadiusLg),
+              boxShadow: [
+                BoxShadow(
+                  color: dark
+                      ? Colors.black.withValues(alpha: 0.3)
+                      : Colors.grey.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'App Information',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: dark ? Colors.white : Tcolors.dark,
+                      ),
+                ),
+                const SizedBox(height: Tsizes.spaceBtwItems),
+                _buildInfoRow(context, dark, 'Version', '1.0.0'),
+                _buildInfoRow(context, dark, 'Build Number', '1'),
+                _buildInfoRow(context, dark, 'Current Date', _getCurrentDate()),
+              ],
+            ),
+          );
+        }
+
+        final packageInfo = snapshot.data!;
+        
+        // Debug print to see what we're getting
+        print('Package Info loaded:');
+        print('  App Name: ${packageInfo.appName}');
+        print('  Version: ${packageInfo.version}');
+        print('  Build Number: ${packageInfo.buildNumber}');
+        print('  Package Name: ${packageInfo.packageName}');
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(Tsizes.defaultSpace),
+          decoration: BoxDecoration(
+            color: dark ? Tcolors.darkerGrey : Colors.white,
+            borderRadius: BorderRadius.circular(Tsizes.borderRadiusLg),
+            boxShadow: [
+              BoxShadow(
+                color: dark
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : Colors.grey.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
-          const SizedBox(height: Tsizes.spaceBtwItems),
-          _buildInfoRow(context, dark, 'Version', '1.0.0'),
-          _buildInfoRow(context, dark, 'Build', '2024.12.29'),
-          _buildInfoRow(context, dark, 'Last Updated', 'December 29, 2024'),
-          _buildInfoRow(context, dark, 'Current Date', _getCurrentDate()),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'App Information',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: dark ? Colors.white : Tcolors.dark,
+                    ),
+              ),
+              const SizedBox(height: Tsizes.spaceBtwItems),
+              _buildInfoRow(context, dark, 'App Name', packageInfo.appName.isNotEmpty ? packageInfo.appName : 'PMIS'),
+              _buildInfoRow(context, dark, 'Version', packageInfo.version.isNotEmpty ? packageInfo.version : '1.0.0'),
+              _buildInfoRow(context, dark, 'Build Number', packageInfo.buildNumber.isNotEmpty ? packageInfo.buildNumber : '1'),
+              _buildInfoRow(context, dark, 'Package Name', packageInfo.packageName.isNotEmpty ? packageInfo.packageName : 'ug.co.future.pmis'),
+              _buildInfoRow(context, dark, 'Current Date', _getCurrentDate()),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -418,7 +571,7 @@ class UserMenuScreen extends StatelessWidget {
                 color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
+              child: const Icon(
                 HugeIcons.strokeRoundedLogout01,
                 color: Colors.red,
                 size: 28,

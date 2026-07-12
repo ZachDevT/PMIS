@@ -22,6 +22,8 @@ class PmsService {
       ).timeout(_timeoutDuration);
 
       return _handleResponse(response);
+    } on TimeoutException {
+      throw const TimeoutException('Request timeout. Please try again.');
     } on SocketException {
       throw const NetworkException(
           'No internet connection. Please check your network.');
@@ -31,6 +33,10 @@ class PmsService {
       throw const ServerException('Invalid response format from server.');
     } catch (e) {
       if (e is ApiException) rethrow;
+      // Check if it's a timeout error
+      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+        throw const TimeoutException('Request timeout. Please try again.');
+      }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
     }
   }
@@ -46,6 +52,17 @@ class PmsService {
           // Convert to List<Map<String, dynamic>>
           final List<Map<String, dynamic>> pmsData =
               dataList.map((item) => item as Map<String, dynamic>).toList();
+
+          // Debug: Print raw API response
+          print('=== PMS API Response Debug ===');
+          print('Total records: ${pmsData.length}');
+          if (pmsData.isNotEmpty) {
+            print('First record keys: ${pmsData.first.keys.toList()}');
+            print('First record data: ${pmsData.first}');
+            print('Inspector Name from API: ${pmsData.first['inspectorName'] ?? pmsData.first['InspectorName'] ?? 'NOT FOUND'}');
+            print('Inspector ID from API: ${pmsData.first['inspectorId'] ?? pmsData.first['InspectorId'] ?? 'NOT FOUND'}');
+          }
+          print('=== End PMS API Debug ===');
 
           return pmsData;
         } catch (e) {
@@ -119,7 +136,7 @@ class PmsService {
           pascalKey = 'InspectorName';
           break;
         case 'inspectorId':
-          pascalKey = 'InspectorId';
+          pascalKey = 'inspectorId';
           break;
         case 'intRegion':
           pascalKey = 'IntRegion';
@@ -153,6 +170,9 @@ class PmsService {
           break;
         case 'licenseNo':
           pascalKey = 'LicenseNo';
+          break;
+        case 'licenseExpiryDate':
+          pascalKey = 'LicenseExpiryDate';
           break;
         case 'categoryStatus':
           pascalKey = 'CategoryStatus';
@@ -223,6 +243,8 @@ class PmsService {
           .timeout(_timeoutDuration);
 
       return _handlePostResponse(response);
+    } on TimeoutException {
+      throw const TimeoutException('Request timeout. Please try again.');
     } on SocketException {
       throw const NetworkException(
           'No internet connection. Please check your network.');
@@ -232,6 +254,10 @@ class PmsService {
       throw const ServerException('Invalid response format from server.');
     } catch (e) {
       if (e is ApiException) rethrow;
+      // Check if it's a timeout error
+      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+        throw const TimeoutException('Request timeout. Please try again.');
+      }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
     }
   }

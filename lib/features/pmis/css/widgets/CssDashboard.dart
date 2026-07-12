@@ -9,10 +9,15 @@ import 'package:pmis/features/pmis/css/controllers/CssController.dart';
 import 'package:pmis/features/pmis/gpp/controllers/GppController.dart';
 import 'package:pmis/features/pmis/gdp/controllers/GdpController.dart';
 import 'package:pmis/features/pmis/pmsa/controllers/PmsaController.dart';
+import 'package:pmis/features/pmis/shiftmarket/controllers/ShiftMarketController.dart';
+import 'package:pmis/features/pmis/enforcement/controllers/EnforcementController.dart';
+import 'package:pmis/features/pmis/rts/controllers/RtsController.dart';
+import 'package:pmis/features/pmis/sensitizationmeeting/controllers/SensitizationMeetingController.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:pmis/navigationbar.dart';
 
 class CssDashboardSection extends StatelessWidget {
-  CssDashboardSection({super.key});
+  const CssDashboardSection({super.key});
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
@@ -106,6 +111,10 @@ class CssDashboardSection extends StatelessWidget {
                   final gppController = Get.find<GppController>();
                   final gdpController = Get.find<GdpController>();
                   final pmsaController = Get.find<PmsaController>();
+                  final smController = Get.find<ShiftMarketController>();
+                  final enfController = Get.find<EnforcementController>();
+                  final rtsController = Get.find<RtsController>();
+                  final sensController = Get.find<SensitizationMeetingController>();
 
                   final kpiData = [
                     {
@@ -113,28 +122,64 @@ class CssDashboardSection extends StatelessWidget {
                       'label': 'CSS',
                       'count': cssController.activities.length,
                       'color': Tcolors.secondarySecond,
-                      'subtitle': 'Compliant Support Suppervision'
+                      'subtitle': 'Compliant Support Suppervision',
+                      'screenIndex': 0,
                     },
                     {
                       'icon': HugeIcons.strokeRoundedMedicine02,
                       'label': 'GPP',
                       'count': gppController.activities.length,
                       'color': Colors.blue,
-                      'subtitle': 'Good Pharmacy Practice'
+                      'subtitle': 'Good Pharmacy Practice',
+                      'screenIndex': 1,
                     },
                     {
                       'icon': HugeIcons.strokeRoundedDeliveryTracking01,
                       'label': 'GDP',
                       'count': gdpController.activities.length,
                       'color': Colors.blue,
-                      'subtitle': 'Good Distribution Practice'
+                      'subtitle': 'Good Distribution Practice',
+                      'screenIndex': 2,
                     },
                     {
                       'icon': Iconsax.activity,
                       'label': 'PMSA',
                       'count': pmsaController.activities.length,
                       'color': Tcolors.secondarySecond,
-                      'subtitle': 'Post Market Surveillance'
+                      'subtitle': 'Post Market Surveillance',
+                      'screenIndex': 3,
+                    },
+                    {
+                      'icon': HugeIcons.strokeRoundedRadio,
+                      'label': 'RTS',
+                      'count': rtsController.activities.length,
+                      'color': Colors.orange,
+                      'subtitle': 'Radio Talk Shows',
+                      'screenIndex': 4,
+                    },
+                    {
+                      'icon': Iconsax.shop,
+                      'label': 'SM',
+                      'count': smController.activities.length,
+                      'color': Colors.purple,
+                      'subtitle': 'Shift Markets',
+                      'screenIndex': 5,
+                    },
+                    {
+                      'icon': HugeIcons.strokeRoundedSecurity,
+                      'label': 'Enforcement',
+                      'count': enfController.activities.length,
+                      'color': Colors.red,
+                      'subtitle': 'Enforcement Activities',
+                      'screenIndex': 6,
+                    },
+                    {
+                      'icon': Iconsax.people,
+                      'label': 'Sensitization',
+                      'count': sensController.activities.length,
+                      'color': Colors.teal,
+                      'subtitle': 'Sensitization Meetings',
+                      'screenIndex': 7,
                     },
                   ];
 
@@ -151,14 +196,21 @@ class CssDashboardSection extends StatelessWidget {
                     itemCount: kpiData.length,
                     itemBuilder: (context, index) {
                       final kpi = kpiData[index];
-                      return _buildEnhancedKpiCard(
-                        context,
-                        icon: kpi['icon'] as IconData,
-                        label: kpi['label'] as String,
-                        count: kpi['count'] as int,
-                        color: kpi['color'] as Color,
-                        subtitle: kpi['subtitle'] as String,
-                        dark: dark,
+                      return GestureDetector(
+                        onTap: () {
+                          // Navigate to the corresponding feature page
+                          final navigationController = Get.find<NavigationController>();
+                          navigationController.selectedIndex.value = kpi['screenIndex'] as int;
+                        },
+                        child: _buildEnhancedKpiCard(
+                          context,
+                          icon: kpi['icon'] as IconData,
+                          label: kpi['label'] as String,
+                          count: kpi['count'] as int,
+                          color: kpi['color'] as Color,
+                          subtitle: kpi['subtitle'] as String,
+                          dark: dark,
+                        ),
                       );
                     },
                   );
@@ -195,12 +247,20 @@ class CssDashboardSection extends StatelessWidget {
                   final gppController = Get.find<GppController>();
                   final gdpController = Get.find<GdpController>();
                   final pmsaController = Get.find<PmsaController>();
+                  final smController = Get.find<ShiftMarketController>();
+                  final enfController = Get.find<EnforcementController>();
+                  final rtsController = Get.find<RtsController>();
+                  final sensController = Get.find<SensitizationMeetingController>();
 
                   final chartData = _generateYearlyChartData(
                     cssController.activities,
                     gppController.activities,
                     gdpController.activities,
                     pmsaController.activities,
+                    smController.activities,
+                    enfController.activities,
+                    rtsController.activities,
+                    sensController.activities,
                   );
 
                   return SizedBox(
@@ -225,16 +285,13 @@ class CssDashboardSection extends StatelessWidget {
                                 String text;
                                 switch (value.toInt()) {
                                   case 0:
-                                    text = 'J-M';
+                                    text = 'Oct';
                                     break;
                                   case 1:
-                                    text = 'A-J';
+                                    text = 'Nov';
                                     break;
                                   case 2:
-                                    text = 'J-S';
-                                    break;
-                                  case 3:
-                                    text = 'N-D';
+                                    text = 'Dec';
                                     break;
                                   default:
                                     text = '';
@@ -344,8 +401,8 @@ class CssDashboardSection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    '${count}',
-                    style: TextStyle(
+                    '$count',
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
                     ),
@@ -405,16 +462,24 @@ class CssDashboardSection extends StatelessWidget {
     List<dynamic> gppActivities,
     List<dynamic> gdpActivities,
     List<dynamic> pmsaActivities,
+    List<dynamic> smActivities,
+    List<dynamic> enfActivities,
+    List<dynamic> rtsActivities,
+    List<dynamic> sensActivities,
   ) {
-    // Group activities by quarter
-    Map<int, int> quarterlyCount = {};
+    // Group activities by month (October, November, December)
+    Map<int, int> monthlyCount = {};
 
     // Process all activities
     List<List<dynamic>> allActivities = [
       cssActivities,
       gppActivities,
       gdpActivities,
-      pmsaActivities
+      pmsaActivities,
+      smActivities,
+      enfActivities,
+      rtsActivities,
+      sensActivities,
     ];
 
     for (var activityList in allActivities) {
@@ -426,27 +491,21 @@ class CssDashboardSection extends StatelessWidget {
           inspectionDate = DateTime.parse(activity.inspectionDate.toString());
         }
 
-        int quarter;
-        if (inspectionDate.month >= 1 && inspectionDate.month <= 3) {
-          quarter = 0; // J-M
-        } else if (inspectionDate.month >= 4 && inspectionDate.month <= 6) {
-          quarter = 1; // A-J
-        } else if (inspectionDate.month >= 7 && inspectionDate.month <= 9) {
-          quarter = 2; // J-S
-        } else {
-          quarter = 3; // N-D
+        // Only count activities from October (10), November (11), December (12)
+        if (inspectionDate.month >= 10 && inspectionDate.month <= 12) {
+          monthlyCount[inspectionDate.month] = (monthlyCount[inspectionDate.month] ?? 0) + 1;
         }
-
-        quarterlyCount[quarter] = (quarterlyCount[quarter] ?? 0) + 1;
       }
     }
 
-    // Generate bar groups
+    // Generate bar groups for October, November, December
     List<BarChartGroupData> barGroups = [];
     int maxY = 0;
+    List<int> months = [10, 11, 12]; // October, November, December
 
-    for (int i = 0; i < 4; i++) {
-      int count = quarterlyCount[i] ?? 0;
+    for (int i = 0; i < months.length; i++) {
+      int month = months[i];
+      int count = monthlyCount[month] ?? 0;
       maxY = count > maxY ? count : maxY;
 
       barGroups.add(

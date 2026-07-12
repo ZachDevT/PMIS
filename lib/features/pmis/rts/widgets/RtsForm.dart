@@ -65,6 +65,7 @@ class RtsForm extends StatelessWidget {
                 controller: controller.inspectorNameController,
                 label: "Inspector Name",
                 prefixIcon: Iconsax.user,
+                readOnly: true,
                 validator: (value) => value!.isEmpty ? "Required" : null,
               ),
               const SizedBox(height: Tsizes.spaceBtwInputFields),
@@ -163,7 +164,8 @@ class RtsForm extends StatelessWidget {
                       )
                     : ElevatedButton.icon(
                         onPressed: () => controller.submitActivity(),
-                        icon: const Icon(Icons.check_circle, color: Colors.white),
+                        icon:
+                            const Icon(Icons.check_circle, color: Colors.white),
                         label: const Text("Submit"),
                       )),
               ),
@@ -228,7 +230,7 @@ class RtsForm extends StatelessWidget {
     final dark = THelperFunctions.isDarkMode(Get.context!);
 
     return Obx(() => DropdownButtonFormField<String>(
-          value: selectedItem.value.isEmpty ? null : selectedItem.value,
+          initialValue: selectedItem.value.isEmpty ? null : selectedItem.value,
           decoration: InputDecoration(
             labelText: label,
             prefixIcon: Icon(prefixIcon),

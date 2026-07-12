@@ -5,13 +5,17 @@ import 'package:pmis/utils/states/app_state.dart';
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
 import 'package:pmis/utils/local_storage/storage_utility.dart';
 import 'package:pmis/features/authentification/screens/login/LoginSlider.dart';
+import 'package:pmis/utils/popups/loaders.dart';
+import 'package:pmis/bindings/generalbindings.dart';
+import 'package:pmis/features/pmis/css/controllers/CssController.dart';
+import 'package:pmis/utils/helpers/role_manager.dart';
 
 class AuthController extends GetxController {
   final AuthRepository _repo = Get.find<AuthRepository>();
   final TLocalStorage _storage = TLocalStorage();
 
   // State management using AppState
-  final Rx<AppState<Map<String, dynamic>>> loginState = 
+  final Rx<AppState<Map<String, dynamic>>> loginState =
       Rx<AppState<Map<String, dynamic>>>(AppState.initial());
 
   // Reactive state for UI
@@ -55,7 +59,7 @@ class AuthController extends GetxController {
     ever(username, (String value) {
       isUsernameValid.value = value.trim().isNotEmpty;
     });
-    
+
     ever(password, (String value) {
       isPasswordValid.value = value.trim().isNotEmpty;
     });
@@ -79,17 +83,63 @@ class AuthController extends GetxController {
 
       // Perform login
       final result = await _repo.login(username.value, password.value);
+
+      // Accept any non-empty response from server - no strict validation
+      if (result.isEmpty) {
+        throw const ServerException('Empty response from server');
+      }
+
+      // Log the response for debugging but don't validate fields
+      print('=== LOGIN RESPONSE DEBUG ===');
+      print('Response keys: ${result.keys.toList()}');
+      print('Full response data: $result');
+      print('Response as JSON string: ${result.toString()}');
       
+      // Log specific fields we're looking for
+      if (result.containsKey('name')) print('name: ${result['name']}');
+      if (result.containsKey('username')) print('username: ${result['username']}');
+      if (result.containsKey('userName')) print('userName: ${result['userName']}');
+      if (result.containsKey('fullName')) print('fullName: ${result['fullName']}');
+      if (result.containsKey('displayName')) print('displayName: ${result['displayName']}');
+      if (result.containsKey('email')) print('email: ${result['email']}');
+      if (result.containsKey('Email')) print('Email: ${result['Email']}');
+      if (result.containsKey('id')) print('id: ${result['id']}');
+      if (result.containsKey('Id')) print('Id: ${result['Id']}');
+      if (result.containsKey('userId')) print('userId: ${result['userId']}');
+      if (result.containsKey('UserId')) print('UserId: ${result['UserId']}');
+      if (result.containsKey('roleId')) print('roleId: ${result['roleId']}');
+      if (result.containsKey('RoleId')) print('RoleId: ${result['RoleId']}');
+      if (result.containsKey('roles')) print('roles: ${result['roles']}');
+      if (result.containsKey('Roles')) print('Roles: ${result['Roles']}');
+      if (result.containsKey('roleManager')) print('roleManager: ${result['roleManager']}');
+      if (result.containsKey('RoleManager')) print('RoleManager: ${result['RoleManager']}');
+      print('=== END LOGIN RESPONSE DEBUG ===');
+
+      // If API doesn't return user data (only message), add username to the response
+      // This handles the case where API only returns {"message":"Login Successfull"}
+      final Map<String, dynamic> userData = Map<String, dynamic>.from(result);
+      if (!userData.containsKey('username') && !userData.containsKey('userName') && 
+          !userData.containsKey('name') && !userData.containsKey('displayName')) {
+        // API doesn't return user data, so use the username from login form
+        userData['username'] = username.value;
+        userData['userName'] = username.value;
+        print('=== API did not return user data, using username: ${username.value} ===');
+      }
+
       // Store user data
-      await _storage.saveData('user_data', result);
-      
+      await _storage.saveData('user_data', userData);
+
       // Update state
-      user.value = result;
-      loginState.value = AppState.success(result);
+      user.value = userData;
+      loginState.value = AppState.success(userData);
+
+      // Ensure all controllers are registered before navigation
+      if (!Get.isRegistered<CssController>()) {
+        GeneralBindings().dependencies();
+      }
       
       // Navigate to dashboard
       Get.off(() => const NavigationMenu());
-      
     } on ValidationException catch (e) {
       _handleError('Validation Error', e.message);
     } on AuthException catch (e) {
@@ -101,7 +151,8 @@ class AuthController extends GetxController {
     } on TimeoutException catch (e) {
       _handleError('Timeout Error', e.message);
     } catch (e) {
-      _handleError('Unexpected Error', 'An unexpected error occurred. Please try again.');
+      _handleError('Unexpected Error',
+          'An unexpected error occurred. Please try again.');
     } finally {
       isLoading.value = false;
     }
@@ -116,13 +167,10 @@ class AuthController extends GetxController {
 
   /// Show error message to user
   void _showError(String message) {
-    Get.snackbar(
-      'Error',
-      message,
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Get.theme.colorScheme.error,
-      colorText: Get.theme.colorScheme.onError,
-      duration: const Duration(seconds: 4),
+    Loaders.errorSnackbar(
+      title: 'Error',
+      message: message,
+      duration: 4,
     );
   }
 
@@ -149,16 +197,15 @@ class AuthController extends GetxController {
     try {
       // Clear stored data
       await _storage.removeData('user_data');
-      
+
       // Reset state
       user.value = null;
       loginState.value = AppState.initial();
       username.value = '';
       password.value = '';
-      
-      // Navigate to login screen
+
+      // Navigate to login screen - NavigationMenu will ensure controllers are registered on next login
       Get.offAll(() => const LoginSliderScreen());
-      
     } catch (e) {
       _showError('Error during logout. Please try again.');
     }
@@ -182,10 +229,121 @@ class AuthController extends GetxController {
   String get userDisplayName {
     final userData = user.value;
     if (userData == null) return 'Guest';
+
+    // Try various field names (case-sensitive and case-insensitive)
+    // Priority: name > fullName > displayName > username > email
+    final displayName = userData['name']?.toString() ??
+        userData['Name']?.toString() ??
+        userData['fullName']?.toString() ??
+        userData['FullName']?.toString() ??
+        userData['displayName']?.toString() ??
+        userData['DisplayName']?.toString() ??
+        (userData['firstName'] != null && userData['lastName'] != null 
+            ? '${userData['firstName']} ${userData['lastName']}' 
+            : null) ??
+        (userData['FirstName'] != null && userData['LastName'] != null 
+            ? '${userData['FirstName']} ${userData['LastName']}' 
+            : null) ??
+        userData['username']?.toString() ??
+        userData['userName']?.toString() ??
+        userData['UserName']?.toString() ??
+        userData['email']?.toString() ??
+        userData['Email']?.toString();
     
-    return userData['name'] ?? 
-           userData['username'] ?? 
-           userData['email'] ?? 
-           'User';
+    // If still no name found, return 'User' instead of null
+    return displayName ?? 'User';
+  }
+
+  /// Get user email
+  String get userEmail {
+    final userData = user.value;
+    if (userData == null) return '';
+
+    return userData['email'] ??
+        userData['Email'] ??
+        userData['username'] ??
+        userData['userName'] ??
+        '';
+  }
+
+  /// Get user ID
+  String get userId {
+    final userData = user.value;
+    if (userData == null) return '';
+
+    return userData['id']?.toString() ??
+        userData['Id']?.toString() ??
+        userData['userId']?.toString() ??
+        userData['UserId']?.toString() ??
+        userData['user_id']?.toString() ??
+        '';
+  }
+
+  /// Get user role IDs (handles both single role and array of roles)
+  List<String> get userRoleIds {
+    final userData = user.value;
+    if (userData == null) return [];
+
+    // Try to get roles as array
+    if (userData['roles'] != null) {
+      if (userData['roles'] is List) {
+        return (userData['roles'] as List)
+            .map((r) => r.toString())
+            .where((r) => r.isNotEmpty)
+            .toList();
+      }
+    }
+    if (userData['Roles'] != null) {
+      if (userData['Roles'] is List) {
+        return (userData['Roles'] as List)
+            .map((r) => r.toString())
+            .where((r) => r.isNotEmpty)
+            .toList();
+      }
+    }
+
+    // Try to get single role ID
+    final singleRoleId = userData['roleId'] ??
+        userData['RoleId'] ??
+        userData['role_id'] ??
+        userData['rolemanager'] ??
+        userData['roleManager'] ??
+        userData['RoleManager'];
+    
+    if (singleRoleId != null) {
+      return [singleRoleId.toString()];
+    }
+
+    return [];
+  }
+
+  /// Get user role ID (returns first role for backward compatibility)
+  String? get userRoleId {
+    final roleIds = userRoleIds;
+    return roleIds.isNotEmpty ? roleIds.first : null;
+  }
+
+  /// Get user role names (handles multiple roles)
+  String get userRoleName {
+    final roleIds = userRoleIds;
+    if (roleIds.isEmpty) return 'Unknown';
+    
+    final roleNames = roleIds
+        .map((roleId) => RoleManager.getRoleName(roleId))
+        .where((name) => name != 'Unknown')
+        .toList();
+    
+    return roleNames.isEmpty 
+        ? 'Unknown' 
+        : roleNames.join(', ');
+  }
+
+  /// Check if current user is admin (checks all roles)
+  bool get isAdmin {
+    final roleIds = userRoleIds;
+    if (roleIds.isEmpty) return false;
+    
+    // Check if any role is admin
+    return roleIds.any((roleId) => RoleManager.isAdminRole(roleId));
   }
 }

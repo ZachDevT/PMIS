@@ -22,6 +22,8 @@ class ShiftMarketService {
       ).timeout(_timeoutDuration);
 
       return _handleResponse(response);
+    } on TimeoutException {
+      throw const TimeoutException('Request timeout. Please try again.');
     } on SocketException {
       throw const NetworkException(
           'No internet connection. Please check your network.');
@@ -31,6 +33,11 @@ class ShiftMarketService {
       throw const ServerException('Invalid response format from server.');
     } catch (e) {
       if (e is ApiException) rethrow;
+      // Check if it's a timeout error
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
+        throw const TimeoutException('Request timeout. Please try again.');
+      }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
     }
   }
@@ -102,34 +109,62 @@ class ShiftMarketService {
 
   /// Convert to API format for ShiftMarket
   Map<String, dynamic> _convertToPascalCase(Map<String, dynamic> data) {
-    // Based on the CSS API data structure
-    return {
-      'inspectionDate': data['inspectionDate'] is DateTime 
-          ? (data['inspectionDate'] as DateTime).toIso8601String()
-          : DateTime.parse(data['inspectionDate']).toIso8601String(),
-      'inspectorName': data['inspectorName'],
-      'latitude': data['latitude']?.toDouble() ?? 0.0,
-      'longitude': data['longitude']?.toDouble() ?? 0.0,
-      'intRegion': data['region'] != null ? _getRegionGuid(data['region']) : null,
-      'districtId': data['district'] != null ? _getDistrictId(data['district']) : null,
-      'facilityName': data['facilityName'],
-      'facilityStatus': _getFacilityStatus(data['facilityStatus']),
-      'facilityPersonType': 1, // Default value
-      'personName': data['personName'],
-      'contact': data['contact'],
-      'qualifications': data['qualifications'],
-      'categoryOfpremises': _getCategoryOfPremises(data['categoryOfPremises']),
-      'licenseStatus': 1, // Default value
-      'licenseNo': '',
-      'unlicensed': 0, // Default value
-      'categoryStatus': 1, // Default value
-      'premisesCondition': 1, // Default value
-      'recordKeeping': 1, // Default value
-      'classofDrugs': 0, // Default value
-      'unRegisteredDrug': 0, // Default value
-      'unRegDrugQty': '',
-      'action': 0, // Default value
-    };
+    final Map<String, dynamic> converted = {};
+
+    if (data['inspectionDate'] is DateTime) {
+      converted['InspectionDate'] =
+          (data['inspectionDate'] as DateTime).toIso8601String();
+    } else {
+      converted['InspectionDate'] =
+          DateTime.parse(data['inspectionDate']).toIso8601String();
+    }
+
+    converted['InspectorName'] = data['inspectorName'];
+
+    final lat = data['latitude']?.toDouble() ?? 0.0;
+    final lon = data['longitude']?.toDouble() ?? 0.0;
+    converted['Gps'] = data['gps'] ?? '$lat,$lon';
+    converted['Latitude'] = lat;
+    converted['Longitude'] = lon;
+
+    converted['IntRegion'] =
+        data['region'] != null ? _getRegionGuid(data['region']) : null;
+    converted['DistrictId'] =
+        data['district'] != null ? _getDistrictId(data['district']) : null;
+
+    converted['FacilityName'] = data['facilityName'];
+    converted['FacilityPersonType'] = 1;
+    converted['PersonName'] = data['personName'];
+    converted['Contact'] = data['contact'];
+    converted['Qualifications'] = data['qualifications'];
+    converted['CategoryOfpremises'] =
+        _getCategoryOfPremises(data['categoryOfPremises']);
+
+    // License handling
+    converted['LicenseStatus'] = _mapLicenseStatus(data['licenseStatus']);
+    if (data.containsKey('licenseNo'))
+      converted['LicenseNo'] = data['licenseNo'];
+    if (data.containsKey('licenseExpiryDate') &&
+        (data['licenseExpiryDate'] as String).isNotEmpty) {
+      converted['LicenseExpiryDate'] = data['licenseExpiryDate'];
+    }
+
+    converted['RegulatoryAction'] =
+        data['regulatoryActionTaken'] ?? data['regulatoryAction'];
+    converted['Consignment'] = data['consignmentsImpounded'];
+
+    return converted;
+  }
+
+  int _mapLicenseStatus(dynamic status) {
+    if (status is int) return status;
+    if (status is String) {
+      final s = status.toLowerCase();
+      if (s.contains('licensed')) return 1;
+      if (s.contains('un')) return 2;
+      if (s.contains('not')) return 3;
+    }
+    return 1;
   }
 
   /// Get region GUID from region name
@@ -169,20 +204,10 @@ class ShiftMarketService {
   }
 
   /// Get facility status code
-  int _getFacilityStatus(String status) {
-    switch (status?.toUpperCase()) {
-      case 'OPEN':
-        return 1;
-      case 'CLOSED':
-        return 0;
-      default:
-        return 1;
-    }
-  }
 
   /// Get category of premises code
   int _getCategoryOfPremises(String category) {
-    switch (category?.toUpperCase()) {
+    switch (category.toUpperCase()) {
       case 'WHOLESALE PHARMACY':
         return 1;
       case 'RETAIL PHARMACY':
@@ -218,13 +243,15 @@ class ShiftMarketService {
 
   /// Post Shift Market data to the API
   /// Returns success response on success, throws appropriate exception on failure
-  Future<Map<String, dynamic>> postShiftMarketData(Map<String, dynamic> shiftMarketData) async {
+  Future<Map<String, dynamic>> postShiftMarketData(
+      Map<String, dynamic> shiftMarketData) async {
     try {
       final uri = Uri.parse('$_baseUrl/ShiftMarket');
       print('🌐 DEBUG: ShiftMarket API URL: $uri');
 
       // Convert camelCase to PascalCase for API
-      final Map<String, dynamic> apiData = _convertToPascalCase(shiftMarketData);
+      final Map<String, dynamic> apiData =
+          _convertToPascalCase(shiftMarketData);
       print('🔄 DEBUG: Converted ShiftMarket API data: $apiData');
 
       print('📤 DEBUG: Sending POST request to ShiftMarket API...');
@@ -239,10 +266,13 @@ class ShiftMarketService {
           )
           .timeout(_timeoutDuration);
 
-      print('📥 DEBUG: ShiftMarket API Response Status: ${response.statusCode}');
+      print(
+          '📥 DEBUG: ShiftMarket API Response Status: ${response.statusCode}');
       print('📥 DEBUG: ShiftMarket API Response Body: ${response.body}');
 
       return _handlePostResponse(response);
+    } on TimeoutException {
+      throw const TimeoutException('Request timeout. Please try again.');
     } on SocketException {
       throw const NetworkException(
           'No internet connection. Please check your network.');
@@ -252,6 +282,11 @@ class ShiftMarketService {
       throw const ServerException('Invalid response format from server.');
     } catch (e) {
       if (e is ApiException) rethrow;
+      // Check if it's a timeout error
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
+        throw const TimeoutException('Request timeout. Please try again.');
+      }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
     }
   }
@@ -263,7 +298,10 @@ class ShiftMarketService {
       case 201:
         try {
           if (response.body.isEmpty) {
-            return {'success': true, 'message': 'Shift Market data saved successfully'};
+            return {
+              'success': true,
+              'message': 'Shift Market data saved successfully'
+            };
           }
 
           final Map<String, dynamic> data =

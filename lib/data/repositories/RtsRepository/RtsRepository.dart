@@ -1,14 +1,44 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:pmis/data/services/rts/RtsService.dart';
+import 'package:pmis/utils/helpers/networkmanager.dart';
+import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'dart:io';
 
 class RtsRepository {
   final RtsService _service = Get.find<RtsService>();
   final box = GetStorage();
 
   /// Fetch RTS data from the API
-  Future<List<Map<String, dynamic>>> getRtsData() {
-    return _service.getRtsData();
+  Future<List<Map<String, dynamic>>> getRtsData() async {
+    try {
+      // Check connectivity before making API call
+      final networkManager = Get.find<NetworkManager>();
+      final isOnline = await networkManager.isconnected();
+      
+      if (!isOnline) {
+        print('No internet connection, returning empty list');
+        return [];
+      }
+      
+      return await _service.getRtsData();
+    } on TimeoutException catch (e) {
+      print('Timeout error fetching RTS data: ${e.message}');
+      return [];
+    } on SocketException catch (e) {
+      print('Network error fetching RTS data: ${e.message}');
+      return [];
+    } on NetworkException catch (e) {
+      print('Network exception: ${e.message}');
+      return [];
+    } catch (e) {
+      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+        print('Timeout error detected: ${e.toString()}');
+        return [];
+      }
+      print('Error fetching RTS data: $e');
+      return [];
+    }
   }
 
   /// Post RTS data to the API

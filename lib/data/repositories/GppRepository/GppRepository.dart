@@ -1,14 +1,45 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:pmis/data/services/gpp/GppService.dart';
+import 'package:pmis/utils/helpers/networkmanager.dart';
+import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'dart:io';
 
 class GppRepository {
   final GppService _service = Get.find<GppService>();
   final box = GetStorage();
 
   /// Fetch GPP data from the API
-  Future<List<Map<String, dynamic>>> getGppData() {
-    return _service.getGppData();
+  Future<List<Map<String, dynamic>>> getGppData() async {
+    try {
+      // Check connectivity before making API call
+      final networkManager = Get.find<NetworkManager>();
+      final isOnline = await networkManager.isconnected();
+      
+      if (!isOnline) {
+        print('No internet connection, returning empty list');
+        return [];
+      }
+      
+      // Try to fetch from API
+      return await _service.getGppData();
+    } on TimeoutException catch (e) {
+      print('Timeout error fetching GPP data: ${e.message}');
+      return [];
+    } on SocketException catch (e) {
+      print('Network error fetching GPP data: ${e.message}');
+      return [];
+    } on NetworkException catch (e) {
+      print('Network exception: ${e.message}');
+      return [];
+    } catch (e) {
+      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+        print('Timeout error detected: ${e.toString()}');
+        return [];
+      }
+      print('Error fetching GPP data: $e');
+      return [];
+    }
   }
 
   /// Post GPP data to the API

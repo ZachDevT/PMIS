@@ -1,5 +1,9 @@
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:pmis/data/services/gdp/GdpService.dart';
+import 'package:pmis/utils/helpers/networkmanager.dart';
+import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'dart:io';
 
 class GdpRepository {
   final box = GetStorage();
@@ -8,8 +12,30 @@ class GdpRepository {
   /// Fetch GDP activities from API.
   Future<List<Map<String, dynamic>>> fetchActivities() async {
     try {
+      // Check connectivity before making API call
+      final networkManager = Get.find<NetworkManager>();
+      final isOnline = await networkManager.isconnected();
+      
+      if (!isOnline) {
+        print('No internet connection, returning empty list');
+        return [];
+      }
+      
       return await _gdpService.getGdpData();
+    } on TimeoutException catch (e) {
+      print('Timeout error fetching GDP activities: ${e.message}');
+      return [];
+    } on SocketException catch (e) {
+      print('Network error fetching GDP activities: ${e.message}');
+      return [];
+    } on NetworkException catch (e) {
+      print('Network exception: ${e.message}');
+      return [];
     } catch (e) {
+      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+        print('Timeout error detected: ${e.toString()}');
+        return [];
+      }
       print('Error fetching GDP activities: $e');
       return [];
     }

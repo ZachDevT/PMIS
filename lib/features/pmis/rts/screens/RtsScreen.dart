@@ -4,6 +4,7 @@ import 'package:pmis/features/pmis/rts/controllers/RtsController.dart';
 import 'package:pmis/features/pmis/rts/widgets/RtsForm.dart';
 import 'package:pmis/features/pmis/rts/widgets/RtsActivityCard.dart';
 import 'package:pmis/utils/constants/colors.dart';
+import 'package:pmis/utils/constants/images_strings.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:pmis/utils/constants/sizes.dart';
 import 'package:pmis/utils/helpers/helpers_functions.dart';
@@ -56,6 +57,10 @@ class RtsScreen extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
+              image: const DecorationImage(
+                image: AssetImage(TImagestring.nda),
+                fit: BoxFit.contain,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),
@@ -63,15 +68,6 @@ class RtsScreen extends StatelessWidget {
                   offset: const Offset(0, 2),
                 ),
               ],
-            ),
-            child: Center(
-              child: Text(
-                "R",
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: Tcolors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
             ),
           ),
           const Spacer(),
@@ -182,7 +178,6 @@ class _ActivityListSection extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: RtsActivityCard(
                     activity: activity,
-                    onTap: () => _showActivityDetails(context, activity),
                   ),
                 );
               },
@@ -223,15 +218,6 @@ class _ActivityListSection extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  void _showActivityDetails(BuildContext context, activity) {
-    // TODO: Implement activity details view
-    Get.snackbar(
-      "Activity Details",
-      "Details for ${activity.topicOfDiscussion}",
-      snackPosition: SnackPosition.BOTTOM,
     );
   }
 }
@@ -351,7 +337,7 @@ class _SearchBarWidget extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Obx(() => DropdownButtonFormField<String>(
-                  value: controller.filterRegion.value.isEmpty
+                  initialValue: controller.filterRegion.value.isEmpty
                       ? null
                       : controller.filterRegion.value,
                   decoration: const InputDecoration(
@@ -371,7 +357,7 @@ class _SearchBarWidget extends StatelessWidget {
                 )),
             const SizedBox(height: 16),
             Obx(() => DropdownButtonFormField<String>(
-                  value: controller.filterDistrict.value.isEmpty
+                  initialValue: controller.filterDistrict.value.isEmpty
                       ? null
                       : controller.filterDistrict.value,
                   decoration: const InputDecoration(

@@ -5,6 +5,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:pmis/utils/constants/colors.dart';
 import 'package:pmis/utils/constants/sizes.dart';
 import 'package:pmis/utils/helpers/helpers_functions.dart';
+import 'package:pmis/utils/popups/loaders.dart';
 
 class PrivacySecurityScreen extends StatefulWidget {
   const PrivacySecurityScreen({super.key});
@@ -345,7 +346,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Tcolors.primary,
+            activeThumbColor: Tcolors.primary,
           ),
         ],
       ),
@@ -406,7 +407,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Tcolors.primary,
+            activeThumbColor: Tcolors.primary,
           ),
         ],
       ),
@@ -605,7 +606,10 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       child: InkWell(
         onTap: () {
           Get.back();
-          Get.snackbar('Export Started', 'Exporting data as $title');
+          Loaders.successSnackbar(
+            title: 'Export Started',
+            message: 'Exporting data as $title',
+          );
         },
         child: Container(
           padding: const EdgeInsets.all(16),
@@ -666,8 +670,10 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
           TextButton(
             onPressed: () {
               Get.back();
-              Get.snackbar(
-                  'Account Deletion', 'Account deletion process started');
+              Loaders.warningSnackbar(
+                title: 'Account Deletion',
+                message: 'Account deletion process started',
+              );
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
@@ -678,14 +684,23 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
   }
 
   void _showChangePasswordDialog(BuildContext context) {
-    Get.snackbar('Change Password', 'Password change feature coming soon');
+    Loaders.warningSnackbar(
+      title: 'Change Password',
+      message: 'Password change feature coming soon',
+    );
   }
 
   void _showActiveSessionsDialog(BuildContext context) {
-    Get.snackbar('Active Sessions', 'Session management feature coming soon');
+    Loaders.warningSnackbar(
+      title: 'Active Sessions',
+      message: 'Session management feature coming soon',
+    );
   }
 
   void _show2FADialog(BuildContext context) {
-    Get.snackbar('2FA Setup', 'Two-factor authentication setup coming soon');
+    Loaders.warningSnackbar(
+      title: '2FA Setup',
+      message: 'Two-factor authentication setup coming soon',
+    );
   }
 }
