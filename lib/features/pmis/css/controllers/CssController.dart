@@ -8,6 +8,7 @@ import 'package:pmis/utils/popups/loaders.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
 class CssController extends GetxController {
   var activities = <CssModel>[].obs;
@@ -26,6 +27,7 @@ class CssController extends GetxController {
   final inspectionDateController = TextEditingController();
   final inspectionTimeController = TextEditingController();
   final inspectorNameController = TextEditingController();
+  final inspectorIdController = TextEditingController();
   final gpsLocationController = TextEditingController();
   final facilityNameController = TextEditingController();
   final nameController = TextEditingController();
@@ -33,6 +35,7 @@ class CssController extends GetxController {
   final qualificationsController = TextEditingController();
   final otherCategoryPremiseController = TextEditingController();
   final licenseNoController = TextEditingController();
+  final licenseExpiryDateController = TextEditingController();
   final unRegDrugQtyController = TextEditingController();
 
   // Dropdown Values
@@ -58,7 +61,8 @@ class CssController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadActivities();
+    // Defer activity loading to avoid blocking main thread during initialization
+    Future.microtask(() => loadActivities());
     getCurrentLocation(); // Get current location on init
     _autoFillDefaults();
     
@@ -76,21 +80,64 @@ class CssController extends GetxController {
         DateTime.now().toLocal().toString().split(' ')[0];
     inspectionTimeController.text = TimeOfDay.now().format(Get.context!);
     // GPS location will be set by getCurrentLocation()
+    
+    // Prepopulate inspector name and ID from logged-in user
+    if (Get.isRegistered<AuthController>()) {
+      final authController = Get.find<AuthController>();
+      inspectorNameController.text = authController.userDisplayName;
+      inspectorIdController.text = authController.userId;
+    }
   }
 
   Future<void> loadActivities() async {
     try {
+      print('=== CSS Controller: Loading Activities ===');
       var data = await repository.getCssData();
+      print('CSS Controller: Raw data received: ${data.length} records');
+      if (data.isNotEmpty) {
+        print('CSS Controller: First record: ${data.first}');
+      }
       var cssActivities = data.map((item) => CssModel.fromJson(item)).toList();
+      print('CSS Controller: Parsed activities: ${cssActivities.length}');
+      if (cssActivities.isNotEmpty) {
+        print('CSS Controller: First parsed activity inspectorName: ${cssActivities.first.inspectorName}');
+        print('CSS Controller: First parsed activity inspectorId: ${cssActivities.first.inspectorId}');
+      }
       activities.assignAll(cssActivities);
+      print('=== End CSS Controller: Loading Activities ===');
     } catch (e) {
-      Loaders.errorSnackbar(title: "Error", message: "Failed to load CSS data: ${e.toString()}");
+      // Repository now handles network errors gracefully and returns empty list
+      // Only show error for unexpected errors
+      if (!e.toString().contains('SocketException') && !e.toString().contains('NetworkException')) {
+        print('CSS Controller Error: $e');
+        Loaders.errorSnackbar(title: "Error", message: "Failed to load CSS data. Please check your connection and try again.");
+      } else {
+        print('CSS Controller: No network connection, loading from local storage if available');
+      }
+      // Ensure activities list is initialized even on error
+      if (activities.isEmpty) {
+        activities.assignAll([]);
+      }
     }
   }
 
   /// Filter activities based on search query and selected filters
   void filterActivities() {
+    // Get current user info
+    final authController = Get.isRegistered<AuthController>() 
+        ? Get.find<AuthController>() 
+        : null;
+    final isAdmin = authController?.isAdmin ?? false;
+    final userId = authController?.userId ?? '';
+
     var filtered = activities.where((activity) {
+      // Role-based filter: If not admin, only show activities created by this user
+      if (!isAdmin && userId.isNotEmpty) {
+        if (activity.inspectorId != userId) {
+          return false;
+        }
+      }
+
       // Search query filter
       bool matchesSearch = searchQuery.value.isEmpty ||
           activity.facilityName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
@@ -180,8 +227,10 @@ class CssController extends GetxController {
           emptyFields.add("Record Keeping");
         }
       }
-      // Action Taken is always required
-      if (selectedActionTaken.value.isEmpty) emptyFields.add("Action Taken");
+      // Action Taken is only required when facility is Open
+      if (selectedFacilityStatus.value == "Open") {
+        if (selectedActionTaken.value.isEmpty) emptyFields.add("Action Taken");
+      }
 
       if (emptyFields.isNotEmpty) {
         Loaders.errorSnackbar(
@@ -196,7 +245,7 @@ class CssController extends GetxController {
         id: 0, // Will be set by API
         inspectionDate: DateTime.parse(inspectionDateController.text),
         inspectorName: inspectorNameController.text,
-        inspectorId: "INSP001", // Default inspector ID
+        inspectorId: inspectorIdController.text,
         latitude: currentLatitude.value,
         longitude: currentLongitude.value,
         intRegion: _getRegionGuid(selectedRegion.value),
@@ -208,9 +257,10 @@ class CssController extends GetxController {
         contact: contactController.text,
         qualifications: qualificationsController.text,
         categoryOfpremises: _getCategoryOfPremises(selectedCategoryOfFacility.value),
-        otherCategoryPremise: selectedCategoryOfFacility.value == "Other" ? otherCategoryPremiseController.text : "",
+        otherCategoryPremise: selectedCategoryOfFacility.value == "Others" ? otherCategoryPremiseController.text : "",
         licenseStatus: _getLicenseStatus(selectedLicensedStatus.value),
         licenseNo: selectedLicensedStatus.value == "Licensed" ? licenseNoController.text : "",
+        licenseExpiryDate: selectedLicensedStatus.value == "Licensed" ? licenseExpiryDateController.text : "",
         unlicensed: _getUnlicensedStatus(selectedLicensedStatus.value) ?? 0,
         categoryStatus: _getCategoryStatus(selectedCategoryOfDrugs.value),
         premisesCondition: _getPremisesCondition(selectedConditionOfPremises.value),
@@ -229,8 +279,11 @@ class CssController extends GetxController {
           print('Sending CSS data: $activityData'); // Debug log
           await repository.postCssData(activityData);
           activities.add(newActivity);
+          // Show success message
           Loaders.successSnackbar(
               title: "Success", message: "CSS activity added successfully...");
+          // Wait a moment to ensure snackbar is visible before closing
+          await Future.delayed(const Duration(milliseconds: 500));
         } catch (e) {
           // If online submission fails, save locally as fallback
           await repository.saveActivityLocally(activityData);
@@ -238,6 +291,7 @@ class CssController extends GetxController {
           Loaders.errorSnackbar(
               title: "Network Error", 
               message: "Failed to send online. Saved locally for sync.");
+          await Future.delayed(const Duration(milliseconds: 500));
         }
       } else {
         // For offline mode - save locally
@@ -246,6 +300,8 @@ class CssController extends GetxController {
         Loaders.successSnackbar(
             title: "Offline",
             message: "CSS activity saved locally. Will sync when online.");
+        // Wait a moment to ensure snackbar is visible before closing
+        await Future.delayed(const Duration(milliseconds: 500));
       }
       // Clear the form fields after submission.
       clearForm();
@@ -262,6 +318,7 @@ class CssController extends GetxController {
     inspectionDateController.clear();
     inspectionTimeController.clear();
     inspectorNameController.clear();
+    inspectorIdController.clear();
     gpsLocationController.clear();
     facilityNameController.clear();
     nameController.clear();
@@ -269,6 +326,7 @@ class CssController extends GetxController {
     qualificationsController.clear();
     otherCategoryPremiseController.clear();
     licenseNoController.clear();
+    licenseExpiryDateController.clear();
     unRegDrugQtyController.clear();
     selectedRegion.value = '';
     selectedDistrict.value = '';
@@ -312,31 +370,49 @@ class CssController extends GetxController {
 
   int _getCategoryOfPremises(String category) {
     switch (category) {
-      case "Retail Pharmacy": return 1;
-      case "Drug Shop": return 2;
-      case "Hospital": return 3;
-      case "HCIV": return 4;
-      case "HCIII": return 5;
-      case "Clinic": return 6;
-      default: return 1;
+      case "Wholesale Pharmacy": return 1;
+      case "Retail Pharmacy": return 2;
+      case "Drug Shop": return 3;
+      case "External Stores": return 4;
+      case "Hospital": return 5;
+      case "HCIV": return 6;
+      case "HCIII": return 7;
+      case "Clinic": return 8;
+      case "Herbal Selling Outlet": return 9;
+      case "Shift Market": return 10;
+      case "Pharmaceutical/Medical Device Manufacturing Premise": return 11;
+      case "Others": return 12;
+      default: return 2; // Default to Retail Pharmacy
     }
   }
 
   int _getLicenseStatus(String status) {
     switch (status) {
-      case "Licensed": return 1;
-      case "Un-Licensed": return 2;
-      case "Not-Applicable": return 3;
-      default: return 1;
+      case "Licensed":
+        return 1;
+      case "Un-Licensed":
+      case "Unlicensed":
+        return 2;
+      case "Not-Applicable":
+      case "Not Applicable":
+        return 3;
+      default:
+        return 1;
     }
   }
 
   int? _getUnlicensedStatus(String status) {
     switch (status) {
-      case "Licensed": return 0;
-      case "Un-Licensed": return 1;
-      case "Not-Applicable": return null;
-      default: return 0;
+      case "Licensed":
+        return 0;
+      case "Un-Licensed":
+      case "Unlicensed":
+        return 1;
+      case "Not-Applicable":
+      case "Not Applicable":
+        return null;
+      default:
+        return 0;
     }
   }
 

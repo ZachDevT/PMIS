@@ -209,18 +209,23 @@ class CssForm extends StatelessWidget {
                     buildDropdown(
                       label: "Category of Facility",
                       items: [
+                        "Wholesale Pharmacy",
                         "Retail Pharmacy",
                         "Drug Shop",
+                        "External Stores",
                         "Hospital",
                         "HCIV",
                         "HCIII",
                         "Clinic",
-                        "Other"
+                        "Herbal Selling Outlet",
+                        "Shift Market",
+                        "Pharmaceutical/Medical Device Manufacturing Premise",
+                        "Others"
                       ],
                       selectedItem: controller.selectedCategoryOfFacility,
                       prefixIcon: Icons.category,
                     ),
-                    if (controller.selectedCategoryOfFacility.value == "Other") ...[
+                    if (controller.selectedCategoryOfFacility.value == "Others") ...[
                       buildTextField(
                         controller: controller.otherCategoryPremiseController,
                         label: "State the other type of facility",
@@ -230,7 +235,7 @@ class CssForm extends StatelessWidget {
                     ],
                     buildDropdown(
                       label: "Licensed Status",
-                      items: ["Licensed", "Unlicensed", "Not Applicable"],
+                      items: ["Licensed", "Un-Licensed", "Not-Applicable"],
                       selectedItem: controller.selectedLicensedStatus,
                       prefixIcon: Icons.verified_user,
                     ),
@@ -241,8 +246,27 @@ class CssForm extends StatelessWidget {
                         prefixIcon: Icons.badge,
                         validator: (value) => value!.isEmpty ? "Required" : null,
                       ),
+                      buildTextField(
+                        controller: controller.licenseExpiryDateController,
+                        label: "License Expiry Date",
+                        prefixIcon: Icons.date_range,
+                        readOnly: true,
+                        onTap: () async {
+                          DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                          );
+                          if (picked != null) {
+                            controller.licenseExpiryDateController.text =
+                                picked.toLocal().toString().split(' ')[0];
+                          }
+                        },
+                        validator: (value) => value!.isEmpty ? "Required" : null,
+                      ),
                     ],
-                    if (controller.selectedLicensedStatus.value == "Unlicensed") ...[
+                    if (controller.selectedLicensedStatus.value == "Un-Licensed" || controller.selectedLicensedStatus.value == "Unlicensed") ...[
                       buildDropdown(
                         label: "Previously Licensed or Illegal Outlet",
                         items: ["Previously Licensed", "Illegal Outlet"],
@@ -296,18 +320,20 @@ class CssForm extends StatelessWidget {
                     ),
                   ],
 
-                  buildDropdown(
-                    label: "Action Taken",
-                    items: [
-                      "Closed",
-                      "Outlet abandoned by owner",
-                      "Impounded",
-                      "Suspect arrested",
-                      "No action taken"
-                    ],
-                    selectedItem: controller.selectedActionTaken,
-                    prefixIcon: Icons.assignment_turned_in,
-                  ),
+                  // Action Taken - only show if facility is Open
+                  if (controller.selectedFacilityStatus.value == "Open")
+                    buildDropdown(
+                      label: "Action Taken",
+                      items: [
+                        "Closed",
+                        "Outlet abandoned by owner",
+                        "Impounded",
+                        "Suspect arrested",
+                        "No action taken"
+                      ],
+                      selectedItem: controller.selectedActionTaken,
+                      prefixIcon: Icons.assignment_turned_in,
+                    ),
 
                   // Submit Button
                   const SizedBox(height: 15),

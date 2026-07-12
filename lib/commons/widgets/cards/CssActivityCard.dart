@@ -1,6 +1,5 @@
 // CssActivityCard.dart
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pmis/features/pmis/css/models/CssModel.dart';
@@ -11,7 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 class CssActivityCard extends StatelessWidget {
   final CssModel activity;
 
-  CssActivityCard({super.key, required this.activity});
+  const CssActivityCard({super.key, required this.activity});
 
   Color _getStatusColor(int status) {
     switch (status) {
@@ -44,90 +43,132 @@ class CssActivityCard extends StatelessWidget {
   String _getDistrictName(int? districtId) {
     if (districtId == null) return 'Unknown';
     switch (districtId) {
-      case 1: return 'Kampala';
-      case 2: return 'Masaka';
-      case 3: return 'Kabale';
-      case 4: return 'Fortportal';
-      default: return 'Unknown';
+      case 1:
+        return 'Kampala';
+      case 2:
+        return 'Masaka';
+      case 3:
+        return 'Kabale';
+      case 4:
+        return 'Fortportal';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getFacilityStatusText(int status) {
     switch (status) {
-      case 1: return 'Open';
-      case 0: return 'Closed';
-      default: return 'Unknown';
+      case 1:
+        return 'Open';
+      case 0:
+        return 'Closed';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getLicenseStatusText(int status) {
     switch (status) {
-      case 1: return 'Licensed';
-      case 2: return 'Un-Licensed';
-      case 3: return 'Not-Applicable';
-      default: return 'Unknown';
+      case 1:
+        return 'Licensed';
+      case 2:
+        return 'Un-Licensed';
+      case 3:
+        return 'Not-Applicable';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getCategoryStatusText(int status) {
     switch (status) {
-      case 1: return 'Medical Device';
-      case 2: return 'Veterinary drugs';
-      case 3: return 'Human drugs';
-      case 4: return 'Public Healthcare products';
-      case 5: return 'Herbal drugs';
-      default: return 'Unknown';
+      case 1:
+        return 'Medical Device';
+      case 2:
+        return 'Veterinary drugs';
+      case 3:
+        return 'Human drugs';
+      case 4:
+        return 'Public Healthcare products';
+      case 5:
+        return 'Herbal drugs';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getCategoryOfPremisesText(int category) {
     switch (category) {
-      case 1: return 'Retail Pharmacy';
-      case 2: return 'Drug Shop';
-      case 3: return 'Hospital';
-      case 4: return 'HCIV';
-      case 5: return 'HCIII';
-      case 6: return 'Clinic';
-      default: return 'Unknown';
+      case 1:
+        return 'Retail Pharmacy';
+      case 2:
+        return 'Drug Shop';
+      case 3:
+        return 'Hospital';
+      case 4:
+        return 'HCIV';
+      case 5:
+        return 'HCIII';
+      case 6:
+        return 'Clinic';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getPremisesConditionText(int condition) {
     switch (condition) {
-      case 1: return 'Good';
-      case 2: return 'Fair';
-      case 3: return 'Poor';
-      default: return 'Unknown';
+      case 1:
+        return 'Good';
+      case 2:
+        return 'Fair';
+      case 3:
+        return 'Poor';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getRecordKeepingText(int? keeping) {
     if (keeping == null) return 'Not specified';
     switch (keeping) {
-      case 1: return 'Good';
-      case 2: return 'Fair';
-      case 3: return 'Poor';
-      default: return 'Unknown';
+      case 1:
+        return 'Good';
+      case 2:
+        return 'Fair';
+      case 3:
+        return 'Poor';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getActionText(int? action) {
     if (action == null) return 'Not specified';
     switch (action) {
-      case 1: return 'Closed';
-      case 2: return 'Outlet abandoned by owner';
-      case 3: return 'Impounded';
-      case 4: return 'Suspect arrested';
-      case 5: return 'No action taken';
-      default: return 'Unknown';
+      case 1:
+        return 'Closed';
+      case 2:
+        return 'Outlet abandoned by owner';
+      case 3:
+        return 'Impounded';
+      case 4:
+        return 'Suspect arrested';
+      case 5:
+        return 'No action taken';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getPersonTypeText(int type) {
     switch (type) {
-      case 1: return 'In-charge';
-      case 2: return 'Attendant/Operator';
-      default: return 'Unknown';
+      case 1:
+        return 'In-charge';
+      case 2:
+        return 'Attendant/Operator';
+      default:
+        return 'Unknown';
     }
   }
 
@@ -165,7 +206,8 @@ class CssActivityCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _getStatusColor(activity.facilityStatus).withOpacity(0.1),
+                    color: _getStatusColor(activity.facilityStatus)
+                        .withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -180,11 +222,12 @@ class CssActivityCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                    activity.facilityName,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: dark ? Colors.white : Colors.black87,
-                            ),
+                        activity.facilityName,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: dark ? Colors.white : Colors.black87,
+                                ),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -230,7 +273,8 @@ class CssActivityCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Tcolors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
@@ -372,6 +416,18 @@ class CssActivityCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
+                    // Debug: Print activity data
+                    Builder(
+                      builder: (context) {
+                        print('=== CSS Activity Card Debug ===');
+                        print(
+                            'Activity inspectorName: ${activity.inspectorName}');
+                        print('Activity inspectorId: ${activity.inspectorId}');
+                        print('Activity keys: ${activity.toString()}');
+                        print('=== End CSS Activity Card Debug ===');
+                        return const SizedBox.shrink();
+                      },
+                    ),
                     _buildModernDetailSection(
                       'Inspection Information',
                       Iconsax.calendar_1,
@@ -382,12 +438,16 @@ class CssActivityCard extends StatelessWidget {
                             Iconsax.calendar),
                         _buildModernDetailRow('Inspector Name',
                             activity.inspectorName, Iconsax.user),
-                        _buildModernDetailRow('GPS Location',
-                            '${activity.latitude}, ${activity.longitude}', Iconsax.location),
+                        _buildModernDetailRow(
+                            'GPS Location',
+                            '${activity.latitude}, ${activity.longitude}',
+                            Iconsax.location),
                         _buildModernDetailRow('Region',
                             _getRegionName(activity.intRegion), Iconsax.map),
-                        _buildModernDetailRow('District ID',
-                            activity.districtId.toString(), Iconsax.building),
+                        _buildModernDetailRow(
+                            'District',
+                            _getDistrictName(activity.districtId),
+                            Iconsax.building),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -401,64 +461,77 @@ class CssActivityCard extends StatelessWidget {
                             'Facility Status',
                             _getFacilityStatusText(activity.facilityStatus),
                             Iconsax.info_circle),
-                        _buildModernDetailRow(
-                            'Category of Premises',
-                            _getCategoryOfPremisesText(activity.categoryOfpremises),
-                            Iconsax.building),
-                        _buildModernDetailRow(
-                            'License Status',
-                            _getLicenseStatusText(activity.licenseStatus),
-                            Iconsax.shield_tick),
-                        _buildModernDetailRow(
-                            'License Number',
-                            activity.licenseNo ?? 'Not provided',
-                            Iconsax.document),
+                        // Only show these details if facility is not Closed
+                        if (activity.facilityStatus != 0) ...[
+                          _buildModernDetailRow(
+                              'Category of Premises',
+                              _getCategoryOfPremisesText(
+                                  activity.categoryOfpremises),
+                              Iconsax.building),
+                          _buildModernDetailRow(
+                              'License Status',
+                              _getLicenseStatusText(activity.licenseStatus),
+                              Iconsax.shield_tick),
+                          _buildModernDetailRow(
+                              'License Number',
+                              activity.licenseNo.isNotEmpty ? activity.licenseNo : 'Not provided',
+                              Iconsax.document),
+                          _buildModernDetailRow(
+                              'License Expiry Date',
+                              activity.licenseExpiryDate.isNotEmpty ? activity.licenseExpiryDate : 'Not provided',
+                              Iconsax.calendar),
+                        ],
                       ],
                     ),
-                    const SizedBox(height: 24),
-                    _buildModernDetailSection(
-                      'Personnel Information',
-                      Iconsax.profile_2user,
-                      [
-                        _buildModernDetailRow(
-                            'Person Name', activity.personName, Iconsax.user),
-                        _buildModernDetailRow(
-                            'Contact', activity.contact ?? 'Not provided', Iconsax.call),
-                        _buildModernDetailRow('Qualifications',
-                            activity.qualifications ?? 'Not provided', Iconsax.book),
-                        _buildModernDetailRow(
-                            'Person Type',
-                            _getPersonTypeText(activity.facilityPersonType),
-                            Iconsax.user_tag),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    _buildModernDetailSection(
-                      'CSS Specific Details',
-                      HugeIcons.strokeRoundedMedicineBottle02,
-                      [
-                        _buildModernDetailRow(
-                            'Category Status',
-                            _getCategoryStatusText(activity.categoryStatus),
-                            Iconsax.category_2),
-                        _buildModernDetailRow(
-                            'Premises Condition',
-                            _getPremisesConditionText(activity.premisesCondition),
-                            Iconsax.home_2),
-                        _buildModernDetailRow(
-                            'Record Keeping',
-                            _getRecordKeepingText(activity.recordKeeping),
-                            Iconsax.document_text),
-                        _buildModernDetailRow(
-                            'Action Taken',
-                            _getActionText(activity.action),
-                            Iconsax.warning_2),
-                        _buildModernDetailRow(
-                            'Inspector ID',
-                            activity.inspectorId ?? 'Not assigned',
-                            Iconsax.user_square),
-                      ],
-                    ),
+                    // Only show Personnel Information if facility is not Closed
+                    if (activity.facilityStatus != 0) ...[
+                      const SizedBox(height: 24),
+                      _buildModernDetailSection(
+                        'Personnel Information',
+                        Iconsax.profile_2user,
+                        [
+                          _buildModernDetailRow(
+                              'Person Name', activity.personName, Iconsax.user),
+                          _buildModernDetailRow('Contact', activity.contact, Iconsax.call),
+                          _buildModernDetailRow('Qualifications', activity.qualifications, Iconsax.book),
+                          _buildModernDetailRow(
+                              'Person Type',
+                              _getPersonTypeText(activity.facilityPersonType),
+                              Iconsax.user_tag),
+                        ],
+                      ),
+                    ],
+                    // Only show CSS Specific Details if facility is not Closed
+                    if (activity.facilityStatus != 0) ...[
+                      const SizedBox(height: 24),
+                      _buildModernDetailSection(
+                        'CSS Specific Details',
+                        HugeIcons.strokeRoundedMedicineBottle02,
+                        [
+                          _buildModernDetailRow(
+                              'Category Status',
+                              _getCategoryStatusText(activity.categoryStatus),
+                              Iconsax.category_2),
+                          _buildModernDetailRow(
+                              'Premises Condition',
+                              _getPremisesConditionText(
+                                  activity.premisesCondition),
+                              Iconsax.home_2),
+                          _buildModernDetailRow(
+                              'Record Keeping',
+                              _getRecordKeepingText(activity.recordKeeping),
+                              Iconsax.document_text),
+                          _buildModernDetailRow(
+                              'Action Taken',
+                              _getActionText(activity.action),
+                              Iconsax.warning_2),
+                          _buildModernDetailRow(
+                              'Inspector ID',
+                              activity.inspectorId,
+                              Iconsax.user_square),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     _buildModernDetailSection(
                       'Location Coordinates',
@@ -579,8 +652,8 @@ class CssActivityCard extends StatelessWidget {
             width: 1,
           ),
         ),
-      child: Row(
-        children: [
+        child: Row(
+          children: [
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -593,11 +666,11 @@ class CssActivityCard extends StatelessWidget {
                 size: 16,
               ),
             ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
                     label,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -664,18 +737,25 @@ class CssActivityCard extends StatelessWidget {
 
   Color _getLicenseStatusColor(int status) {
     switch (status) {
-      case 1: return Colors.green; // Licensed
-      case 2: return Colors.orange; // Un-Licensed
-      case 3: return Colors.grey; // Not-Applicable
-      default: return Colors.grey;
+      case 1:
+        return Colors.green; // Licensed
+      case 2:
+        return Colors.orange; // Un-Licensed
+      case 3:
+        return Colors.grey; // Not-Applicable
+      default:
+        return Colors.grey;
     }
   }
 
   Color _getFacilityStatusColor(int status) {
     switch (status) {
-      case 1: return Colors.green; // Open
-      case 0: return Colors.red; // Closed
-      default: return Colors.grey;
+      case 1:
+        return Colors.green; // Open
+      case 0:
+        return Colors.red; // Closed
+      default:
+        return Colors.grey;
     }
   }
 
@@ -751,7 +831,7 @@ class CssActivityCard extends StatelessWidget {
   Future<void> _openMapView(BuildContext context) async {
     // Check location permission before opening map
     PermissionStatus status = await Permission.location.status;
-    
+
     if (status.isGranted) {
       // Permission already granted, open map
       Navigator.push(
@@ -761,14 +841,15 @@ class CssActivityCard extends StatelessWidget {
             latitude: activity.latitude,
             longitude: activity.longitude,
             facilityName: activity.facilityName,
-            address: '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
+            address:
+                '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
           ),
         ),
       );
     } else {
       // Request permission first
       PermissionStatus newStatus = await Permission.location.request();
-      
+
       if (newStatus.isGranted) {
         // Permission granted, open map
         Navigator.push(
@@ -778,7 +859,8 @@ class CssActivityCard extends StatelessWidget {
               latitude: activity.latitude,
               longitude: activity.longitude,
               facilityName: activity.facilityName,
-              address: '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
+              address:
+                  '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
             ),
           ),
         );
@@ -789,7 +871,8 @@ class CssActivityCard extends StatelessWidget {
         // Permission denied, show message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Location permission is required to view the map'),
+            content:
+                const Text('Location permission is required to view the map'),
             backgroundColor: Colors.orange,
             action: SnackBarAction(
               label: 'Settings',
