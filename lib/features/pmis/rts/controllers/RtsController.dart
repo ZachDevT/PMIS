@@ -97,7 +97,13 @@ class RtsController extends GetxController {
   /// Create new RTS activity
   Future<void> createNewActivity(BuildContext context) async {
     try {
-      if (!formKey.currentState!.validate()) return;
+      if (!formKey.currentState!.validate()) {
+        Loaders.errorSnackbar(
+          title: "Incomplete Form",
+          message: "Please fill in all the required fields.",
+        );
+        return;
+      }
       
       List<String> emptyFields = [];
       if (selectedRegion.value.isEmpty) emptyFields.add("Region");
@@ -176,6 +182,8 @@ class RtsController extends GetxController {
     radioCompanyNameController.clear();
     selectedRegion.value = '';
     selectedDistrict.value = '';
+  
+    _initializeForm();
   }
 
   /// Filter activities based on search and filter criteria
@@ -224,8 +232,12 @@ class RtsController extends GetxController {
   /// Submit RTS activity
   Future<void> submitActivity() async {
     if (!formKey.currentState!.validate()) {
-      return;
-    }
+        Loaders.errorSnackbar(
+          title: "Incomplete Form",
+          message: "Please fill in all the required fields.",
+        );
+        return;
+      }
 
     try {
       isSubmitting.value = true;

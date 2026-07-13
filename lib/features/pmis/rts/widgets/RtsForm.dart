@@ -7,6 +7,8 @@ import 'package:pmis/utils/helpers/helpers_functions.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:iconsax/iconsax.dart';
 
+import 'package:pmis/commons/widgets/icons/circular_icon.dart';
+
 class RtsForm extends StatelessWidget {
   const RtsForm({super.key});
 
@@ -15,40 +17,39 @@ class RtsForm extends StatelessWidget {
     final controller = Get.find<RtsController>();
     final dark = THelperFunctions.isDarkMode(context);
 
-    return Scaffold(
-      backgroundColor: dark ? Tcolors.dark : Colors.white,
-      appBar: AppBar(
-        backgroundColor: Tcolors.primary,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: () => Get.back(),
-        ),
-        title: const Text(
-          'Radio Talk Show',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
-            onPressed: () => Get.back(),
-          ),
-        ],
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      body: Form(
-        key: controller.formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(Tsizes.defaultSpace),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Basic Information Section
-              _buildSectionHeader("Basic Information", dark),
-              const SizedBox(height: Tsizes.spaceBtwItems / 2),
+              const Text("Radio Talk Show Details",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+              TcircularIcon(
+                width: 40,
+                height: 40,
+                icon: Icons.close,
+                onpressed: () => Get.back(),
+              ),
+            ],
+          ),
+          const Divider(),
+          const SizedBox(height: 12),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Form(
+                key: controller.formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+            // Basic Information Section
+            _buildSectionHeader("Basic Information", dark),
+            const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
               // Inspection Date
               _buildTextField(
@@ -63,9 +64,10 @@ class RtsForm extends StatelessWidget {
               // Inspector Name
               _buildTextField(
                 controller: controller.inspectorNameController,
+                    readOnly: true,
                 label: "Inspector Name",
                 prefixIcon: Iconsax.user,
-                readOnly: true,
+                
                 validator: (value) => value!.isEmpty ? "Required" : null,
               ),
               const SizedBox(height: Tsizes.spaceBtwInputFields),
@@ -170,9 +172,12 @@ class RtsForm extends StatelessWidget {
                       )),
               ),
               const SizedBox(height: 40),
-            ],
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

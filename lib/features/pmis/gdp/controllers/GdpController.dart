@@ -51,12 +51,14 @@ class GdpController extends GetxController {
 
   // Section: Category of Facility
   var selectedCategoryOfFacility = ''.obs;
+  final otherCategoryPremiseController = TextEditingController();
 
   // Section: Licensed/Unlicensed & Certification (in GDP, certification status applies)
   var selectedLicenseStatus = ''.obs;
   var selectedCertificationStatus = ''.obs;
   final licenseNoController = TextEditingController();
   final licenseExpiryDateController = TextEditingController();
+  var selectedPreviouslyLicensed = ''.obs;
 
   // Section: Category of Drugs
   var selectedCategoryOfDrugs = ''.obs;
@@ -220,6 +222,10 @@ class GdpController extends GetxController {
   Future<void> createNewActivity(BuildContext context) async {
     try {
       if (!formKey.currentState!.validate()) {
+        Loaders.errorSnackbar(
+          title: "Incomplete Form",
+          message: "Please fill in all the required fields.",
+        );
         return;
       }
       List<String> emptyFields = [];
@@ -275,12 +281,12 @@ class GdpController extends GetxController {
         facilityStatus: _getFacilityStatus(selectedFacilityStatus.value),
         facilityPersonType: selectedFacilityStatus.value == "Closed"
             ? 0
-            : _getPersonType("In-charge"),
+            : _getPersonType(personFoundController.value),
         personName:
             selectedFacilityStatus.value == "Closed" ? "" : nameController.text,
         contact: selectedFacilityStatus.value == "Closed"
             ? ""
-            : contactQualificationsController.text,
+            : contactController.text,
         qualifications: selectedFacilityStatus.value == "Closed"
             ? ""
             : qualificationsController.text,
@@ -370,6 +376,7 @@ class GdpController extends GetxController {
     selectedFacilityStatus.value = '';
     personFoundController.value = '';
     selectedCategoryOfFacility.value = '';
+    otherCategoryPremiseController.clear();
     selectedLicenseStatus.value = '';
     selectedCertificationStatus.value = '';
     selectedCategoryOfDrugs.value = '';
@@ -378,6 +385,8 @@ class GdpController extends GetxController {
     licenseNoController.clear();
     licenseExpiryDateController.clear();
     nameController.clear();
+  
+    _autoFillDefaults();
   }
 
   // Helper methods to map form values to API values

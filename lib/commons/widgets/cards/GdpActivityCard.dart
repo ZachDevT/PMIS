@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
+
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
@@ -414,7 +416,7 @@ class GdpActivityCard extends StatelessWidget {
                               'License Status',
                               _getLicenseStatusText(activity.licenseStatus),
                               Iconsax.shield_tick),
-                          _buildModernDetailRow(
+                          if (activity.licenseStatus == 1) _buildModernDetailRow(
                               'License Number',
                               activity.licenseNo ?? 'Not provided',
                               Iconsax.document),
@@ -463,10 +465,6 @@ class GdpActivityCard extends StatelessWidget {
                               _getRecommendationText(
                                   activity.recommendedforGDP),
                               Iconsax.like),
-                          _buildModernDetailRow(
-                              'Inspector ID',
-                              activity.inspectorId ?? 'Not assigned',
-                              Iconsax.user_square),
                         ],
                       ),
                     ],
@@ -881,18 +879,6 @@ class GdpActivityCard extends StatelessWidget {
   }
 
   String _getDistrictName(int? districtId) {
-    if (districtId == null) return 'Unknown';
-    switch (districtId) {
-      case 1:
-        return 'Kampala';
-      case 2:
-        return 'Masaka';
-      case 3:
-        return 'Kabale';
-      case 4:
-        return 'Fortportal';
-      default:
-        return 'Unknown';
-    }
+    return RegionDistrictConstants.getDistrictName(districtId ?? 1);
   }
 }

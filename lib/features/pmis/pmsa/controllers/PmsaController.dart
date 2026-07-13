@@ -50,6 +50,7 @@ class PmsaController extends GetxController {
   // Section: Facility Category & Licensing
   var selectedCategoryOfFacility = ''.obs;
   var licensedStatus = ''.obs;
+  var selectedPreviouslyLicensed = ''.obs;
   final licenseNoController = TextEditingController();
   final licenseExpiryDateController = TextEditingController();
 
@@ -201,6 +202,10 @@ class PmsaController extends GetxController {
   Future<void> createNewActivity(BuildContext context) async {
     try {
       if (!formKey.currentState!.validate()) {
+        Loaders.errorSnackbar(
+          title: "Incomplete Form",
+          message: "Please fill in all the required fields.",
+        );
         return;
       }
       List<String> emptyFields = [];
@@ -385,6 +390,8 @@ class PmsaController extends GetxController {
     productComplaintInvestigatedController.clear();
     postMarketComplaintNotedController.clear();
     specifyActivityController.clear();
+  
+    _autoFillDefaults();
   }
 
   // Helper methods to map form values to API values

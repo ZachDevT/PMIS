@@ -84,10 +84,13 @@ class PmsaForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -102,11 +105,13 @@ class PmsaForm extends StatelessWidget {
             ],
           ),
           const Divider(),
-          // Form
-          Form(
-            key: controller.formKey,
-            child: Obx(
-              () => Column(
+          const SizedBox(height: 5),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Form(
+                key: controller.formKey,
+                child: Obx(
+                  () => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // SECTION: Inspection Details
@@ -150,6 +155,7 @@ class PmsaForm extends StatelessWidget {
                   ),
                   buildTextField(
                     controller: controller.inspectorNameController,
+                    readOnly: true,
                     label: "Inspector Name",
                     prefixIcon: Icons.person,
                     validator: (value) =>
@@ -159,7 +165,7 @@ class PmsaForm extends StatelessWidget {
                     controller: controller.gpsLocationController,
                     label: "GPS Location",
                     prefixIcon: Icons.gps_fixed,
-                    readOnly: true,
+                    
                   ),
                   // SECTION: Location Details
                   const Text("Location Details",
@@ -209,22 +215,19 @@ class PmsaForm extends StatelessWidget {
                           controller: controller.nameController,
                           label: "Contact Name",
                           prefixIcon: HugeIcons.strokeRoundedUser,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
+                          
                         ),
                         buildTextField(
                           controller: controller.contactController,
                           label: "Contact",
                           prefixIcon: Icons.contact_phone,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
+                          
                         ),
                         buildTextField(
                           controller: controller.qualificationsController,
                           label: "Qualifications",
                           prefixIcon: Icons.school,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
+                          
                         ),
                         // SECTION: Facility Category & Licensing
                         const Text("Facility Category",
@@ -364,6 +367,14 @@ class PmsaForm extends StatelessWidget {
                       ],
                     ),
                   const SizedBox(height: 14),
+                                    Obx(() => controller.licensedStatus.value == "Un-Licensed" || controller.licensedStatus.value == "Unlicensed"
+                      ? buildDropdown(
+                          label: "Previously Licensed or Illegal Outlet",
+                          items: ["Previously Licensed", "Illegal Outlet"],
+                          selectedItem: controller.selectedPreviouslyLicensed,
+                          prefixIcon: Icons.warning,
+                        )
+                      : const SizedBox.shrink()),
                   // Submit Button
                   Center(
                     child: SizedBox(
@@ -388,7 +399,9 @@ class PmsaForm extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 40),
-                ],
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

@@ -17,12 +17,35 @@ class GppRepository {
       final isOnline = await networkManager.isconnected();
       
       if (!isOnline) {
-        print('No internet connection, returning empty list');
-        return [];
+        print('No internet connection, returning local data');
+        List storedActivities = box.read<List>('gpp_activities') ?? [];
+        return storedActivities.map((e) => Map<String, dynamic>.from(e)).toList();
       }
       
       // Try to fetch from API
-      return await _service.getGppData();
+      List<Map<String, dynamic>> onlineData = [];
+      try {
+        onlineData = await _service.getGppData();
+      } catch(e) {
+        print('Service fetch error: $e');
+      }
+      
+      // Merge with local unsynced activities
+      List storedActivities = box.read<List>('gpp_activities') ?? [];
+      
+      final Map<String, Map<String, dynamic>> mergedMap = {};
+      for (var item in onlineData) {
+        if (item['id'] != null) {
+          mergedMap[item['id'].toString()] = item;
+        }
+      }
+      for (var item in storedActivities) {
+        if (item['id'] != null) {
+          mergedMap[item['id'].toString()] = Map<String, dynamic>.from(item);
+        }
+      }
+      
+      return mergedMap.values.toList();
     } on TimeoutException catch (e) {
       print('Timeout error fetching GPP data: ${e.message}');
       return [];

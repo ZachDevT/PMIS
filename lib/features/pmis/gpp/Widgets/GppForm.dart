@@ -83,8 +83,12 @@ class GppForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -100,10 +104,13 @@ class GppForm extends StatelessWidget {
             ],
           ),
           const Divider(),
-          Form(
-            key: controller.formKey,
-            child: Obx(
-              () => Column(
+          const SizedBox(height: 5),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Form(
+                key: controller.formKey,
+                child: Obx(
+                  () => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // SECTION: Inspection Details
@@ -145,6 +152,7 @@ class GppForm extends StatelessWidget {
                   ),
                   buildTextField(
                     controller: controller.inspectorNameController,
+                    readOnly: true,
                     label: "Inspector Name",
                     prefixIcon: Icons.person,
                     validator: (value) => value!.isEmpty ? "Required" : null,
@@ -153,7 +161,7 @@ class GppForm extends StatelessWidget {
                     controller: controller.gpsLocationController,
                     label: "GPS Location",
                     prefixIcon: Icons.gps_fixed,
-                    readOnly: true,
+                    
                   ),
                   // SECTION: Region & District
                   const Text("Location Details",
@@ -204,15 +212,13 @@ class GppForm extends StatelessWidget {
                           controller: controller.nameController,
                           label: "Name ",
                           prefixIcon: HugeIcons.strokeRoundedUser,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
+                          
                         ),
                         buildTextField(
                           controller: controller.contactController,
                           label: "Contact ",
                           prefixIcon: Icons.contact_phone,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
+                          
                         ),
                         buildTextField(
                           controller: controller.QualificationsController,
@@ -245,6 +251,14 @@ class GppForm extends StatelessWidget {
                           selectedItem: controller.selectedCategoryOfFacility,
                           prefixIcon: Icons.category,
                         ),
+                        if (controller.selectedCategoryOfFacility.value == "Others") ...[
+                          buildTextField(
+                            controller: controller.otherCategoryPremiseController,
+                            label: "Specify Category of Premises",
+                            prefixIcon: Icons.edit,
+                            validator: (v) => v!.isEmpty ? "Required" : null,
+                          ),
+                        ],
                         buildDropdown(
                           label: "Licensed/Unlicensed",
                           items: ["Licensed", "Un-Licensed", "Not-Applicable"],
@@ -276,6 +290,14 @@ class GppForm extends StatelessWidget {
                               }
                             },
                             validator: (value) => value!.isEmpty ? "Required" : null,
+                          ),
+                        ],
+                        if (controller.selectedLicensedStatus.value == "Un-Licensed" || controller.selectedLicensedStatus.value == "Unlicensed") ...[
+                          buildDropdown(
+                            label: "Previously Licensed or Illegal Outlet",
+                            items: ["Previously Licensed", "Illegal Outlet"],
+                            selectedItem: controller.selectedPreviouslyLicensed,
+                            prefixIcon: Icons.history,
                           ),
                         ],
                         // SECTION: Drugs & GPP Details
@@ -345,7 +367,9 @@ class GppForm extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 40),
-                ],
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

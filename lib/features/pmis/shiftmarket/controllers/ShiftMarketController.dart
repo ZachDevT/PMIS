@@ -54,7 +54,8 @@ class ShiftMarketController extends GetxController {
   var selectedRegulatoryAction = ''.obs;
   final regulatoryActionTakenController = TextEditingController();
   final consignmentsImpoundedController = TextEditingController();
-  var selectedLicenseStatus = ''.obs;
+  var selectedLicenseStatus = 'Licensed'.obs;
+  var selectedPreviouslyLicensed = ''.obs;
   final licenseNoController = TextEditingController();
   final licenseExpiryController = TextEditingController();
 
@@ -119,6 +120,7 @@ class ShiftMarketController extends GetxController {
     selectedLicenseStatus.value = 'Licensed';
     // Default facility status to Open so fields show by default
     selectedFacilityStatus.value = 'Open';
+    selectedCategoryOfPremises.value = 'Shift Market';
   }
 
   /// Load activities from local storage or API
@@ -148,8 +150,12 @@ class ShiftMarketController extends GetxController {
   /// Submit ShiftMarket activity
   Future<void> submitActivity() async {
     if (!formKey.currentState!.validate()) {
-      return;
-    }
+        Loaders.errorSnackbar(
+          title: "Incomplete Form",
+          message: "Please fill in all the required fields.",
+        );
+        return;
+      }
 
     try {
       isSubmitting.value = true;

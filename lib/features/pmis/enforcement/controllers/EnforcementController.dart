@@ -55,13 +55,16 @@ class EnforcementController extends GetxController {
 
   // Section: Category and Licensing
   var selectedCategoryOfPremises = ''.obs;
-  var selectedLicenseStatus = ''.obs;
+  var selectedLicenseStatus = 'Licensed'.obs;
+  var selectedPreviouslyLicensed = ''.obs;
   var selectedCategoryStatus = ''.obs;
   final licenseNoController = TextEditingController();
   final licenseExpiryController = TextEditingController();
 
   // Section: Enforcement Actions
   var selectedEnforcementActionTaken = ''.obs;
+  var selectedEnforcementActions = <String>[].obs;
+  final otherCategoryController = TextEditingController();
   final commentsController = TextEditingController();
 
   // GPS Location controller (auto-filled)
@@ -162,8 +165,12 @@ class EnforcementController extends GetxController {
   /// Submit Enforcement activity
   Future<void> submitActivity() async {
     if (!formKey.currentState!.validate()) {
-      return;
-    }
+        Loaders.errorSnackbar(
+          title: "Incomplete Form",
+          message: "Please fill in all the required fields.",
+        );
+        return;
+      }
 
     try {
       isSubmitting.value = true;
@@ -190,7 +197,7 @@ class EnforcementController extends GetxController {
           : qualificationsController.text,
         categoryOfPremises: selectedFacilityStatus.value == "Closed"
           ? ""
-          : selectedCategoryOfPremises.value,
+          : (selectedCategoryOfPremises.value == "Other" ? otherCategoryController.text : selectedCategoryOfPremises.value),
         licenseStatus: selectedFacilityStatus.value == "Closed"
           ? ""
           : selectedLicenseStatus.value,
@@ -203,7 +210,7 @@ class EnforcementController extends GetxController {
         categoryStatus: selectedFacilityStatus.value == "Closed"
           ? ""
           : selectedCategoryStatus.value,
-        enforcementActionTaken: selectedEnforcementActionTaken.value,
+        enforcementActionTaken: selectedEnforcementActions.join(", "),
         comments: commentsController.text,
         createdAt: DateTime.now(),
         inspectorName: inspectorNameController.text,
@@ -323,6 +330,8 @@ class EnforcementController extends GetxController {
     selectedLicenseStatus.value = '';
     selectedCategoryStatus.value = '';
     selectedEnforcementActionTaken.value = '';
+    selectedEnforcementActions.clear();
+    otherCategoryController.clear();
 
     // Re-initialize with current values
     _initializeForm();

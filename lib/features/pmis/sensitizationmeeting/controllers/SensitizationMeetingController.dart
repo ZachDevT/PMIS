@@ -161,8 +161,12 @@ class SensitizationMeetingController extends GetxController {
 
   Future<void> createActivity(BuildContext context) async {
     if (!formKey.currentState!.validate()) {
-      return;
-    }
+        Loaders.errorSnackbar(
+          title: "Incomplete Form",
+          message: "Please fill in all the required fields.",
+        );
+        return;
+      }
 
     try {
       DateTime inspectionDate;

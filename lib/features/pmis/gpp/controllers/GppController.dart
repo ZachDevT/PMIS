@@ -35,6 +35,8 @@ class GppController extends GetxController {
       TextEditingController(); // auto-load current location
   final licenseNoController = TextEditingController();
   final licenseExpiryDateController = TextEditingController();
+  var selectedPreviouslyLicensed = ''.obs;
+  final otherCategoryPremiseController = TextEditingController();
 
   // Section: Region Details
   var selectedRegion = ''.obs;
@@ -193,6 +195,10 @@ class GppController extends GetxController {
   Future<void> createNewActivity(context) async {
     try {
       if (!formKey.currentState!.validate()) {
+        Loaders.errorSnackbar(
+          title: "Incomplete Form",
+          message: "Please fill in all the required fields.",
+        );
         return;
       }
       List<String> emptyFields = [];
@@ -331,6 +337,8 @@ class GppController extends GetxController {
     recommendedForGpp.value = '';
     contactController.clear();
     nameController.clear();
+  
+    _autoFillDefaults();
   }
 
   // Helper methods to map form values to API values

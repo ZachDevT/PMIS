@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pmis/features/pmis/gpp/models/GppModel.dart';
@@ -313,6 +314,7 @@ class GppActivityCard extends StatelessWidget {
                               'License Status',
                               _getLicenseStatusText(activity.licenseStatus),
                               Iconsax.shield_tick),
+                          if (activity.licenseStatus == 1)
                           _buildModernDetailRow(
                               'License Number',
                               activity.licenseNo ?? 'Not provided',
@@ -359,10 +361,6 @@ class GppActivityCard extends StatelessWidget {
                               'Recommended for GPP',
                               _getRecommendedText(activity.recommendedforGPP),
                               Iconsax.like),
-                          _buildModernDetailRow(
-                              'Inspector ID',
-                              activity.inspectorId ?? 'Not assigned',
-                              Iconsax.user_square),
                         ],
                       ),
                     ],
@@ -561,19 +559,31 @@ class GppActivityCard extends StatelessWidget {
   String _getCategoryText(int category) {
     switch (category) {
       case 1:
-        return 'Retail Pharmacy';
+        return 'Wholesale Pharmacy';
       case 2:
-        return 'Drug Shop';
+        return 'Retail Pharmacy';
       case 3:
-        return 'Hospital';
+        return 'Drug Shop';
       case 4:
-        return 'HCIV';
+        return 'External Stores';
       case 5:
-        return 'HCIII';
+        return 'Hospital';
       case 6:
+        return 'HCIV';
+      case 7:
+        return 'HCIII';
+      case 8:
         return 'Clinic';
+      case 9:
+        return 'Herbal Selling Outlet';
+      case 10:
+        return 'Shift Market';
+      case 11:
+        return 'Manufacturing Premise';
+      case 12:
+        return 'Others';
       default:
-        return 'Unknown';
+        return 'Not specified';
     }
   }
 
@@ -714,19 +724,8 @@ class GppActivityCard extends StatelessWidget {
   }
 
   String _getDistrictName(int? districtId) {
-    if (districtId == null) return 'Unknown';
-    switch (districtId) {
-      case 1:
-        return 'Kampala';
-      case 2:
-        return 'Masaka';
-      case 3:
-        return 'Kabale';
-      case 4:
-        return 'Fortportal';
-      default:
-        return 'Unknown';
-    }
+    if (districtId == null) return 'Not specified';
+    return RegionDistrictConstants.getDistrictName(districtId);
   }
 
   Widget _buildMapViewRow() {

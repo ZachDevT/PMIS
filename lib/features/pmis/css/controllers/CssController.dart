@@ -50,7 +50,7 @@ class CssController extends GetxController {
   var selectedUnregisteredDrugs = ''.obs;
   var selectedConditionOfPremises = ''.obs;
   var selectedRecordKeeping = ''.obs;
-  var selectedActionTaken = ''.obs;
+  var selectedActionTaken = <String>[].obs;
   var selectedPreviouslyLicensed = ''.obs;
 
   // Location variables
@@ -204,7 +204,13 @@ class CssController extends GetxController {
 
   Future<void> createNewActivity(BuildContext context) async {
     try {
-      if (!formKey.currentState!.validate()) return;
+      if (!formKey.currentState!.validate()) {
+        Loaders.errorSnackbar(
+          title: "Incomplete Form",
+          message: "Please fill in all the required fields.",
+        );
+        return;
+      }
       List<String> emptyFields = [];
       if (selectedRegion.value.isEmpty) emptyFields.add("Region");
       if (selectedDistrict.value.isEmpty) emptyFields.add("District");
@@ -295,7 +301,7 @@ class CssController extends GetxController {
         unRegDrugQty: selectedUnregisteredDrugs.value == "Present"
             ? unRegDrugQtyController.text
             : "",
-        action: _getActionTaken(selectedActionTaken.value) ?? 0,
+        action: selectedActionTaken.join(', '),
       );
 
       bool online = await NetworkManager.instance.isconnected();
@@ -366,8 +372,10 @@ class CssController extends GetxController {
     selectedUnregisteredDrugs.value = '';
     selectedConditionOfPremises.value = '';
     selectedRecordKeeping.value = '';
-    selectedActionTaken.value = '';
+    selectedActionTaken.clear();
     selectedPreviouslyLicensed.value = '';
+  
+    _autoFillDefaults();
   }
 
   // Helper methods to map form values to API values
@@ -529,22 +537,7 @@ class CssController extends GetxController {
     }
   }
 
-  int? _getActionTaken(String action) {
-    switch (action) {
-      case "Closed":
-        return 1;
-      case "Outlet abandoned by owner":
-        return 2;
-      case "Impounded":
-        return 3;
-      case "Suspect arrested":
-        return 4;
-      case "No action taken":
-        return 5;
-      default:
-        return null;
-    }
-  }
+  
 
   // Helper methods for filter text conversion
   String _getFacilityStatusText(int status) {

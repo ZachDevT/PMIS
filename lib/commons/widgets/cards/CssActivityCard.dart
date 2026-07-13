@@ -1,5 +1,6 @@
 // CssActivityCard.dart
 import 'package:flutter/material.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pmis/features/pmis/css/models/CssModel.dart';
@@ -41,19 +42,8 @@ class CssActivityCard extends StatelessWidget {
   }
 
   String _getDistrictName(int? districtId) {
-    if (districtId == null) return 'Unknown';
-    switch (districtId) {
-      case 1:
-        return 'Kampala';
-      case 2:
-        return 'Masaka';
-      case 3:
-        return 'Kabale';
-      case 4:
-        return 'Fortportal';
-      default:
-        return 'Unknown';
-    }
+    if (districtId == null) return 'Not specified';
+    return RegionDistrictConstants.getDistrictName(districtId);
   }
 
   String _getFacilityStatusText(int status) {
@@ -100,19 +90,31 @@ class CssActivityCard extends StatelessWidget {
   String _getCategoryOfPremisesText(int category) {
     switch (category) {
       case 1:
-        return 'Retail Pharmacy';
+        return 'Wholesale Pharmacy';
       case 2:
-        return 'Drug Shop';
+        return 'Retail Pharmacy';
       case 3:
-        return 'Hospital';
+        return 'Drug Shop';
       case 4:
-        return 'HCIV';
+        return 'External Stores';
       case 5:
-        return 'HCIII';
+        return 'Hospital';
       case 6:
+        return 'HCIV';
+      case 7:
+        return 'HCIII';
+      case 8:
         return 'Clinic';
+      case 9:
+        return 'Herbal Selling Outlet';
+      case 10:
+        return 'Shift Market';
+      case 11:
+        return 'Manufacturing Premise';
+      case 12:
+        return 'Others';
       default:
-        return 'Unknown';
+        return 'Not specified';
     }
   }
 
@@ -143,23 +145,7 @@ class CssActivityCard extends StatelessWidget {
     }
   }
 
-  String _getActionText(int? action) {
-    if (action == null) return 'Not specified';
-    switch (action) {
-      case 1:
-        return 'Closed';
-      case 2:
-        return 'Outlet abandoned by owner';
-      case 3:
-        return 'Impounded';
-      case 4:
-        return 'Suspect arrested';
-      case 5:
-        return 'No action taken';
-      default:
-        return 'Unknown';
-    }
-  }
+  
 
   String _getPersonTypeText(int type) {
     switch (type) {
@@ -231,7 +217,7 @@ class CssActivityCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${_getRegionName(activity.intRegion)} • ${_getDistrictName(activity.districtId)}',
+                        '${_getRegionName(activity.intRegion)} • ${RegionDistrictConstants.getDistrictName(activity.districtId ?? 1)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.grey.shade600,
                               fontWeight: FontWeight.w400,
@@ -446,7 +432,7 @@ class CssActivityCard extends StatelessWidget {
                             _getRegionName(activity.intRegion), Iconsax.map),
                         _buildModernDetailRow(
                             'District',
-                            _getDistrictName(activity.districtId),
+                            RegionDistrictConstants.getDistrictName(activity.districtId ?? 1),
                             Iconsax.building),
                       ],
                     ),
@@ -472,6 +458,7 @@ class CssActivityCard extends StatelessWidget {
                               'License Status',
                               _getLicenseStatusText(activity.licenseStatus),
                               Iconsax.shield_tick),
+                          if (activity.licenseStatus == 1) ...[  
                           _buildModernDetailRow(
                               'License Number',
                               activity.licenseNo.isNotEmpty
@@ -484,6 +471,7 @@ class CssActivityCard extends StatelessWidget {
                                   ? activity.licenseExpiryDate
                                   : 'Not provided',
                               Iconsax.calendar),
+                          ],
                         ],
                       ],
                     ),
@@ -529,10 +517,9 @@ class CssActivityCard extends StatelessWidget {
                               Iconsax.document_text),
                           _buildModernDetailRow(
                               'Action Taken',
-                              _getActionText(activity.action),
+                              activity.action.isEmpty ? 'Not specified' : activity.action,
                               Iconsax.warning_2),
-                          _buildModernDetailRow('Inspector ID',
-                              activity.inspectorId, Iconsax.user_square),
+                          
                         ],
                       ),
                     ],
@@ -846,7 +833,7 @@ class CssActivityCard extends StatelessWidget {
             longitude: activity.longitude,
             facilityName: activity.facilityName,
             address:
-                '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
+                '${_getRegionName(activity.intRegion)}, District ${RegionDistrictConstants.getDistrictName(activity.districtId ?? 1)}',
           ),
         ),
       );
@@ -864,7 +851,7 @@ class CssActivityCard extends StatelessWidget {
               longitude: activity.longitude,
               facilityName: activity.facilityName,
               address:
-                  '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
+                  '${_getRegionName(activity.intRegion)}, District ${RegionDistrictConstants.getDistrictName(activity.districtId ?? 1)}',
             ),
           ),
         );

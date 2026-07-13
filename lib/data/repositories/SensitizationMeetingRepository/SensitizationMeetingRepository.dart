@@ -17,11 +17,14 @@ class SensitizationMeetingRepository {
       final isOnline = await networkManager.isconnected();
 
       if (!isOnline) {
-        print('No internet connection, returning empty list');
-        return [];
+        print('No internet connection, returning local data');
+        List storedActivities = box.read<List>('sensitization_meeting_activities') ?? [];
+        return storedActivities.map((e) => Map<String, dynamic>.from(e)).toList();
       }
 
-      return await _service.getSensitizationMeetingData();
+      List<Map<String, dynamic>> remoteData = await _service.getSensitizationMeetingData();
+      List<Map<String, dynamic>> localData = (box.read<List>('sensitization_meeting_activities') ?? []).map((e) => e as Map<String, dynamic>).toList();
+      return [...remoteData, ...localData];
     } on TimeoutException catch (e) {
       print(
           'Timeout error fetching Sensitization Meeting activities: ${e.message}');
@@ -59,7 +62,32 @@ class SensitizationMeetingRepository {
 
   /// Get Sensitization Meeting data from the API
   Future<List<Map<String, dynamic>>> getSensitizationMeetingData() async {
-    return await fetchActivities();
+    List<Map<String, dynamic>> onlineData = [];
+    try {
+      final networkManager = Get.find<NetworkManager>();
+      final isOnline = await networkManager.isconnected();
+      if (isOnline) {
+        onlineData = await _service.getSensitizationMeetingData();
+      }
+    } catch (e) {
+      print('Error fetching Sensitization Meeting activities: $e');
+    }
+    
+    List storedActivities = box.read<List>('sensitization_meeting_activities') ?? [];
+    
+    final Map<String, Map<String, dynamic>> mergedMap = {};
+    for (var item in onlineData) {
+      if (item['id'] != null) {
+        mergedMap[item['id'].toString()] = item;
+      }
+    }
+    for (var item in storedActivities) {
+      if (item['id'] != null) {
+        mergedMap[item['id'].toString()] = Map<String, dynamic>.from(item);
+      }
+    }
+    
+    return mergedMap.values.toList();
   }
 
   /// Save a Sensitization Meeting activity locally when offline.

@@ -7,6 +7,8 @@ import 'package:pmis/utils/helpers/helpers_functions.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:iconsax/iconsax.dart';
 
+import 'package:pmis/commons/widgets/icons/circular_icon.dart';
+
 class EnforcementForm extends StatelessWidget {
   const EnforcementForm({super.key});
 
@@ -15,40 +17,39 @@ class EnforcementForm extends StatelessWidget {
     final controller = Get.find<EnforcementController>();
     final dark = THelperFunctions.isDarkMode(context);
 
-    return Scaffold(
-      backgroundColor: dark ? Tcolors.dark : Colors.white,
-      appBar: AppBar(
-        backgroundColor: Tcolors.primary,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: () => Get.back(),
-        ),
-        title: const Text(
-          'Enforcement',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
-            onPressed: () => Get.back(),
-          ),
-        ],
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      body: Form(
-        key: controller.formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(Tsizes.defaultSpace),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Basic Information Section
-              _buildSectionHeader("Basic Information", dark),
-              const SizedBox(height: Tsizes.spaceBtwItems / 2),
+              const Text("Enforcement Details",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+              TcircularIcon(
+                width: 40,
+                height: 40,
+                icon: Icons.close,
+                onpressed: () => Get.back(),
+              ),
+            ],
+          ),
+          const Divider(),
+          const SizedBox(height: 12),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Form(
+                key: controller.formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+            // Basic Information Section
+            _buildSectionHeader("Basic Information", dark),
+            const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
               // Inspection Date
               _buildTextField(
@@ -63,9 +64,10 @@ class EnforcementForm extends StatelessWidget {
               // Inspector Name
               _buildTextField(
                 controller: controller.inspectorNameController,
+                    readOnly: true,
                 label: "Inspector Name",
                 prefixIcon: Iconsax.user,
-                readOnly: true,
+                
                 validator: (value) => value!.isEmpty ? "Required" : null,
               ),
               const SizedBox(height: Tsizes.spaceBtwInputFields),
@@ -134,7 +136,7 @@ class EnforcementForm extends StatelessWidget {
                   items: ["In-charge", "Attendant/Operator"],
                   selectedItem: controller.selectedPersonFoundAtFacility,
                   prefixIcon: Iconsax.user,
-                  validator: (value) => value!.isEmpty ? "Required" : null,
+                  
                 ),
                 const SizedBox(height: Tsizes.spaceBtwInputFields),
 
@@ -143,7 +145,7 @@ class EnforcementForm extends StatelessWidget {
                   controller: controller.personNameController,
                   label: "Person Name",
                   prefixIcon: Iconsax.user,
-                  validator: (value) => value!.isEmpty ? "Required" : null,
+                  
                 ),
                 const SizedBox(height: Tsizes.spaceBtwInputFields),
 
@@ -152,7 +154,7 @@ class EnforcementForm extends StatelessWidget {
                   controller: controller.contactController,
                   label: "Contact",
                   prefixIcon: Iconsax.call,
-                  validator: (value) => value!.isEmpty ? "Required" : null,
+                  
                 ),
                 const SizedBox(height: Tsizes.spaceBtwInputFields),
 
@@ -161,7 +163,7 @@ class EnforcementForm extends StatelessWidget {
                   controller: controller.qualificationsController,
                   label: "Qualifications",
                   prefixIcon: Icons.school,
-                  validator: (value) => value!.isEmpty ? "Required" : null,
+                  
                 ),
                 const SizedBox(height: Tsizes.spaceBtwSections / 2),
 
@@ -177,6 +179,17 @@ class EnforcementForm extends StatelessWidget {
                   prefixIcon: Iconsax.category,
                   validator: (value) => value!.isEmpty ? "Required" : null,
                 ),
+                Obx(() => controller.selectedCategoryOfPremises.value == "Other" 
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: _buildTextField(
+                          controller: controller.otherCategoryController,
+                          label: "Please specify other category",
+                          prefixIcon: Iconsax.edit,
+                          validator: (value) => value!.isEmpty ? "Required" : null,
+                        ),
+                      )
+                    : const SizedBox.shrink()),
                 const SizedBox(height: Tsizes.spaceBtwInputFields),
 
                 // License Status
@@ -261,16 +274,29 @@ class EnforcementForm extends StatelessWidget {
 
               // Enforcement Actions Section
               _buildSectionHeader("Enforcement Actions", dark),
-              const SizedBox(height: Tsizes.spaceBtwItems / 2),
-
-              // Enforcement Action Taken
-              _buildDropdown(
-                label: "Enforcement Action Taken",
-                items: controller.enforcementActionOptions,
-                selectedItem: controller.selectedEnforcementActionTaken,
-                prefixIcon: Iconsax.shield_security,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
+              const SizedBox(height: Tsizes.spaceBtwSections / 2),
+              
+              // Actions Taken (Multi-select)
+              const Text("Actions Taken", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              const SizedBox(height: 8),
+              Obx(() => Wrap(
+                spacing: 8.0,
+                runSpacing: 4.0,
+                children: controller.enforcementActionOptions.map((action) {
+                  final isSelected = controller.selectedEnforcementActions.contains(action);
+                  return FilterChip(
+                    label: Text(action),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected) {
+                        controller.selectedEnforcementActions.add(action);
+                      } else {
+                        controller.selectedEnforcementActions.remove(action);
+                      }
+                    },
+                  );
+                }).toList(),
+              )),
               const SizedBox(height: Tsizes.spaceBtwInputFields),
 
               // Comments
@@ -282,7 +308,15 @@ class EnforcementForm extends StatelessWidget {
               ),
               const SizedBox(height: Tsizes.spaceBtwSections * 2),
 
-              // Submit Button
+                                Obx(() => controller.selectedLicenseStatus.value == "Un-Licensed" || controller.selectedLicenseStatus.value == "Unlicensed"
+                      ? _buildDropdown(
+                          label: "Previously Licensed or Illegal Outlet",
+                          items: ["Previously Licensed", "Illegal Outlet"],
+                          selectedItem: controller.selectedPreviouslyLicensed,
+                          prefixIcon: Icons.warning,
+                        )
+                      : const SizedBox.shrink()),
+                  // Submit Button
               const SizedBox(height: 15),
               SizedBox(
                 width: double.infinity,
@@ -298,9 +332,12 @@ class EnforcementForm extends StatelessWidget {
                       )),
               ),
               const SizedBox(height: 40),
-            ],
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

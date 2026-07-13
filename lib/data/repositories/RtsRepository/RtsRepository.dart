@@ -17,11 +17,34 @@ class RtsRepository {
       final isOnline = await networkManager.isconnected();
       
       if (!isOnline) {
-        print('No internet connection, returning empty list');
-        return [];
+        print('No internet connection, returning local data');
+        List storedActivities = box.read<List>('rts_activities') ?? [];
+        return storedActivities.map((e) => Map<String, dynamic>.from(e)).toList();
       }
       
-      return await _service.getRtsData();
+      List<Map<String, dynamic>> onlineData = [];
+      try {
+        onlineData = await _service.getRtsData();
+      } catch(e) {
+        print('Service fetch error: $e');
+      }
+      
+      // Merge with local unsynced activities
+      List storedActivities = box.read<List>('rts_activities') ?? [];
+      
+      final Map<String, Map<String, dynamic>> mergedMap = {};
+      for (var item in onlineData) {
+        if (item['id'] != null) {
+          mergedMap[item['id'].toString()] = item;
+        }
+      }
+      for (var item in storedActivities) {
+        if (item['id'] != null) {
+          mergedMap[item['id'].toString()] = Map<String, dynamic>.from(item);
+        }
+      }
+      
+      return mergedMap.values.toList();
     } on TimeoutException catch (e) {
       print('Timeout error fetching RTS data: ${e.message}');
       return [];

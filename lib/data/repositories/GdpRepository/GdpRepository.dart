@@ -11,34 +11,32 @@ class GdpRepository {
 
   /// Fetch GDP activities from API.
   Future<List<Map<String, dynamic>>> fetchActivities() async {
+    List<Map<String, dynamic>> onlineData = [];
     try {
-      // Check connectivity before making API call
       final networkManager = Get.find<NetworkManager>();
       final isOnline = await networkManager.isconnected();
-      
-      if (!isOnline) {
-        print('No internet connection, returning empty list');
-        return [];
+      if (isOnline) {
+        onlineData = await _gdpService.getGdpData();
       }
-      
-      return await _gdpService.getGdpData();
-    } on TimeoutException catch (e) {
-      print('Timeout error fetching GDP activities: ${e.message}');
-      return [];
-    } on SocketException catch (e) {
-      print('Network error fetching GDP activities: ${e.message}');
-      return [];
-    } on NetworkException catch (e) {
-      print('Network exception: ${e.message}');
-      return [];
     } catch (e) {
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
-        print('Timeout error detected: ${e.toString()}');
-        return [];
-      }
       print('Error fetching GDP activities: $e');
-      return [];
     }
+    
+    List storedActivities = box.read<List>('gdp_activities') ?? [];
+    
+    final Map<String, Map<String, dynamic>> mergedMap = {};
+    for (var item in onlineData) {
+      if (item['id'] != null) {
+        mergedMap[item['id'].toString()] = item;
+      }
+    }
+    for (var item in storedActivities) {
+      if (item['id'] != null) {
+        mergedMap[item['id'].toString()] = Map<String, dynamic>.from(item);
+      }
+    }
+    
+    return mergedMap.values.toList();
   }
 
   /// Save a GDP activity locally when offline.

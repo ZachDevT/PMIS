@@ -25,7 +25,7 @@ class CssModel {
   final int classofDrugs;
   final int unRegisteredDrug;
   final String unRegDrugQty;
-  final int action;
+  final String action;
 
   CssModel({
     required this.id,
@@ -103,7 +103,7 @@ class CssModel {
       classofDrugs: json['classofDrugs'] ?? 0,
       unRegisteredDrug: json['unRegisteredDrug'] ?? 0,
       unRegDrugQty: json['unRegDrugQty'] ?? '',
-      action: json['action'] ?? 0,
+      action: json['action']?.toString() ?? '',
     );
   }
 
@@ -264,22 +264,8 @@ class CssModel {
     }
   }
 
-  String _getActionText(int? action) {
-    if (action == null) return 'Not specified';
-    switch (action) {
-      case 1:
-        return 'Closed';
-      case 2:
-        return 'Outlet abandoned by owner';
-      case 3:
-        return 'Impounded';
-      case 4:
-        return 'Suspect arrested';
-      case 5:
-        return 'No action taken';
-      default:
-        return 'Unknown';
-    }
+  String _getActionText(String? action) {
+    return action == null || action.isEmpty ? 'Not specified' : action;
   }
 
   CssModel copyWith({
@@ -309,7 +295,7 @@ class CssModel {
     int? classofDrugs,
     int? unRegisteredDrug,
     String? unRegDrugQty,
-    int? action,
+    String? action,
   }) {
     return CssModel(
       id: id ?? this.id,

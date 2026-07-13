@@ -1,5 +1,6 @@
 // widgets/CssForm.dart
 import 'package:flutter/material.dart';
+import 'package:pmis/commons/widgets/inputs/TMultiSelectDropdown.dart';
 import 'package:get/get.dart';
 import 'package:pmis/commons/widgets/icons/circular_icon.dart';
 import 'package:pmis/features/pmis/css/controllers/CssController.dart';
@@ -82,8 +83,12 @@ class CssForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -101,8 +106,10 @@ class CssForm extends StatelessWidget {
           const SizedBox(height: 5),
           const Divider(),
           const SizedBox(height: 5),
-          Obx(
-            () => Form(
+          Flexible(
+            child: SingleChildScrollView(
+              child: Obx(
+                () => Form(
               key: controller.formKey,
               child: Column(
                 children: [
@@ -127,6 +134,7 @@ class CssForm extends StatelessWidget {
                   ),
                   buildTextField(
                     controller: controller.inspectorNameController,
+                    readOnly: true,
                     label: "Inspector Name",
                     prefixIcon: Icons.person,
                     validator: (value) => value!.isEmpty ? "Required" : null,
@@ -135,7 +143,7 @@ class CssForm extends StatelessWidget {
                     controller: controller.inspectionTimeController,
                     label: "Inspection Time",
                     prefixIcon: Icons.access_time,
-                    readOnly: true,
+                    
                     onTap: () async {
                       TimeOfDay? picked = await showTimePicker(
                           context: context, initialTime: TimeOfDay.now());
@@ -191,19 +199,19 @@ class CssForm extends StatelessWidget {
                       controller: controller.nameController,
                       label: "Name",
                       prefixIcon: Icons.person,
-                      validator: (value) => value!.isEmpty ? "Required" : null,
+                      
                     ),
                     buildTextField(
                       controller: controller.contactController,
                       label: "Contact",
                       prefixIcon: Icons.phone,
-                      validator: (value) => value!.isEmpty ? "Required" : null,
+                      
                     ),
                     buildTextField(
                       controller: controller.qualificationsController,
                       label: "Qualifications",
                       prefixIcon: Icons.school,
-                      validator: (value) => value!.isEmpty ? "Required" : null,
+                      
                     ),
                     // Compliance Details
                     buildDropdown(
@@ -231,8 +239,7 @@ class CssForm extends StatelessWidget {
                         controller: controller.otherCategoryPremiseController,
                         label: "State the other type of facility",
                         prefixIcon: Icons.edit,
-                        validator: (value) =>
-                            value!.isEmpty ? "Required" : null,
+                        
                       ),
                     ],
                     buildDropdown(
@@ -333,16 +340,16 @@ class CssForm extends StatelessWidget {
 
                   // Action Taken - only show if facility is Open
                   if (controller.selectedFacilityStatus.value == "Open")
-                    buildDropdown(
+                    TMultiSelectDropdown(
                       label: "Action Taken",
-                      items: [
-                        "Closed",
-                        "Outlet abandoned by owner",
+                      items: const [
+                        "Warning Letter",
+                        "NDA Form 43",
                         "Impounded",
                         "Suspect arrested",
                         "No action taken"
                       ],
-                      selectedItem: controller.selectedActionTaken,
+                      selectedItems: controller.selectedActionTaken,
                       prefixIcon: Icons.assignment_turned_in,
                     ),
 
@@ -358,7 +365,8 @@ class CssForm extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 40),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pmis/features/pmis/pmsa/models/PmsModel.dart';
@@ -39,21 +40,7 @@ class PmsaActivityCard extends StatelessWidget {
     }
   }
 
-  String _getDistrictName(int? districtId) {
-    if (districtId == null) return 'Unknown';
-    switch (districtId) {
-      case 1:
-        return 'Kampala';
-      case 2:
-        return 'Masaka';
-      case 3:
-        return 'Kabale';
-      case 4:
-        return 'Fortportal';
-      default:
-        return 'Unknown';
-    }
-  }
+  
 
   String _getFacilityStatusText(int status) {
     switch (status) {
@@ -185,7 +172,7 @@ class PmsaActivityCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${_getRegionName(activity.intRegion)} • ${_getDistrictName(activity.districtId)}',
+                        '${RegionDistrictConstants.getRegionName(activity.intRegion)} • ${RegionDistrictConstants.getDistrictName(activity.districtId)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.grey.shade600,
                               fontWeight: FontWeight.w400,
@@ -397,10 +384,10 @@ class PmsaActivityCard extends StatelessWidget {
                             '${activity.latitude}, ${activity.longitude}',
                             Iconsax.location),
                         _buildModernDetailRow('Region',
-                            _getRegionName(activity.intRegion), Iconsax.map),
+                            RegionDistrictConstants.getRegionName(activity.intRegion), Iconsax.map),
                         _buildModernDetailRow(
                             'District',
-                            _getDistrictName(activity.districtId),
+                            RegionDistrictConstants.getDistrictName(activity.districtId),
                             Iconsax.building),
                       ],
                     ),
@@ -426,10 +413,12 @@ class PmsaActivityCard extends StatelessWidget {
                               'License Status',
                               _getLicenseStatusText(activity.licenseStatus),
                               Iconsax.shield_tick),
+                          if (activity.licenseStatus == 1) ...[  
                           _buildModernDetailRow(
                               'License Number',
                               activity.licenseNo ?? 'Not provided',
                               Iconsax.document),
+                          ],
                         ],
                       ],
                     ),
@@ -500,10 +489,6 @@ class PmsaActivityCard extends StatelessWidget {
                                   ? activity.otherActivity
                                   : 'Not provided',
                               Iconsax.more),
-                          _buildModernDetailRow(
-                              'Inspector ID',
-                              activity.inspectorId ?? 'Not assigned',
-                              Iconsax.user_square),
                         ],
                       ),
                     ],
@@ -817,7 +802,7 @@ class PmsaActivityCard extends StatelessWidget {
             longitude: activity.longitude,
             facilityName: activity.facilityName,
             address:
-                '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
+                '${RegionDistrictConstants.getRegionName(activity.intRegion)}, District ${activity.districtId}',
           ),
         ),
       );
@@ -835,7 +820,7 @@ class PmsaActivityCard extends StatelessWidget {
               longitude: activity.longitude,
               facilityName: activity.facilityName,
               address:
-                  '${_getRegionName(activity.intRegion)}, District ${activity.districtId}',
+                  '${RegionDistrictConstants.getRegionName(activity.intRegion)}, District ${activity.districtId}',
             ),
           ),
         );

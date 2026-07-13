@@ -9,13 +9,14 @@ import 'package:pmis/utils/theme/custom_themes/textbuttontheme.dart';
 import 'package:pmis/utils/theme/custom_themes/textfieldtheme.dart';
 import 'package:pmis/utils/theme/custom_themes/texttheme.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TApptheme {
   TApptheme._();
 
   static ThemeData lighttheme = ThemeData(
     useMaterial3: true,
-    fontFamily: 'Poppins',
+    fontFamily: GoogleFonts.bricolageGrotesque().fontFamily,
     brightness: Brightness.light,
     scaffoldBackgroundColor: Colors.white,
     textTheme: Ttexttheme.lighttexttheme,
@@ -32,7 +33,7 @@ class TApptheme {
 
   static ThemeData darktheme = ThemeData(
     useMaterial3: true,
-    fontFamily: 'Poppins',
+    fontFamily: GoogleFonts.bricolageGrotesque().fontFamily,
     brightness: Brightness.dark,
     textTheme: Ttexttheme.darktexttheme,
     primaryColor: Tcolors.primary,

@@ -16,30 +16,41 @@ class SensitizationMeetingForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: controller.formKey,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Sensitization Meeting",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-                TcircularIcon(
-                  width: 40,
-                  height: 40,
-                  icon: Icons.close,
-                  onpressed: () => Get.back(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Sensitization Meeting",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              ),
+              TcircularIcon(
+                width: 40,
+                height: 40,
+                icon: Icons.close,
+                onpressed: () => Get.back(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Divider(),
+          const SizedBox(height: 12),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Form(
+                key: controller.formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
 
             // Inspection Date
             _buildDateField(context),
@@ -47,9 +58,10 @@ class SensitizationMeetingForm extends StatelessWidget {
             // Inspector Name
             _buildTextField(
               controller: controller.inspectorNameController,
+                    readOnly: true,
               label: "Inspector Name",
               prefixIcon: Iconsax.user,
-              readOnly: true,
+              
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return "Please enter inspector name";
@@ -211,7 +223,7 @@ class SensitizationMeetingForm extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  "Create",
+                  "Submit",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
@@ -229,8 +241,12 @@ class SensitizationMeetingForm extends StatelessWidget {
             ),
 
             const SizedBox(height: 16),
-          ],
-        ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
