@@ -19,17 +19,32 @@ class ShiftMarketActivityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = THelperFunctions.isDarkMode(context);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: Tsizes.spaceBtwItems),
-      color: dark ? Tcolors.darkGrey : Colors.white,
-      child: InkWell(
-        onTap: onTap ?? () => _showDetailView(context),
-        borderRadius: BorderRadius.circular(Tsizes.borderRadiusLg),
-        child: Padding(
-          padding: const EdgeInsets.all(Tsizes.defaultSpace),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return GestureDetector(
+      onTap: onTap ?? () => _showDetailView(context),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        margin: const EdgeInsets.only(bottom: Tsizes.spaceBtwItems),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: dark ? const Color(0xFF2C2C2E) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(
+            color: dark
+                ? Colors.white.withOpacity(0.1)
+                : Colors.black.withOpacity(0.05),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
               // Header Row
               Row(
                 children: [
@@ -175,8 +190,7 @@ class ShiftMarketActivityCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildDetailItem({
