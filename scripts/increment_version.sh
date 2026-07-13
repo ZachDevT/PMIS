@@ -27,9 +27,18 @@ if [ "$SEMVER" == "$BUILD" ]; then
     BUILD=0
 fi
 
+# Split semantic version into major, minor, patch
+MAJOR=$(echo $SEMVER | cut -d'.' -f1)
+MINOR=$(echo $SEMVER | cut -d'.' -f2)
+PATCH=$(echo $SEMVER | cut -d'.' -f3)
+
+# Increment patch version
+NEW_PATCH=$((PATCH + 1))
+NEW_SEMVER="${MAJOR}.${MINOR}.${NEW_PATCH}"
+
 # Increment the build number
 NEW_BUILD=$((BUILD + 1))
-NEW_VERSION_STRING="${SEMVER}+${NEW_BUILD}"
+NEW_VERSION_STRING="${NEW_SEMVER}+${NEW_BUILD}"
 
 # Replace the version line in pubspec.yaml
 if [[ "$OSTYPE" == "darwin"* ]]; then
