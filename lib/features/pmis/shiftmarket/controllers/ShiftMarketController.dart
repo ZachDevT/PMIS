@@ -104,8 +104,10 @@ class ShiftMarketController extends GetxController {
 
   void _initializeForm() {
     // Set default values
-    inspectionDateController.text = DateTime.now().toString();
-    inspectionTimeController.text = DateTime.now().toString();
+    inspectionDateController.text = DateTime.now().toLocal().toString().split(' ')[0];
+    final now = DateTime.now();
+    inspectionTimeController.text =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00';
 
     // Initialize with current location
     getCurrentLocation();
@@ -162,7 +164,7 @@ class ShiftMarketController extends GetxController {
 
       // Create ShiftMarket model
         final shiftMarketActivity = ShiftMarketModel(
-        inspectionDate: inspectionDateController.text,
+        inspectionDate: "${inspectionDateController.text} ${inspectionTimeController.text}",
         inspectorName: inspectorNameController.text,
         latitude: currentLatitude.value,
         longitude: currentLongitude.value,
@@ -203,7 +205,7 @@ class ShiftMarketController extends GetxController {
           var result = await repository.postShiftMarketData(activityData);
           print('✅ DEBUG: API response received: $result');
 
-          activities.add(shiftMarketActivity);
+          activities.add(shiftMarketActivity.copyWith(isSynced: true));
           Loaders.successSnackbar(
               title: "Success",
               message: "ShiftMarket activity sent to API successfully!");

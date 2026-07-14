@@ -101,9 +101,9 @@ class GdpController extends GetxController {
     // Set current date/time
     inspectionDateController.text =
         DateTime.now().toLocal().toString().split(' ')[0];
-    final now = TimeOfDay.now();
+    final now = DateTime.now();
     inspectionTimeController.text =
-        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00';
 
     // Prepopulate inspector name and ID from logged-in user
     if (Get.isRegistered<AuthController>()) {
@@ -272,7 +272,7 @@ class GdpController extends GetxController {
       // Create a new GdpModel from the form inputs.
       var newActivity = GdpModel(
         id: DateTime.now().millisecondsSinceEpoch,
-        inspectionDate: DateTime.parse(inspectionDateController.text),
+        inspectionDate: DateTime.parse("${inspectionDateController.text} ${inspectionTimeController.text}"),
         inspectorName: inspectorNameController.text,
         gps: gpsLocationController.text,
         intRegion: _getRegionGuid(selectedRegion.value),

@@ -97,7 +97,9 @@ class PmsaController extends GetxController {
     // Set current date/time
     inspectionDateController.text =
         DateTime.now().toLocal().toString().split(' ')[0];
-    inspectionTimeController.text = TimeOfDay.now().format(Get.context!);
+    final now = DateTime.now();
+    inspectionTimeController.text =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00';
     numberOfSamplesCollectedController.text = "0";
     
     // Prepopulate inspector name and ID from logged-in user
@@ -293,7 +295,7 @@ class PmsaController extends GetxController {
       // Create a new PMS activity from the form inputs.
       var newActivity = PmsModel(
         id: 0, // Will be set by API
-        inspectionDate: DateTime.parse(inspectionDateController.text),
+        inspectionDate: DateTime.parse("${inspectionDateController.text} ${inspectionTimeController.text}"),
         inspectorName: inspectorNameController.text,
         inspectorId: inspectorIdController.text,
         latitude: currentLatitude.value,

@@ -210,6 +210,9 @@ class PmsService {
         case 'other_Activity':
           pascalKey = 'Other_Activity';
           break;
+        case 'inspectorId':
+          pascalKey = 'InspectorId';
+          break;
         default:
           // Keep original key if no conversion needed
           pascalKey = entry.key;

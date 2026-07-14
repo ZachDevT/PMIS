@@ -78,7 +78,9 @@ class CssController extends GetxController {
   void _autoFillDefaults() {
     inspectionDateController.text =
         DateTime.now().toLocal().toString().split(' ')[0];
-    inspectionTimeController.text = TimeOfDay.now().format(Get.context!);
+    final now = DateTime.now();
+    inspectionTimeController.text =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00';
     // GPS location will be set by getCurrentLocation()
 
     // Prepopulate inspector name and ID from logged-in user
@@ -265,7 +267,7 @@ class CssController extends GetxController {
 
       var newActivity = CssModel(
         id: 0, // Will be set by API
-        inspectionDate: DateTime.parse(inspectionDateController.text),
+        inspectionDate: DateTime.parse("${inspectionDateController.text} ${inspectionTimeController.text}"),
         inspectorName: inspectorNameController.text,
         inspectorId: inspectorIdController.text,
         latitude: currentLatitude.value,

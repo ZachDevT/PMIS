@@ -120,6 +120,9 @@ class ShiftMarketService {
     }
 
     converted['InspectorName'] = data['inspectorName'];
+    if (data.containsKey('inspectorId')) {
+      converted['InspectorId'] = data['inspectorId'];
+    }
 
     final lat = data['latitude']?.toDouble() ?? 0.0;
     final lon = data['longitude']?.toDouble() ?? 0.0;

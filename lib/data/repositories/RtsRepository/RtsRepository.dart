@@ -35,7 +35,10 @@ class RtsRepository {
       final Map<String, Map<String, dynamic>> mergedMap = {};
       for (var item in onlineData) {
         if (item['id'] != null) {
-          mergedMap[item['id'].toString()] = item;
+          // Mark API records as synced
+          final syncedItem = Map<String, dynamic>.from(item);
+          syncedItem['isSynced'] = true;
+          mergedMap[item['id'].toString()] = syncedItem;
         }
       }
       for (var item in storedActivities) {

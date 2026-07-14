@@ -240,7 +240,7 @@ class EnforcementActivityCard extends StatelessWidget {
   String _formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
-      return "${date.day}/${date.month}/${date.year}";
+      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     } catch (e) {
       return dateString;
     }
@@ -408,13 +408,23 @@ class EnforcementActivityCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    _buildModernDetailSection(
+                     _buildModernDetailSection(
                       context,
                       'Compliance Information',
                       Iconsax.shield_tick,
                       [
                         _buildModernDetailRow(context, 'License Status',
                             activity.licenseStatus, Iconsax.document),
+                        if (activity.licenseStatus.toLowerCase().contains('licens') &&
+                            !activity.licenseStatus.toLowerCase().contains('un'))
+                          _buildModernDetailRow(context, 'License No.',
+                              activity.licenseNo?.isNotEmpty == true ? activity.licenseNo! : 'N/A',
+                              Iconsax.document_text),
+                        if (activity.licenseStatus.toLowerCase().contains('licens') &&
+                            !activity.licenseStatus.toLowerCase().contains('un'))
+                          _buildModernDetailRow(context, 'License Expiry Date',
+                              activity.licenseExpiryDate?.isNotEmpty == true ? activity.licenseExpiryDate! : 'N/A',
+                              Iconsax.calendar),
                         _buildModernDetailRow(context, 'Category Status',
                             activity.categoryStatus, Iconsax.info_circle),
                       ],

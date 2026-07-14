@@ -177,9 +177,9 @@ class EnforcementService {
     // Category and enforcement action
     converted['CategoryStatus'] = _mapCategoryStatus(data['categoryStatus']);
     final actionCode = _mapEnforcementAction(data['enforcementActionTaken']);
-    converted['EnfAction'] = actionCode;
+    converted['EnfAction'] = actionCode.toString();
     // Some backends expect 'enforcement' field name — include both
-    converted['Enforcement'] = actionCode;
+    converted['Enforcement'] = actionCode.toString();
     converted['Comments'] = data['comments'];
 
     return converted;

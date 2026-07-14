@@ -37,6 +37,7 @@ class EnforcementController extends GetxController {
 
   // Section: Basic Information
   final inspectionDateController = TextEditingController();
+  final inspectionTimeController = TextEditingController();
   final gpsController = TextEditingController();
   final inspectorNameController = TextEditingController();
   final inspectorIdController = TextEditingController();
@@ -122,7 +123,10 @@ class EnforcementController extends GetxController {
 
   void _initializeForm() {
     // Set default values
-    inspectionDateController.text = DateTime.now().toString();
+    inspectionDateController.text = DateTime.now().toLocal().toString().split(' ')[0];
+    final now = DateTime.now();
+    inspectionTimeController.text =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00';
 
     // Default license status to Licensed so fields show by default
     selectedLicenseStatus.value = 'Licensed';
@@ -177,7 +181,7 @@ class EnforcementController extends GetxController {
 
       // Create Enforcement model
         final enforcementActivity = EnforcementModel(
-        inspectionDate: inspectionDateController.text,
+        inspectionDate: "${inspectionDateController.text} ${inspectionTimeController.text}",
         gps: "${currentLatitude.value}, ${currentLongitude.value}",
         region: selectedRegion.value,
         district: selectedDistrict.value,
@@ -230,7 +234,7 @@ class EnforcementController extends GetxController {
           var result = await repository.postEnforcementData(activityData);
           print('✅ DEBUG: API response received: $result');
 
-          activities.add(enforcementActivity);
+          activities.add(enforcementActivity.copyWith(isSynced: true));
           Loaders.successSnackbar(
               title: "Success",
               message: "Enforcement activity sent to API successfully!");
@@ -265,6 +269,33 @@ class EnforcementController extends GetxController {
     } finally {
       isSubmitting.value = false;
     }
+  }
+
+  void clearForm() {
+    inspectionDateController.clear();
+    inspectionTimeController.clear();
+    inspectorNameController.clear();
+    gpsController.clear();
+    facilityNameController.clear();
+    personNameController.clear();
+    contactController.clear();
+    qualificationsController.clear();
+    licenseNoController.clear();
+    licenseExpiryController.clear();
+    otherCategoryController.clear();
+    commentsController.clear();
+    selectedRegion.value = '';
+    selectedDistrict.value = '';
+    selectedFacilityStatus.value = '';
+    selectedPersonFoundAtFacility.value = '';
+    selectedCategoryOfPremises.value = '';
+    selectedLicenseStatus.value = 'Licensed';
+    selectedPreviouslyLicensed.value = '';
+    selectedCategoryStatus.value = '';
+    selectedEnforcementActionTaken.value = '';
+    selectedEnforcementActions.clear();
+
+    _initializeForm();
   }
 
   /// Filter activities based on search and filter criteria
@@ -312,32 +343,7 @@ class EnforcementController extends GetxController {
     filteredActivities.value = filtered;
   }
 
-  void clearForm() {
-    inspectionDateController.clear();
-    gpsController.clear();
-    inspectorNameController.clear();
-    inspectorIdController.clear();
-    facilityNameController.clear();
-    personNameController.clear();
-    contactController.clear();
-    qualificationsController.clear();
-    commentsController.clear();
-    licenseNoController.clear();
-    licenseExpiryController.clear();
-    selectedRegion.value = '';
-    selectedDistrict.value = '';
-    selectedFacilityStatus.value = '';
-    selectedPersonFoundAtFacility.value = '';
-    selectedCategoryOfPremises.value = '';
-    selectedLicenseStatus.value = '';
-    selectedCategoryStatus.value = '';
-    selectedEnforcementActionTaken.value = '';
-    selectedEnforcementActions.clear();
-    otherCategoryController.clear();
 
-    // Re-initialize with current values
-    _initializeForm();
-  }
 
   /// Get current location
   Future<void> getCurrentLocation() async {

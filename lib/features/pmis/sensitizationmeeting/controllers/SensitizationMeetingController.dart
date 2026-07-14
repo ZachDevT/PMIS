@@ -200,15 +200,16 @@ class SensitizationMeetingController extends GetxController {
       bool online = await NetworkManager.instance.isconnected();
 
       if (online) {
-        var activityData = newActivity.toJson();
+        var apiData = newActivity.toApiJson();
+        var localData = newActivity.toJson();
         try {
-          await repository.postSensitizationMeetingData(activityData);
+          await repository.postSensitizationMeetingData(apiData);
           activities.add(newActivity);
           Loaders.successSnackbar(
               title: "Success", message: "Meeting recorded successfully...");
         } catch (e) {
           // Any exception means API call failed - save locally and continue
-          await repository.saveActivityLocally(activityData);
+          await repository.saveActivityLocally(localData);
           activities.add(newActivity);
           // Check if it's a 404 (endpoint not implemented)
           if (e.toString().contains('404') || e.toString().contains('endpoint not found')) {
@@ -222,8 +223,8 @@ class SensitizationMeetingController extends GetxController {
           }
         }
       } else {
-        var activityData = newActivity.toJson();
-        await repository.saveActivityLocally(activityData);
+        var localData = newActivity.toJson();
+        await repository.saveActivityLocally(localData);
         activities.add(newActivity);
         Loaders.successSnackbar(
             title: "Offline",

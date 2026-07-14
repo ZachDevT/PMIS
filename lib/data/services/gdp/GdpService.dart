@@ -184,7 +184,7 @@ class GdpService {
           pascalKey = 'RecommendedforGDP';
           break;
         case 'inspectorId':
-          pascalKey = 'inspectorId';
+          pascalKey = 'InspectorId';
           break;
         case 'latitude':
           pascalKey = 'Latitude';

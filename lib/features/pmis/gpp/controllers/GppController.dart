@@ -92,7 +92,9 @@ class GppController extends GetxController {
     // Set current date/time
     inspectionDateController.text =
         DateTime.now().toLocal().toString().split(' ')[0];
-    inspectionTimeController.text = TimeOfDay.now().format(Get.context!);
+    final now = DateTime.now();
+    inspectionTimeController.text =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00';
     
     // Prepopulate inspector name and ID from logged-in user
     if (Get.isRegistered<AuthController>()) {
@@ -242,7 +244,7 @@ class GppController extends GetxController {
       // Create a new GppActivity from the form inputs.
       var newActivity = GppActivity(
         id: 0, // Will be set by API
-        inspectionDate: DateTime.parse(inspectionDateController.text),
+        inspectionDate: DateTime.parse("${inspectionDateController.text} ${inspectionTimeController.text}"),
         inspectorName: inspectorNameController.text,
         gps: gpsLocationController.text,
         intRegion: _getRegionGuid(selectedRegion.value),

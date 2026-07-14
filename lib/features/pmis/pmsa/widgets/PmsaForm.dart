@@ -289,6 +289,16 @@ class PmsaForm extends StatelessWidget {
                             validator: (value) => value!.isEmpty ? "Required" : null,
                           ),
                         ],
+                        // Previously Licensed or Illegal Outlet (shown when Un-Licensed)
+                        if (controller.licensedStatus.value == "Un-Licensed" ||
+                            controller.licensedStatus.value == "Unlicensed") ...[
+                          buildDropdown(
+                            label: "Previously Licensed or Illegal Outlet",
+                            items: ["Previously Licensed", "Illegal Outlet"],
+                            selectedItem: controller.selectedPreviouslyLicensed,
+                            prefixIcon: Icons.warning,
+                          ),
+                        ],
                         // SECTION: PMSA Activity Carried Out
                         const Text("PMSA Activity Carried Out",
                             style: TextStyle(
@@ -366,15 +376,6 @@ class PmsaForm extends StatelessWidget {
                         ],
                       ],
                     ),
-                  const SizedBox(height: 14),
-                                    Obx(() => controller.licensedStatus.value == "Un-Licensed" || controller.licensedStatus.value == "Unlicensed"
-                      ? buildDropdown(
-                          label: "Previously Licensed or Illegal Outlet",
-                          items: ["Previously Licensed", "Illegal Outlet"],
-                          selectedItem: controller.selectedPreviouslyLicensed,
-                          prefixIcon: Icons.warning,
-                        )
-                      : const SizedBox.shrink()),
                   // Submit Button
                   Center(
                     child: SizedBox(

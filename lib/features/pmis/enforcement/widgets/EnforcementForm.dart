@@ -61,6 +61,16 @@ class EnforcementForm extends StatelessWidget {
               ),
               const SizedBox(height: Tsizes.spaceBtwInputFields),
 
+              // Inspection Time
+              _buildTextField(
+                controller: controller.inspectionTimeController,
+                label: "Inspection Time",
+                prefixIcon: Iconsax.clock,
+                readOnly: true,
+                validator: (value) => value!.isEmpty ? "Required" : null,
+              ),
+              const SizedBox(height: Tsizes.spaceBtwInputFields),
+
               // Inspector Name
               _buildTextField(
                 controller: controller.inspectorNameController,
@@ -255,6 +265,24 @@ class EnforcementForm extends StatelessWidget {
                 }),
                 const SizedBox(height: Tsizes.spaceBtwInputFields),
 
+                // Previously Licensed or Illegal Outlet (shown when Un-Licensed)
+                Obx(() => controller.selectedLicenseStatus.value == "Un-Licensed" ||
+                        controller.selectedLicenseStatus.value == "Unlicensed"
+                    ? Column(
+                        children: [
+                          _buildDropdown(
+                            label: "Previously Licensed or Illegal Outlet",
+                            items: ["Previously Licensed", "Illegal Outlet"],
+                            selectedItem: controller.selectedPreviouslyLicensed,
+                            prefixIcon: Icons.warning,
+                          ),
+                          const SizedBox(height: Tsizes.spaceBtwInputFields),
+                        ],
+                      )
+                    : const SizedBox.shrink()),
+
+                const SizedBox(height: Tsizes.spaceBtwInputFields),
+
                 // Category of Drugs
                 _buildDropdown(
                   label: "Category of Drugs",
@@ -308,15 +336,7 @@ class EnforcementForm extends StatelessWidget {
               ),
               const SizedBox(height: Tsizes.spaceBtwSections * 2),
 
-                                Obx(() => controller.selectedLicenseStatus.value == "Un-Licensed" || controller.selectedLicenseStatus.value == "Unlicensed"
-                      ? _buildDropdown(
-                          label: "Previously Licensed or Illegal Outlet",
-                          items: ["Previously Licensed", "Illegal Outlet"],
-                          selectedItem: controller.selectedPreviouslyLicensed,
-                          prefixIcon: Icons.warning,
-                        )
-                      : const SizedBox.shrink()),
-                  // Submit Button
+              // Submit Button
               const SizedBox(height: 15),
               SizedBox(
                 width: double.infinity,

@@ -60,8 +60,10 @@ class RtsController extends GetxController {
 
   void _initializeForm() {
     // Set default values
-    inspectionDateController.text = DateTime.now().toString();
-    inspectionTimeController.text = DateTime.now().toString();
+    inspectionDateController.text = DateTime.now().toLocal().toString().split(' ')[0];
+    final now = DateTime.now();
+    inspectionTimeController.text =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00';
     
     // Initialize with current location
     getCurrentLocation();
@@ -141,7 +143,7 @@ class RtsController extends GetxController {
         try {
           print('Sending RTS data: $activityData'); // Debug log
           await repository.postRtsData(activityData);
-          activities.add(newActivity);
+          activities.add(newActivity.copyWith(isSynced: true));
           Loaders.successSnackbar(
               title: "Success", message: "RTS activity added successfully...");
         } catch (e) {
@@ -244,7 +246,7 @@ class RtsController extends GetxController {
 
       // Create RTS model
       final rtsActivity = RtsModel(
-        inspectionDate: inspectionDateController.text,
+        inspectionDate: "${inspectionDateController.text} ${inspectionTimeController.text}",
         inspectorName: inspectorNameController.text,
         latitude: currentLatitude.value,
         longitude: currentLongitude.value,
