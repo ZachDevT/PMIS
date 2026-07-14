@@ -10,7 +10,7 @@ class SensitizationMeetingService {
   /// Fetch Sensitization Meeting data from the API
   Future<List<Map<String, dynamic>>> getSensitizationMeetingData() async {
     try {
-      final uri = Uri.parse('$_baseUrl/SensitizationMeeting');
+      final uri = Uri.parse('$_baseUrl/SM');
 
       final response = await http.get(
         uri,
@@ -73,7 +73,7 @@ class SensitizationMeetingService {
   Future<void> postSensitizationMeetingData(
       Map<String, dynamic> meetingData) async {
     try {
-      final uri = Uri.parse('$_baseUrl/SensitizationMeeting');
+      final uri = Uri.parse('$_baseUrl/SM');
 
       final response = await http
           .post(

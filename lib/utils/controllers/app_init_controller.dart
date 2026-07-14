@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:pmis/utils/helpers/sync_manager.dart';
 import 'package:pmis/utils/helpers/networkmanager.dart';
 
@@ -24,6 +25,16 @@ class AppInitController extends GetxController with WidgetsBindingObserver {
 
   void _initializeApp() async {
     try {
+      // Request location permission on launch
+      try {
+        LocationPermission permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          await Geolocator.requestPermission();
+        }
+      } catch (e) {
+        print('Location permission request on launch failed: $e');
+      }
+
       // Wait for bindings to be ready
       await Future.delayed(const Duration(milliseconds: 100));
       
