@@ -376,8 +376,6 @@ class EnforcementActivityCard extends StatelessWidget {
                             'Inspection Date',
                             _formatDate(activity.inspectionDate),
                             Iconsax.calendar),
-                        _buildModernDetailRow(context, 'GPS Location',
-                            activity.gps, Iconsax.location),
                         _buildModernDetailRow(
                             context, 'Region', activity.region, Iconsax.map),
                         _buildModernDetailRow(context, 'District',

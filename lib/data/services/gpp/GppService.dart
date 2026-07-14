@@ -179,7 +179,7 @@ class GppService {
           pascalKey = 'LicenseNo';
           break;
         case 'licenseExpiryDate':
-          pascalKey = 'LicenseExpiryDate';
+          pascalKey = 'LicenseExpDate';
           break;
         case 'gps':
           pascalKey = 'Gps';
@@ -193,6 +193,20 @@ class GppService {
       }
 
       converted[pascalKey] = entry.value;
+    }
+
+    // Map qualifications to QualificationId for GPP backend
+    if (data.containsKey('qualifications')) {
+      final q = data['qualifications']?.toString().toLowerCase() ?? '';
+      int qId = 1; // Default to Pharmacist
+      if (q.contains('nurse')) {
+        qId = 2;
+      } else if (q.contains('dispenser')) {
+        qId = 3;
+      } else if (q.contains('attendant')) {
+        qId = 4;
+      }
+      converted['QualificationId'] = qId;
     }
 
     return converted;

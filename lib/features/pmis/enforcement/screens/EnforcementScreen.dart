@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 import 'package:pmis/features/pmis/enforcement/controllers/EnforcementController.dart';
 import 'package:pmis/features/pmis/enforcement/widgets/EnforcementForm.dart';
 import 'package:pmis/features/pmis/enforcement/widgets/EnforcementActivityCard.dart';
@@ -272,21 +274,68 @@ class _ActionButton extends StatelessWidget {
 class _UserProfileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Get.toNamed('/user-menu'),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(10),
+    final authController = Get.isRegistered<AuthController>() 
+        ? Get.find<AuthController>() 
+        : null;
+    
+    return Obx(() {
+      final displayName = authController?.userDisplayName ?? 'Guest';
+      
+      return InkWell(
+        onTap: () => Get.toNamed('/user-menu'),
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Row(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text("Welcome ", style: Theme.of(context).textTheme.bodyMedium),
+                  Text(
+                    displayName,
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                          color: Tcolors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+              const SizedBox(width: 8),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
+                    child: const Icon(HugeIcons.strokeRoundedUser, size: 30),
+                  ),
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        child: const Icon(
-          Iconsax.user,
-          color: Colors.white,
-          size: 20,
-        ),
-      ),
-    );
+      );
+    });
   }
 }
 

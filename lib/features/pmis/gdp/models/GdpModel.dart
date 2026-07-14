@@ -69,7 +69,13 @@ class GdpModel {
       id: json['id'] ?? 0,
       inspectionDate: DateTime.parse(json['inspectionDate'] ?? json['InspectionDate'] ?? DateTime.now().toIso8601String()),
       inspectorName: inspectorName,
-      gps: json['gps'] ?? json['Gps'] ?? '',
+      gps: (json['gps'] != null && json['gps'].toString().isNotEmpty)
+          ? json['gps'].toString()
+          : (json['Gps'] != null && json['Gps'].toString().isNotEmpty)
+              ? json['Gps'].toString()
+              : ((json['latitude'] != null || json['Latitude'] != null)
+                  ? 'Lat: ${json['latitude'] ?? json['Latitude']}, Lon: ${json['longitude'] ?? json['Longitude']}'
+                  : ''),
       intRegion: json['intRegion'] ?? json['IntRegion'] ?? '',
       districtId: json['districtId'] ?? json['DistrictId'] ?? 0,
       facilityName: json['facilityName'] ?? json['FacilityName'] ?? '',
@@ -87,8 +93,8 @@ class GdpModel {
       inspectorId: json['inspectorId'] ?? json['InspectorId'] ?? '',
       latitude: (json['latitude'] ?? json['Latitude'] ?? 0).toDouble(),
       longitude: (json['longitude'] ?? json['Longitude'] ?? 0).toDouble(),
-      licenseNo: json['licenseNo'] ?? '',
-      licenseExpiryDate: json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? '',
+      licenseNo: json['licenseNo'] ?? json['LicenseNo'] ?? '',
+      licenseExpiryDate: json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? json['licenseExpDate'] ?? json['LicenseExpDate'] ?? '',
     );
   }
 

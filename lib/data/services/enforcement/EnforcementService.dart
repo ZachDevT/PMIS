@@ -125,17 +125,29 @@ class EnforcementService {
     converted['InspectorId'] = data['inspectorId'];
 
     // GPS / LatLng
+    double lat = 0.0;
+    double lon = 0.0;
     if (data['gps'] != null && (data['gps'] as String).isNotEmpty) {
       converted['Gps'] = data['gps'];
+      final gpsStr = data['gps'] as String;
+      final cleanGps = gpsStr
+          .replaceAll('Lat:', '')
+          .replaceAll('Lon:', '')
+          .replaceAll('lat:', '')
+          .replaceAll('lon:', '')
+          .trim();
+      final parts = cleanGps.split(',');
+      if (parts.length == 2) {
+        lat = double.tryParse(parts[0].trim()) ?? 0.0;
+        lon = double.tryParse(parts[1].trim()) ?? 0.0;
+      }
     } else {
-      final lat = data['latitude']?.toDouble() ?? 0.0;
-      final lon = data['longitude']?.toDouble() ?? 0.0;
-      converted['Gps'] = '\$lat,\$lon'
-          .replaceAll('\$lat', lat.toString())
-          .replaceAll('\$lon', lon.toString());
-      converted['Latitude'] = lat;
-      converted['Longitude'] = lon;
+      lat = data['latitude']?.toDouble() ?? 0.0;
+      lon = data['longitude']?.toDouble() ?? 0.0;
+      converted['Gps'] = '$lat,$lon';
     }
+    converted['Latitude'] = lat;
+    converted['Longitude'] = lon;
 
     // Region / District
     converted['IntRegion'] =

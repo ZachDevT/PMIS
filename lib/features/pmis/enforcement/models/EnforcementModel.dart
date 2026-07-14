@@ -87,7 +87,13 @@ class EnforcementModel {
     return EnforcementModel(
       id: json['id']?.toString(),
       inspectionDate: json['inspectionDate'] ?? '',
-      gps: json['gps'] ?? '',
+      gps: (json['gps'] != null && json['gps'].toString().isNotEmpty)
+          ? json['gps'].toString()
+          : (json['Gps'] != null && json['Gps'].toString().isNotEmpty)
+              ? json['Gps'].toString()
+              : ((json['latitude'] != null || json['Latitude'] != null)
+                  ? 'Lat: ${json['latitude'] ?? json['Latitude']}, Lon: ${json['longitude'] ?? json['Longitude']}'
+                  : ''),
       region: _getRegionName(json['intRegion']),
       district: _getDistrictName(json['districtId']),
       facilityName: json['facilityName'] ?? '',
@@ -240,9 +246,11 @@ class EnforcementModel {
   }
 
   /// Convert enforcement action code to name
-  static String _getEnforcementActionName(int? action) {
+  static String _getEnforcementActionName(dynamic action) {
     if (action == null) return '';
-    switch (action) {
+    final int? parsedAction = action is int ? action : int.tryParse(action.toString());
+    if (parsedAction == null) return 'NONE';
+    switch (parsedAction) {
       case 1:
         return 'WARNING';
       case 2:

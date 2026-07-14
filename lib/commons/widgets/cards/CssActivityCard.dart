@@ -424,10 +424,6 @@ class CssActivityCard extends StatelessWidget {
                             Iconsax.calendar),
                         _buildModernDetailRow('Inspector Name',
                             activity.inspectorName, Iconsax.user),
-                        _buildModernDetailRow(
-                            'GPS Location',
-                            '${activity.latitude}, ${activity.longitude}',
-                            Iconsax.location),
                         _buildModernDetailRow('Region',
                             _getRegionName(activity.intRegion), Iconsax.map),
                         _buildModernDetailRow(

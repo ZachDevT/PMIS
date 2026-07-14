@@ -53,7 +53,13 @@ class GppActivity {
         id: json['id'] ?? 0,
         inspectionDate: DateTime.parse(json['inspectionDate'] ?? DateTime.now().toIso8601String()),
         inspectorName: json['inspectorName'] ?? '',
-        gps: json['gps'],
+        gps: (json['gps'] != null && json['gps'].toString().isNotEmpty)
+            ? json['gps'].toString()
+            : (json['Gps'] != null && json['Gps'].toString().isNotEmpty)
+                ? json['Gps'].toString()
+                : ((json['latitude'] != null || json['Latitude'] != null)
+                    ? 'Lat: ${json['latitude'] ?? json['Latitude']}, Lon: ${json['longitude'] ?? json['Longitude']}'
+                    : ''),
         intRegion: json['intRegion'] ?? '',
         districtId: json['districtId'] ?? 0,
         facilityName: json['facilityName'] ?? '',
@@ -61,7 +67,12 @@ class GppActivity {
         facilityPersonType: json['facilityPersonType'] ?? 1,
         personName: json['personName'] ?? '',
         contact: json['contact'] ?? '',
-        qualifications: json['qualifications'] ?? '',
+        qualifications: json['qualifications'] ??
+            (json['qualificationId'] != null
+                ? _getQualificationName(json['qualificationId'])
+                : (json['QualificationId'] != null
+                    ? _getQualificationName(json['QualificationId'])
+                    : '')),
         categoryOfpremises: json['categoryOfpremises'] ?? 1,
         licenseStatus: json['licenseStatus'] ?? 1,
         categoryStatus: json['categoryStatus'] ?? 1,
@@ -72,8 +83,21 @@ class GppActivity {
         latitude: (json['latitude'] ?? 0.0).toDouble(),
         longitude: (json['longitude'] ?? 0.0).toDouble(),
         licenseNo: json['licenseNo'],
-        licenseExpiryDate: json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? null,
+        licenseExpiryDate: json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? json['licenseExpDate'] ?? json['LicenseExpDate'] ?? null,
       );
+
+  static String _getQualificationName(dynamic id) {
+    if (id == null) return '';
+    final intId = id is int ? id : int.tryParse(id.toString());
+    if (intId == null) return '';
+    switch (intId) {
+      case 1: return 'Pharmacist';
+      case 2: return 'Nurse';
+      case 3: return 'Dispenser';
+      case 4: return 'Attendant';
+      default: return 'Other ($intId)';
+    }
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,

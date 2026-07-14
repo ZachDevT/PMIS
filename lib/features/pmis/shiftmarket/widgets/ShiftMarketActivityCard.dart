@@ -379,11 +379,6 @@ class ShiftMarketActivityCard extends StatelessWidget {
                         _buildModernDetailRow(context, 'Inspector Name',
                             activity.inspectorName, Iconsax.user),
                         _buildModernDetailRow(
-                            context,
-                            'GPS Location',
-                            '${activity.latitude}, ${activity.longitude}',
-                            Iconsax.location),
-                        _buildModernDetailRow(
                             context, 'Region', activity.region, Iconsax.map),
                         _buildModernDetailRow(context, 'District',
                             activity.district, Iconsax.building),

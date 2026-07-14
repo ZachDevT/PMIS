@@ -273,6 +273,7 @@ class RtsController extends GetxController {
           activities.add(rtsActivity);
           Loaders.successSnackbar(
               title: "Success", message: "RTS activity sent to API successfully!");
+          Navigator.pop(Get.context!); // Close on success
         } catch (e) {
           print('❌ DEBUG: API call failed: $e');
           // If online submission fails, save locally as fallback
@@ -281,6 +282,7 @@ class RtsController extends GetxController {
           Loaders.errorSnackbar(
               title: "Network Error", 
               message: "Failed to send to API. Saved locally for sync.");
+          Navigator.pop(Get.context!); // Close on fallback success
         }
       } else {
         print('📱 DEBUG: Offline mode - saving locally');
@@ -290,6 +292,7 @@ class RtsController extends GetxController {
         Loaders.successSnackbar(
             title: "Offline",
             message: "RTS activity saved locally. Will sync when online.");
+        Navigator.pop(Get.context!); // Close on success
       }
 
       filterActivities();
@@ -298,7 +301,6 @@ class RtsController extends GetxController {
       Loaders.errorSnackbar(title: "Error", message: "Failed to submit activity");
     } finally {
       isSubmitting.value = false;
-      Navigator.pop(Get.context!); // Close the modal bottom sheet
     }
   }
 
