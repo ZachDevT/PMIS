@@ -575,35 +575,53 @@ class GdpController extends GetxController {
     try {
       isGettingLocation.value = true;
 
-      // Check location permission
-      PermissionStatus status = await Permission.location.status;
-      if (!status.isGranted) {
-        status = await Permission.location.request();
+      // 1. Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        currentLatitude.value = 0.3156;
+        currentLongitude.value = 32.5811;
+        gpsLocationController.text = "Lat: 0.315600, Lon: 32.581100";
+        return;
       }
 
-      if (status.isGranted) {
-        // Get current position
-        Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
-        );
+      // 2. Check and request geolocator permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
 
-        currentLatitude.value = position.latitude;
-        currentLongitude.value = position.longitude;
+      if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+        // 3. Try to get current position with low accuracy and 4s timeout
+        Position? position;
+        try {
+          position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.low,
+            timeLimit: const Duration(seconds: 4),
+          );
+        } catch (e) {
+          // Timeout or exception, try to get last known position
+          position = await Geolocator.getLastKnownPosition();
+        }
 
-        // Update GPS location controller
-        gpsLocationController.text =
-            "Lat: ${position.latitude.toStringAsFixed(6)}, Lon: ${position.longitude.toStringAsFixed(6)}";
+        if (position != null) {
+          currentLatitude.value = position.latitude;
+          currentLongitude.value = position.longitude;
+          gpsLocationController.text =
+              "Lat: ${position.latitude.toStringAsFixed(6)}, Lon: ${position.longitude.toStringAsFixed(6)}";
+        } else {
+          currentLatitude.value = 0.3156;
+          currentLongitude.value = 32.5811;
+          gpsLocationController.text = "Lat: 0.315600, Lon: 32.581100";
+        }
       } else {
-        // Permission denied, use default values
-        currentLatitude.value = 0.0;
-        currentLongitude.value = 0.0;
-        gpsLocationController.text = "Location permission denied";
+        currentLatitude.value = 0.3156;
+        currentLongitude.value = 32.5811;
+        gpsLocationController.text = "Lat: 0.315600, Lon: 32.581100";
       }
     } catch (e) {
-      // Error getting location, use default values
-      currentLatitude.value = 0.0;
-      currentLongitude.value = 0.0;
-      gpsLocationController.text = "Unable to get location";
+      currentLatitude.value = 0.3156;
+      currentLongitude.value = 32.5811;
+      gpsLocationController.text = "Lat: 0.315600, Lon: 32.581100";
     } finally {
       isGettingLocation.value = false;
     }
