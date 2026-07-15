@@ -26,6 +26,7 @@ class PmsModel {
   final String followupComment;
   final String complaintProduct;
   final String otherActivity;
+  final String previouslyLicensed;
 
   PmsModel({
     required this.id,
@@ -55,6 +56,7 @@ class PmsModel {
     required this.followupComment,
     required this.complaintProduct,
     required this.otherActivity,
+    this.previouslyLicensed = '',
   });
 
   factory PmsModel.fromJson(Map<String, dynamic> json) {
@@ -101,6 +103,7 @@ class PmsModel {
       followupComment: json['followup_Comment'] ?? '',
       complaintProduct: json['complaint_Product'] ?? '',
       otherActivity: json['other_Activity'] ?? '',
+      previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
     );
   }
 
@@ -133,6 +136,7 @@ class PmsModel {
       'followup_Comment': followupComment,
       'complaint_Product': complaintProduct,
       'other_Activity': otherActivity,
+      'previouslyLicensed': previouslyLicensed,
     };
   }
 
@@ -213,6 +217,7 @@ class PmsModel {
     String? followupComment,
     String? complaintProduct,
     String? otherActivity,
+    String? previouslyLicensed,
   }) {
     return PmsModel(
       id: id ?? this.id,
@@ -242,6 +247,7 @@ class PmsModel {
       followupComment: followupComment ?? this.followupComment,
       complaintProduct: complaintProduct ?? this.complaintProduct,
       otherActivity: otherActivity ?? this.otherActivity,
+      previouslyLicensed: previouslyLicensed ?? this.previouslyLicensed,
     );
   }
 }

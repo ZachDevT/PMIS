@@ -420,13 +420,19 @@ class EnforcementActivityCard extends StatelessWidget {
                           _buildModernDetailRow(context, 'License No.',
                               activity.licenseNo?.isNotEmpty == true ? activity.licenseNo! : 'N/A',
                               Iconsax.document_text),
-                        if (activity.licenseStatus.toLowerCase().contains('licens') &&
+                         if (activity.licenseStatus.toLowerCase().contains('licens') &&
                             !activity.licenseStatus.toLowerCase().contains('un'))
                           _buildModernDetailRow(context, 'License Expiry Date',
                               activity.licenseExpiryDate?.isNotEmpty == true ? activity.licenseExpiryDate! : 'N/A',
                               Iconsax.calendar),
+                        if (activity.previouslyLicensed.isNotEmpty)
+                          _buildModernDetailRow(context, 'Previously Licensed',
+                              activity.previouslyLicensed, Iconsax.document),
                         _buildModernDetailRow(context, 'Category Status',
                             activity.categoryStatus, Iconsax.info_circle),
+                        if (activity.categoryOfDrugs.isNotEmpty)
+                          _buildModernDetailRow(context, 'Category of Drugs',
+                              activity.categoryOfDrugs, Iconsax.hospital),
                       ],
                     ),
                     const SizedBox(height: 24),

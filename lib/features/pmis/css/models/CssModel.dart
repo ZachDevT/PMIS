@@ -25,6 +25,7 @@ class CssModel {
   final int classofDrugs;
   final int unRegisteredDrug;
   final String unRegDrugQty;
+  final String previouslyLicensed;
   final String action;
 
   CssModel({
@@ -54,6 +55,7 @@ class CssModel {
     required this.classofDrugs,
     required this.unRegisteredDrug,
     required this.unRegDrugQty,
+    required this.previouslyLicensed,
     required this.action,
   });
 
@@ -103,6 +105,7 @@ class CssModel {
       classofDrugs: json['classofDrugs'] ?? 0,
       unRegisteredDrug: json['unRegisteredDrug'] ?? 0,
       unRegDrugQty: json['unRegDrugQty'] ?? '',
+      previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
       action: json['action']?.toString() ?? '',
     );
   }
@@ -135,6 +138,7 @@ class CssModel {
       'classofDrugs': classofDrugs,
       'unRegisteredDrug': unRegisteredDrug,
       'unRegDrugQty': unRegDrugQty,
+      'previouslyLicensed': previouslyLicensed,
       'action': action,
     };
   }
@@ -295,6 +299,7 @@ class CssModel {
     int? classofDrugs,
     int? unRegisteredDrug,
     String? unRegDrugQty,
+    String? previouslyLicensed,
     String? action,
   }) {
     return CssModel(
@@ -324,6 +329,7 @@ class CssModel {
       classofDrugs: classofDrugs ?? this.classofDrugs,
       unRegisteredDrug: unRegisteredDrug ?? this.unRegisteredDrug,
       unRegDrugQty: unRegDrugQty ?? this.unRegDrugQty,
+      previouslyLicensed: previouslyLicensed ?? this.previouslyLicensed,
       action: action ?? this.action,
     );
   }

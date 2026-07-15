@@ -267,6 +267,9 @@ class GppController extends GetxController {
         longitude: currentLongitude.value,
         licenseNo: selectedLicensedStatus.value == "Licensed" ? licenseNoController.text : null,
         licenseExpiryDate: selectedLicensedStatus.value == "Licensed" ? licenseExpiryDateController.text : null,
+        previouslyLicensed: selectedFacilityStatus.value == "Closed"
+            ? ""
+            : selectedPreviouslyLicensed.value,
       );
 
       // Here, check for connectivity (this is a dummy flag).

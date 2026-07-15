@@ -14,6 +14,7 @@ class PmsaActivity {
   final String qualifications;
   final String categoryOfFacility;
   final String licensedStatus;
+  final String previouslyLicensed;
   final String pmsaActivityCarriesOut;
   final String categoryOfDrugs;
   final String categoryOfProductSamples;
@@ -41,6 +42,7 @@ class PmsaActivity {
     required this.qualifications,
     required this.categoryOfFacility,
     required this.licensedStatus,
+    required this.previouslyLicensed,
     required this.pmsaActivityCarriesOut,
     required this.categoryOfDrugs,
     required this.categoryOfProductSamples,
@@ -69,8 +71,9 @@ class PmsaActivity {
       contact: json['contact'],
       qualifications: json['qualifications'],
       categoryOfFacility: json['categoryOfFacility'],
-      licensedStatus: json['licensedStatus'],
-      pmsaActivityCarriesOut: json['pmsaActivityCarriesOut'],
+      licensedStatus: json['licensedStatus'] ?? '',
+      previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
+      pmsaActivityCarriesOut: json['pmsaActivityCarriesOut'] ?? '',
       categoryOfDrugs: json['categoryOfDrugs'],
       categoryOfProductSamples: json['categoryOfProductSamples'],
       productSampledName: json['productSampledName'],
@@ -100,6 +103,7 @@ class PmsaActivity {
       'qualifications': qualifications,
       'categoryOfFacility': categoryOfFacility,
       'licensedStatus': licensedStatus,
+      'previouslyLicensed': previouslyLicensed,
       'pmsaActivityCarriesOut': pmsaActivityCarriesOut,
       'categoryOfDrugs': categoryOfDrugs,
       'categoryOfProductSamples': categoryOfProductSamples,

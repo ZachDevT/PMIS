@@ -59,6 +59,7 @@ class EnforcementController extends GetxController {
   var selectedLicenseStatus = 'Licensed'.obs;
   var selectedPreviouslyLicensed = ''.obs;
   var selectedCategoryStatus = ''.obs;
+  var selectedCategoryOfDrugs = ''.obs;
   final licenseNoController = TextEditingController();
   final licenseExpiryController = TextEditingController();
 
@@ -117,6 +118,8 @@ class EnforcementController extends GetxController {
         licenseNoController.clear();
         licenseExpiryController.clear();
         selectedCategoryStatus.value = '';
+        selectedCategoryOfDrugs.value = '';
+        selectedPreviouslyLicensed.value = '';
       }
     });
   }
@@ -214,6 +217,12 @@ class EnforcementController extends GetxController {
         categoryStatus: selectedFacilityStatus.value == "Closed"
           ? ""
           : selectedCategoryStatus.value,
+        categoryOfDrugs: selectedFacilityStatus.value == "Closed"
+          ? ""
+          : selectedCategoryOfDrugs.value,
+        previouslyLicensed: selectedFacilityStatus.value == "Closed"
+          ? ""
+          : selectedPreviouslyLicensed.value,
         enforcementActionTaken: selectedEnforcementActions.join(", "),
         comments: commentsController.text,
         createdAt: DateTime.now(),

@@ -413,11 +413,14 @@ class ShiftMarketActivityCard extends StatelessWidget {
                           _buildModernDetailRow(context, 'License No.',
                               activity.licenseNo?.isNotEmpty == true ? activity.licenseNo! : 'N/A',
                               Iconsax.document_text),
-                        if (activity.licenseStatus.toLowerCase().contains('licens') &&
+                         if (activity.licenseStatus.toLowerCase().contains('licens') &&
                             !activity.licenseStatus.toLowerCase().contains('un'))
                           _buildModernDetailRow(context, 'License Expiry Date',
                               activity.licenseExpiryDate?.isNotEmpty == true ? activity.licenseExpiryDate! : 'N/A',
                               Iconsax.calendar),
+                        if (activity.previouslyLicensed.isNotEmpty)
+                          _buildModernDetailRow(context, 'Previously Licensed',
+                              activity.previouslyLicensed, Iconsax.document),
                       ],
                     ),
                     const SizedBox(height: 24),

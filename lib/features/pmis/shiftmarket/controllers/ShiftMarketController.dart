@@ -189,6 +189,9 @@ class ShiftMarketController extends GetxController {
           : licenseExpiryController.text,
         regulatoryActionTaken: regulatoryActionTakenController.text,
         consignmentsImpounded: consignmentsImpoundedController.text,
+        previouslyLicensed: selectedFacilityStatus.value == 'Closed'
+          ? ''
+          : selectedPreviouslyLicensed.value,
         createdAt: DateTime.now(),
         isSynced: false,
         );

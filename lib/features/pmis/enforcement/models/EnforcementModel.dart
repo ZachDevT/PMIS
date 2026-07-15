@@ -19,6 +19,8 @@ class EnforcementModel {
   final String? licenseNo;
   final String? licenseExpiryDate;
   final String categoryStatus;
+  final String categoryOfDrugs;
+  final String previouslyLicensed;
   final String enforcementActionTaken;
   final String comments;
   final DateTime? createdAt;
@@ -44,6 +46,8 @@ class EnforcementModel {
     this.licenseNo,
     this.licenseExpiryDate,
     required this.categoryStatus,
+    required this.categoryOfDrugs,
+    required this.previouslyLicensed,
     required this.enforcementActionTaken,
     required this.comments,
     this.createdAt,
@@ -72,6 +76,8 @@ class EnforcementModel {
       'licenseNo': licenseNo,
       'licenseExpiryDate': licenseExpiryDate,
       'categoryStatus': categoryStatus,
+      'categoryOfDrugs': categoryOfDrugs,
+      'previouslyLicensed': previouslyLicensed,
       'enforcementActionTaken': enforcementActionTaken,
       'comments': comments,
       'createdAt': createdAt?.toIso8601String(),
@@ -107,8 +113,10 @@ class EnforcementModel {
       licenseNo: json['licenseNo'] ?? json['LicenseNo'] ?? '',
       licenseExpiryDate:
           json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? '',
-      categoryStatus: _getCategoryStatusName(json['categoryStatus']),
-      enforcementActionTaken: _getEnforcementActionName(json['enfAction']),
+      categoryStatus: _getCategoryStatusName(json['categoryStatus'] ?? json['CategoryStatus']),
+      categoryOfDrugs: json['categoryOfDrugs'] ?? json['CategoryOfDrugs'] ?? '',
+      previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
+      enforcementActionTaken: _getEnforcementActionName(json['enfAction'] ?? json['EnfAction'] ?? json['enforcementActionTaken']),
       comments: json['comments'] ?? '',
       createdAt:
           json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
@@ -281,6 +289,8 @@ class EnforcementModel {
     String? licenseNo,
     String? licenseExpiryDate,
     String? categoryStatus,
+    String? categoryOfDrugs,
+    String? previouslyLicensed,
     String? enforcementActionTaken,
     String? comments,
     DateTime? createdAt,
@@ -309,6 +319,8 @@ class EnforcementModel {
       licenseNo: licenseNo ?? this.licenseNo,
       licenseExpiryDate: licenseExpiryDate ?? this.licenseExpiryDate,
       categoryStatus: categoryStatus ?? this.categoryStatus,
+      categoryOfDrugs: categoryOfDrugs ?? this.categoryOfDrugs,
+      previouslyLicensed: previouslyLicensed ?? this.previouslyLicensed,
       enforcementActionTaken:
           enforcementActionTaken ?? this.enforcementActionTaken,
       comments: comments ?? this.comments,

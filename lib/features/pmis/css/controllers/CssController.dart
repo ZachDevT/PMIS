@@ -303,6 +303,7 @@ class CssController extends GetxController {
         unRegDrugQty: selectedUnregisteredDrugs.value == "Present"
             ? unRegDrugQtyController.text
             : "",
+        previouslyLicensed: selectedPreviouslyLicensed.value,
         action: selectedActionTaken.join(', '),
       );
 

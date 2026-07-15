@@ -58,7 +58,7 @@ void main() {
 
     test('Action Taken should be required when facility is Open', () {
       controller.selectedFacilityStatus.value = "Open";
-      controller.selectedActionTaken.value = "";
+      controller.selectedActionTaken.value = [];
       
       // This would normally trigger validation
       expect(controller.selectedFacilityStatus.value, "Open");
@@ -67,7 +67,7 @@ void main() {
 
     test('Action Taken should not be required when facility is Closed', () {
       controller.selectedFacilityStatus.value = "Closed";
-      controller.selectedActionTaken.value = "";
+      controller.selectedActionTaken.value = [];
       
       // Validation should pass even with empty Action Taken
       expect(controller.selectedFacilityStatus.value, "Closed");

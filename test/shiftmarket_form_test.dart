@@ -85,6 +85,7 @@ void main() {
         categoryOfPremises: 'Shift Market',
         regulatoryActionTaken: 'None',
         consignmentsImpounded: '0',
+        previouslyLicensed: '',
         isSynced: false,
       );
 

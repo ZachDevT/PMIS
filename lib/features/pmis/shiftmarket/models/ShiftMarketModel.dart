@@ -12,14 +12,14 @@ class ShiftMarketModel {
   final String region;
   final String district;
   final String facilityName;
-  final String
-      personFoundAtFacility; // Replaces facilityStatus, personName, contact, qualifications
+  final String personFoundAtFacility; // Replaces facilityStatus, personName, contact, qualifications
   final String categoryOfPremises;
   final String licenseStatus;
   final String? licenseNo;
   final String? licenseExpiryDate;
   final String regulatoryActionTaken;
   final String consignmentsImpounded;
+  final String previouslyLicensed;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final bool isSynced;
@@ -41,6 +41,7 @@ class ShiftMarketModel {
     this.licenseExpiryDate,
     required this.regulatoryActionTaken,
     required this.consignmentsImpounded,
+    required this.previouslyLicensed,
     this.createdAt,
     this.updatedAt,
     this.isSynced = false,
@@ -63,6 +64,7 @@ class ShiftMarketModel {
       'licenseStatus': licenseStatus,
       'licenseNo': licenseNo,
       'licenseExpiryDate': licenseExpiryDate,
+      'previouslyLicensed': previouslyLicensed,
       'regulatoryActionTaken': regulatoryActionTaken,
       'consignmentsImpounded': consignmentsImpounded,
       'createdAt': createdAt?.toIso8601String(),
@@ -93,6 +95,7 @@ class ShiftMarketModel {
       licenseNo: json['licenseNo'] ?? json['LicenseNo'] ?? '',
       licenseExpiryDate:
           json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? '',
+      previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
       regulatoryActionTaken: json['regulatoryAction'] ?? '',
       consignmentsImpounded: json['consignmentsImpounded'] ?? '',
       createdAt:
@@ -213,6 +216,7 @@ class ShiftMarketModel {
     String? licenseStatus,
     String? licenseNo,
     String? licenseExpiryDate,
+    String? previouslyLicensed,
     String? regulatoryActionTaken,
     String? consignmentsImpounded,
     DateTime? createdAt,
@@ -235,6 +239,7 @@ class ShiftMarketModel {
       licenseStatus: licenseStatus ?? this.licenseStatus,
       licenseNo: licenseNo ?? this.licenseNo,
       licenseExpiryDate: licenseExpiryDate ?? this.licenseExpiryDate,
+      previouslyLicensed: previouslyLicensed ?? this.previouslyLicensed,
       regulatoryActionTaken:
           regulatoryActionTaken ?? this.regulatoryActionTaken,
       consignmentsImpounded:

@@ -321,6 +321,9 @@ class GdpController extends GetxController {
             : (selectedLicenseStatus.value == "Licensed"
                 ? licenseExpiryDateController.text
                 : ""),
+        previouslyLicensed: selectedFacilityStatus.value == "Closed"
+            ? ""
+            : selectedPreviouslyLicensed.value,
       );
 
       // Check connectivity status.

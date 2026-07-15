@@ -22,6 +22,7 @@ class GdpModel {
   final double longitude;
   final String licenseNo;
   final String licenseExpiryDate;
+  final String previouslyLicensed;
 
   GdpModel({
     required this.id,
@@ -47,6 +48,7 @@ class GdpModel {
     required this.longitude,
     required this.licenseNo,
     required this.licenseExpiryDate,
+    required this.previouslyLicensed,
   });
 
   factory GdpModel.fromJson(Map<String, dynamic> json) {
@@ -95,6 +97,7 @@ class GdpModel {
       longitude: (json['longitude'] ?? json['Longitude'] ?? 0).toDouble(),
       licenseNo: json['licenseNo'] ?? json['LicenseNo'] ?? '',
       licenseExpiryDate: json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? json['licenseExpDate'] ?? json['LicenseExpDate'] ?? '',
+      previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
     );
   }
 
@@ -123,6 +126,7 @@ class GdpModel {
       'longitude': longitude,
       'licenseNo': licenseNo,
       'licenseExpiryDate': licenseExpiryDate,
+      'previouslyLicensed': previouslyLicensed,
     };
   }
 
@@ -223,6 +227,7 @@ class GdpModel {
     double? longitude,
     String? licenseNo,
     String? licenseExpiryDate,
+    String? previouslyLicensed,
   }) {
     return GdpModel(
       id: id ?? this.id,
@@ -248,6 +253,7 @@ class GdpModel {
       longitude: longitude ?? this.longitude,
       licenseNo: licenseNo ?? this.licenseNo,
       licenseExpiryDate: licenseExpiryDate ?? this.licenseExpiryDate,
+      previouslyLicensed: previouslyLicensed ?? this.previouslyLicensed,
     );
   }
 }

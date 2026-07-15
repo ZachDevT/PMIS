@@ -324,6 +324,9 @@ class PmsaController extends GetxController {
             ? postMarketComplaintNotedController.text 
             : productComplaintInvestigatedController.text,
         otherActivity: specifyActivityController.text,
+        previouslyLicensed: selectedFacilityStatus.value == "Closed"
+            ? ""
+            : selectedPreviouslyLicensed.value,
       );
 
       // Check connectivity status.
