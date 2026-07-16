@@ -139,166 +139,171 @@ class EnforcementForm extends StatelessWidget {
               const SizedBox(height: Tsizes.spaceBtwInputFields),
 
               // Conditionally show fields only when facility is Open
-              if (controller.selectedFacilityStatus.value != "Closed") ...[
-                // Person Found at Facility
-                _buildDropdown(
-                  label: "Person Found at Facility",
-                  items: ["In-charge", "Attendant/Operator"],
-                  selectedItem: controller.selectedPersonFoundAtFacility,
-                  prefixIcon: Iconsax.user,
-                  
-                ),
-                const SizedBox(height: Tsizes.spaceBtwInputFields),
+              Obx(() => controller.selectedFacilityStatus.value != "Closed"
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Person Found at Facility
+                        _buildDropdown(
+                          label: "Person Found at Facility",
+                          items: ["In-charge", "Attendant/Operator"],
+                          selectedItem: controller.selectedPersonFoundAtFacility,
+                          prefixIcon: Iconsax.user,
+                          
+                        ),
+                        const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-                // Person Name
-                _buildTextField(
-                  controller: controller.personNameController,
-                  label: "Person Name",
-                  prefixIcon: Iconsax.user,
-                  
-                ),
-                const SizedBox(height: Tsizes.spaceBtwInputFields),
+                        // Person Name
+                        _buildTextField(
+                          controller: controller.personNameController,
+                          label: "Person Name",
+                          prefixIcon: Iconsax.user,
+                          
+                        ),
+                        const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-                // Contact
-                _buildTextField(
-                  controller: controller.contactController,
-                  label: "Contact",
-                  prefixIcon: Iconsax.call,
-                  
-                ),
-                const SizedBox(height: Tsizes.spaceBtwInputFields),
+                        // Contact
+                        _buildTextField(
+                          controller: controller.contactController,
+                          label: "Contact",
+                          prefixIcon: Iconsax.call,
+                          
+                        ),
+                        const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-                // Qualifications
-                _buildTextField(
-                  controller: controller.qualificationsController,
-                  label: "Qualifications",
-                  prefixIcon: Icons.school,
-                  
-                ),
-                const SizedBox(height: Tsizes.spaceBtwSections / 2),
+                        // Qualifications
+                        _buildTextField(
+                          controller: controller.qualificationsController,
+                          label: "Qualifications",
+                          prefixIcon: Icons.school,
+                          
+                        ),
+                        const SizedBox(height: Tsizes.spaceBtwSections / 2),
 
-                // Category and Licensing Section
-                _buildSectionHeader("Category and Licensing", dark),
-                const SizedBox(height: Tsizes.spaceBtwItems / 2),
+                        // Category and Licensing Section
+                        _buildSectionHeader("Category and Licensing", dark),
+                        const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
-                // Category of Premises
-                _buildDropdown(
-                  label: "Category of Premises",
-                  items: controller.categoryOfPremisesOptions,
-                  selectedItem: controller.selectedCategoryOfPremises,
-                  prefixIcon: Iconsax.category,
-                  validator: (value) => value!.isEmpty ? "Required" : null,
-                ),
-                Obx(() => controller.selectedCategoryOfPremises.value == "Other" 
-                    ? Padding(
-                        padding: const EdgeInsets.only(top: 16.0),
-                        child: _buildTextField(
-                          controller: controller.otherCategoryController,
-                          label: "Please specify other category",
-                          prefixIcon: Iconsax.edit,
+                        // Category of Premises
+                        _buildDropdown(
+                          label: "Category of Premises",
+                          items: controller.categoryOfPremisesOptions,
+                          selectedItem: controller.selectedCategoryOfPremises,
+                          prefixIcon: Iconsax.category,
                           validator: (value) => value!.isEmpty ? "Required" : null,
                         ),
-                      )
-                    : const SizedBox.shrink()),
-                const SizedBox(height: Tsizes.spaceBtwInputFields),
+                        Obx(() => controller.selectedCategoryOfPremises.value == "Other" 
+                            ? Padding(
+                                padding: const EdgeInsets.only(top: 16.0),
+                                child: _buildTextField(
+                                  controller: controller.otherCategoryController,
+                                  label: "Please specify other category",
+                                  prefixIcon: Iconsax.edit,
+                                  validator: (value) => value!.isEmpty ? "Required" : null,
+                                ),
+                              )
+                            : const SizedBox.shrink()),
+                        const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-                // License Status
-                _buildDropdown(
-                  label: "License Status",
-                  items: ["Licensed", "Un-Licensed", "Not-Applicable"],
-                  selectedItem: controller.selectedLicenseStatus,
-                  prefixIcon: Iconsax.shield_tick,
-                  validator: (value) => value!.isEmpty ? "Required" : null,
-                ),
-                const SizedBox(height: Tsizes.spaceBtwInputFields),
-
-                // Show License No & Expiry when Licensed
-                Obx(() {
-                  if (controller.selectedLicenseStatus.value == 'Licensed') {
-                    return Column(
-                      children: [
-                        _buildTextField(
-                          controller: controller.licenseNoController,
-                          label: "License No.",
-                          prefixIcon: Iconsax.crown,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
+                        // License Status
+                        _buildDropdown(
+                          label: "License Status",
+                          items: ["Licensed", "Un-Licensed", "Not-Applicable"],
+                          selectedItem: controller.selectedLicenseStatus,
+                          prefixIcon: Iconsax.shield_tick,
+                          validator: (value) => value!.isEmpty ? "Required" : null,
                         ),
                         const SizedBox(height: Tsizes.spaceBtwInputFields),
-                        TextFormField(
-                          controller: controller.licenseExpiryController,
-                          readOnly: true,
-                          validator: (value) => value == null || value.isEmpty
-                              ? "Required"
-                              : null,
-                          decoration: InputDecoration(
-                            labelText: 'License Expiry Date',
-                            prefixIcon: const Icon(Iconsax.calendar),
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.circular(Tsizes.borderRadiusLg),
-                            ),
-                            filled: true,
-                            fillColor: THelperFunctions.isDarkMode(Get.context!)
-                                ? Tcolors.darkGrey
-                                : Colors.white,
-                          ),
-                          onTap: () async {
-                            DateTime? picked = await showDatePicker(
-                              context: Get.context!,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
+
+                        // Show License No & Expiry when Licensed
+                        Obx(() {
+                          if (controller.selectedLicenseStatus.value == 'Licensed') {
+                            return Column(
+                              children: [
+                                _buildTextField(
+                                  controller: controller.licenseNoController,
+                                  label: "License No.",
+                                  prefixIcon: Iconsax.crown,
+                                  validator: (value) =>
+                                      value!.isEmpty ? "Required" : null,
+                                ),
+                                const SizedBox(height: Tsizes.spaceBtwInputFields),
+                                TextFormField(
+                                  controller: controller.licenseExpiryController,
+                                  readOnly: true,
+                                  validator: (value) => value == null || value.isEmpty
+                                      ? "Required"
+                                      : null,
+                                  decoration: InputDecoration(
+                                    labelText: 'License Expiry Date',
+                                    prefixIcon: const Icon(Iconsax.calendar),
+                                    border: OutlineInputBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(Tsizes.borderRadiusLg),
+                                    ),
+                                    filled: true,
+                                    fillColor: THelperFunctions.isDarkMode(Get.context!)
+                                        ? Tcolors.darkGrey
+                                        : Colors.white,
+                                  ),
+                                  onTap: () async {
+                                    DateTime? picked = await showDatePicker(
+                                      context: Get.context!,
+                                      initialDate: DateTime.now(),
+                                      firstDate: DateTime(2000),
+                                      lastDate: DateTime(2100),
+                                    );
+                                    if (picked != null) {
+                                      controller.licenseExpiryController.text =
+                                          picked.toIso8601String().split('T').first;
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: Tsizes.spaceBtwInputFields),
+                              ],
                             );
-                            if (picked != null) {
-                              controller.licenseExpiryController.text =
-                                  picked.toIso8601String().split('T').first;
-                            }
-                          },
-                        ),
+                          }
+
+                          return const SizedBox.shrink();
+                        }),
                         const SizedBox(height: Tsizes.spaceBtwInputFields),
+
+                        // Previously Licensed or Illegal Outlet (shown when Un-Licensed)
+                        Obx(() => controller.selectedLicenseStatus.value == "Un-Licensed" ||
+                                controller.selectedLicenseStatus.value == "Unlicensed"
+                            ? Column(
+                                children: [
+                                  _buildDropdown(
+                                    label: "Previously Licensed or Illegal Outlet",
+                                    items: ["Previously Licensed", "Illegal Outlet"],
+                                    selectedItem: controller.selectedPreviouslyLicensed,
+                                    prefixIcon: Icons.warning,
+                                  ),
+                                  const SizedBox(height: Tsizes.spaceBtwInputFields),
+                                ],
+                              )
+                            : const SizedBox.shrink()),
+
+                        const SizedBox(height: Tsizes.spaceBtwInputFields),
+
+                        // Category of Drugs
+                        _buildDropdown(
+                          label: "Category of Drugs",
+                          items: [
+                            "Medical Device",
+                            "Veterinary drugs",
+                            "Human drugs",
+                            "Public Healthcare products",
+                            "Herbal drugs"
+                          ],
+                          selectedItem: controller.selectedCategoryStatus,
+                          prefixIcon: Iconsax.tag,
+                          validator: (value) => value!.isEmpty ? "Required" : null,
+                        ),
+                        const SizedBox(height: Tsizes.spaceBtwSections / 2),
                       ],
-                    );
-                  }
-
-                  return const SizedBox.shrink();
-                }),
-                const SizedBox(height: Tsizes.spaceBtwInputFields),
-
-                // Previously Licensed or Illegal Outlet (shown when Un-Licensed)
-                Obx(() => controller.selectedLicenseStatus.value == "Un-Licensed" ||
-                        controller.selectedLicenseStatus.value == "Unlicensed"
-                    ? Column(
-                        children: [
-                          _buildDropdown(
-                            label: "Previously Licensed or Illegal Outlet",
-                            items: ["Previously Licensed", "Illegal Outlet"],
-                            selectedItem: controller.selectedPreviouslyLicensed,
-                            prefixIcon: Icons.warning,
-                          ),
-                          const SizedBox(height: Tsizes.spaceBtwInputFields),
-                        ],
-                      )
-                    : const SizedBox.shrink()),
-
-                const SizedBox(height: Tsizes.spaceBtwInputFields),
-
-                // Category of Drugs
-                _buildDropdown(
-                  label: "Category of Drugs",
-                  items: [
-                    "Medical Device",
-                    "Veterinary drugs",
-                    "Human drugs",
-                    "Public Healthcare products",
-                    "Herbal drugs"
-                  ],
-                  selectedItem: controller.selectedCategoryStatus,
-                  prefixIcon: Iconsax.tag,
-                  validator: (value) => value!.isEmpty ? "Required" : null,
-                ),
-                const SizedBox(height: Tsizes.spaceBtwSections / 2),
-              ],
+                    )
+                  : const SizedBox.shrink()),
 
               // Enforcement Actions Section
               _buildSectionHeader("Enforcement Actions", dark),

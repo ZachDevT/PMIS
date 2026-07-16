@@ -88,18 +88,22 @@ class RtsScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
+      builder: (builderContext) => Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 24,
+          bottom: MediaQuery.of(builderContext).viewInsets.bottom,
         ),
-        decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(24))),
-        child: const RtsForm(),
+        child: Container(
+          padding: const EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 24,
+          ),
+          decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(24))),
+          child: const RtsForm(),
+        ),
       ),
     );
   }
