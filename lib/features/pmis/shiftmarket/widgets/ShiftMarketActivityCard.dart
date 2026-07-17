@@ -394,57 +394,64 @@ class ShiftMarketActivityCard extends StatelessWidget {
                             activity.facilityName, Iconsax.home),
                         _buildModernDetailRow(context, 'Facility Status',
                             activity.facilityStatus, Iconsax.info_circle),
-                        _buildModernDetailRow(context, 'Person Found at Facility',
-                            activity.personFoundAtFacility, Iconsax.user),
-                        _buildModernDetailRow(context, 'Category of Premises',
-                            activity.categoryOfPremises, Iconsax.building),
+                        // Only show below fields when facility is NOT closed
+                        if (!activity.facilityStatus.toLowerCase().contains('closed')) ...[
+                          _buildModernDetailRow(context, 'Person Found at Facility',
+                              activity.personFoundAtFacility.isNotEmpty ? activity.personFoundAtFacility : 'N/A', Iconsax.user),
+                          if (activity.categoryOfPremises.isNotEmpty)
+                            _buildModernDetailRow(context, 'Category of Premises',
+                                activity.categoryOfPremises, Iconsax.building),
+                        ],
                       ],
                     ),
-                    const SizedBox(height: 24),
-                    _buildModernDetailSection(
-                      context,
-                      'Compliance Information',
-                      Iconsax.shield_tick,
-                      [
-                        _buildModernDetailRow(context, 'License Status',
-                            activity.licenseStatus, Iconsax.document),
-                        if (activity.licenseStatus.toLowerCase().contains('licens') &&
-                            !activity.licenseStatus.toLowerCase().contains('un'))
-                          _buildModernDetailRow(context, 'License No.',
-                              activity.licenseNo?.isNotEmpty == true ? activity.licenseNo! : 'N/A',
-                              Iconsax.document_text),
-                         if (activity.licenseStatus.toLowerCase().contains('licens') &&
-                            !activity.licenseStatus.toLowerCase().contains('un'))
-                          _buildModernDetailRow(context, 'License Expiry Date',
-                              activity.licenseExpiryDate?.isNotEmpty == true ? activity.licenseExpiryDate! : 'N/A',
-                              Iconsax.calendar),
-                        if (activity.previouslyLicensed.isNotEmpty)
-                          _buildModernDetailRow(context, 'Previously Licensed',
-                              activity.previouslyLicensed, Iconsax.document),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    _buildModernDetailSection(
-                      context,
-                      'Regulatory Actions',
-                      Iconsax.shield_security,
-                      [
-                        _buildModernDetailRow(
-                            context,
-                            'Regulatory Action Taken',
-                            activity.regulatoryActionTaken.isNotEmpty
-                                ? activity.regulatoryActionTaken
-                                : 'None',
-                            Iconsax.warning_2),
-                        _buildModernDetailRow(
-                            context,
-                            'Consignments Impounded',
-                            activity.consignmentsImpounded.isNotEmpty
-                                ? activity.consignmentsImpounded
-                                : 'None',
-                            Iconsax.box),
-                      ],
-                    ),
+                    // Only show compliance info when facility is NOT closed
+                    if (!activity.facilityStatus.toLowerCase().contains('closed')) ...[
+                      const SizedBox(height: 24),
+                      _buildModernDetailSection(
+                        context,
+                        'Compliance Information',
+                        Iconsax.shield_tick,
+                        [
+                          if (activity.licenseStatus.isNotEmpty)
+                            _buildModernDetailRow(context, 'License Status',
+                                activity.licenseStatus, Iconsax.document),
+                          if (activity.licenseStatus.toLowerCase().contains('licens') &&
+                              !activity.licenseStatus.toLowerCase().contains('un')) ...[
+                            _buildModernDetailRow(context, 'License No.',
+                                activity.licenseNo?.isNotEmpty == true ? activity.licenseNo! : 'N/A',
+                                Iconsax.document_text),
+                            _buildModernDetailRow(context, 'License Expiry Date',
+                                activity.licenseExpiryDate?.isNotEmpty == true ? activity.licenseExpiryDate! : 'N/A',
+                                Iconsax.calendar),
+                          ],
+                          if (activity.previouslyLicensed.isNotEmpty)
+                            _buildModernDetailRow(context, 'Previously Licensed / Illegal Outlet',
+                                activity.previouslyLicensed, Iconsax.document),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      _buildModernDetailSection(
+                        context,
+                        'Regulatory Actions',
+                        Iconsax.shield_security,
+                        [
+                          _buildModernDetailRow(
+                              context,
+                              'Regulatory Action Taken',
+                              activity.regulatoryActionTaken.isNotEmpty
+                                  ? activity.regulatoryActionTaken
+                                  : 'None',
+                              Iconsax.warning_2),
+                          _buildModernDetailRow(
+                              context,
+                              'Consignments Impounded',
+                              activity.consignmentsImpounded.isNotEmpty
+                                  ? activity.consignmentsImpounded
+                                  : 'None',
+                              Iconsax.box),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     _buildModernDetailSection(
                       context,

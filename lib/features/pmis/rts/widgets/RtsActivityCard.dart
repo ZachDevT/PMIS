@@ -392,9 +392,11 @@ class RtsActivityCard extends StatelessWidget {
                       [
                         _buildModernDetailRow(context, 'Topic of Discussion',
                             activity.topicOfDiscussion, Iconsax.message),
-                        _buildModernDetailRow(context, 'Venue Location',
-                            activity.venueLocation, Iconsax.location),
-                        if (activity.radioCompanyName != null)
+                        _buildModernDetailRow(context, 'Venue / Location',
+                            activity.venueLocation.isNotEmpty ? activity.venueLocation : 'N/A', Iconsax.location),
+                        _buildModernDetailRow(context, 'No. of Participants',
+                            activity.numberOfParticipants.toString(), Iconsax.people),
+                        if (activity.radioCompanyName != null && activity.radioCompanyName!.isNotEmpty)
                           _buildModernDetailRow(context, 'Radio Company',
                               activity.radioCompanyName!, Iconsax.building),
                       ],

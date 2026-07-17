@@ -312,11 +312,22 @@ class GppActivityCard extends StatelessWidget {
                               'License Status',
                               _getLicenseStatusText(activity.licenseStatus),
                               Iconsax.shield_tick),
-                          if (activity.licenseStatus == 1)
-                          _buildModernDetailRow(
-                              'License Number',
-                              activity.licenseNo ?? 'Not provided',
-                              Iconsax.document),
+                          if (activity.licenseStatus == 1) ...[
+                            _buildModernDetailRow(
+                                'License Number',
+                                activity.licenseNo ?? 'Not provided',
+                                Iconsax.document),
+                            if (activity.licenseExpiryDate != null && activity.licenseExpiryDate!.isNotEmpty)
+                              _buildModernDetailRow(
+                                  'License Expiry Date',
+                                  activity.licenseExpiryDate!,
+                                  Iconsax.calendar),
+                          ],
+                          if (activity.previouslyLicensed != null && activity.previouslyLicensed!.isNotEmpty)
+                            _buildModernDetailRow(
+                                'Previously Licensed / Illegal Outlet',
+                                activity.previouslyLicensed!,
+                                Iconsax.document),
                         ],
                       ],
                     ),

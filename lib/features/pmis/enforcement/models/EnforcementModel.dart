@@ -112,7 +112,7 @@ class EnforcementModel {
       licenseStatus: _getLicenseStatusName(json['licenseStatus']),
       licenseNo: json['licenseNo'] ?? json['LicenseNo'] ?? '',
       licenseExpiryDate:
-          json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? '',
+          json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? json['licenseExpDate'] ?? json['LicenseExpDate'] ?? '',
       categoryStatus: _getCategoryStatusName(json['categoryStatus'] ?? json['CategoryStatus']),
       categoryOfDrugs: json['categoryOfDrugs'] ?? json['CategoryOfDrugs'] ?? '',
       previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
@@ -241,15 +241,22 @@ class EnforcementModel {
   }
 
   /// Convert category status code to name
-  static String _getCategoryStatusName(int? status) {
+  static String _getCategoryStatusName(dynamic status) {
     if (status == null) return '';
-    switch (status) {
+    final int? parsedStatus = status is int ? status : int.tryParse(status.toString());
+    switch (parsedStatus) {
       case 1:
-        return 'COMPLIANT';
-      case 0:
-        return 'NON-COMPLIANT';
+        return 'Medical Device';
+      case 2:
+        return 'Veterinary drugs';
+      case 3:
+        return 'Human drugs';
+      case 4:
+        return 'Public Healthcare products';
+      case 5:
+        return 'Herbal drugs';
       default:
-        return 'COMPLIANT';
+        return 'Medical Device';
     }
   }
 
@@ -265,6 +272,12 @@ class EnforcementModel {
         return 'FINE';
       case 3:
         return 'CLOSURE';
+      case 4:
+        return 'IMPOUND';
+      case 5:
+        return 'SEIZURE';
+      case 6:
+        return 'ARREST';
       case 0:
       default:
         return 'NONE';

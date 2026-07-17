@@ -136,126 +136,128 @@ class ShiftMarketForm extends StatelessWidget {
               const SizedBox(height: Tsizes.spaceBtwInputFields),
 
               // Conditionally show details when facility is Open
-              if (controller.selectedFacilityStatus.value != "Closed") ...[
-                const SizedBox(height: Tsizes.spaceBtwSections / 2),
+              Obx(() => controller.selectedFacilityStatus.value != "Closed" ? Column(
+                children: [
+                  const SizedBox(height: Tsizes.spaceBtwSections / 2),
 
-                // Category and Actions Section
-                _buildSectionHeader("Category and Actions", dark),
-                const SizedBox(height: Tsizes.spaceBtwItems / 2),
+                  // Category and Actions Section
+                  _buildSectionHeader("Category and Actions", dark),
+                  const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
-                // Category of Premises
-                TextFormField(
-                  initialValue: "Shift Market",
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    labelText: "Category of Premises",
-                    prefixIcon: const Icon(Iconsax.category),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(Tsizes.borderRadiusLg),
+                  // Category of Premises
+                  TextFormField(
+                    initialValue: "Shift Market",
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      labelText: "Category of Premises",
+                      prefixIcon: const Icon(Iconsax.category),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(Tsizes.borderRadiusLg),
+                      ),
+                      filled: true,
+                      fillColor: THelperFunctions.isDarkMode(Get.context!)
+                          ? Tcolors.darkGrey
+                          : Colors.white,
                     ),
-                    filled: true,
-                    fillColor: THelperFunctions.isDarkMode(Get.context!)
-                        ? Tcolors.darkGrey
-                        : Colors.white,
                   ),
-                ),
-                const SizedBox(height: Tsizes.spaceBtwInputFields),
+                  const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-                // License Status
-                _buildDropdown(
-                  label: "License Status",
-                  items: ["Licensed", "Un-Licensed", "Not-Applicable"],
-                  selectedItem: controller.selectedLicenseStatus,
-                  prefixIcon: Iconsax.shield_tick,
-                ),
-                const SizedBox(height: Tsizes.spaceBtwInputFields),
+                  // License Status
+                  _buildDropdown(
+                    label: "License Status",
+                    items: ["Licensed", "Un-Licensed", "Not-Applicable"],
+                    selectedItem: controller.selectedLicenseStatus,
+                    prefixIcon: Iconsax.shield_tick,
+                  ),
+                  const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-                // Show License fields when Licensed
-                Obx(() {
-                  if (controller.selectedLicenseStatus.value == 'Licensed') {
-                    return Column(
-                      children: [
-                        _buildTextField(
-                          controller: controller.licenseNoController,
-                          label: "License No.",
-                          prefixIcon: Iconsax.crown,
-                          validator: (value) =>
-                              value!.isEmpty ? "Required" : null,
-                        ),
-                        const SizedBox(height: Tsizes.spaceBtwInputFields),
-                        TextFormField(
-                          controller: controller.licenseExpiryController,
-                          readOnly: true,
-                          validator: (value) =>
-                              value == null || value.isEmpty ? "Required" : null,
-                          decoration: InputDecoration(
-                            labelText: 'License Expiry Date',
-                            prefixIcon: const Icon(Iconsax.calendar),
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.circular(Tsizes.borderRadiusLg),
-                            ),
-                            filled: true,
-                            fillColor: THelperFunctions.isDarkMode(Get.context!)
-                                ? Tcolors.darkGrey
-                                : Colors.white,
-                          ),
-                          onTap: () async {
-                            DateTime? picked = await showDatePicker(
-                              context: Get.context!,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (picked != null) {
-                              controller.licenseExpiryController.text =
-                                  picked.toIso8601String().split('T').first;
-                            }
-                          },
-                        ),
-                        const SizedBox(height: Tsizes.spaceBtwInputFields),
-                      ],
-                    );
-                  }
-
-                  return const SizedBox.shrink();
-                }),
-                const SizedBox(height: Tsizes.spaceBtwInputFields),
-
-                // Previously Licensed or Illegal Outlet (shown when Un-Licensed)
-                Obx(() => controller.selectedLicenseStatus.value == "Un-Licensed" ||
-                        controller.selectedLicenseStatus.value == "Unlicensed"
-                    ? Column(
+                  // Show License fields when Licensed
+                  Obx(() {
+                    if (controller.selectedLicenseStatus.value == 'Licensed') {
+                      return Column(
                         children: [
-                          _buildDropdown(
-                            label: "Previously Licensed or Illegal Outlet",
-                            items: ["Previously Licensed", "Illegal Outlet"],
-                            selectedItem: controller.selectedPreviouslyLicensed,
-                            prefixIcon: Icons.warning,
+                          _buildTextField(
+                            controller: controller.licenseNoController,
+                            label: "License No.",
+                            prefixIcon: Iconsax.crown,
+                            validator: (value) =>
+                                value!.isEmpty ? "Required" : null,
+                          ),
+                          const SizedBox(height: Tsizes.spaceBtwInputFields),
+                          TextFormField(
+                            controller: controller.licenseExpiryController,
+                            readOnly: true,
+                            validator: (value) =>
+                                value == null || value.isEmpty ? "Required" : null,
+                            decoration: InputDecoration(
+                              labelText: 'License Expiry Date',
+                              prefixIcon: const Icon(Iconsax.calendar),
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.circular(Tsizes.borderRadiusLg),
+                              ),
+                              filled: true,
+                              fillColor: THelperFunctions.isDarkMode(Get.context!)
+                                  ? Tcolors.darkGrey
+                                  : Colors.white,
+                            ),
+                            onTap: () async {
+                              DateTime? picked = await showDatePicker(
+                                context: Get.context!,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
+                              if (picked != null) {
+                                controller.licenseExpiryController.text =
+                                    picked.toIso8601String().split('T').first;
+                              }
+                            },
                           ),
                           const SizedBox(height: Tsizes.spaceBtwInputFields),
                         ],
-                      )
-                    : const SizedBox.shrink()),
-              ],
+                      );
+                    }
 
-              // Regulatory Action Taken
-              _buildTextField(
-                controller: controller.regulatoryActionTakenController,
-                label: "Regulatory action taken (no of arrests made)",
-                prefixIcon: Iconsax.shield_security,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
+                    return const SizedBox.shrink();
+                  }),
+                  const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-              // Consignments Impounded
-              _buildTextField(
-                controller: controller.consignmentsImpoundedController,
-                label:
-                    "Consignments Impounded and Drug Categories (Vet, Human, Herbal, Medical Device)",
-                prefixIcon: Iconsax.box,
-                maxLines: 3,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwSections * 2),
+                  // Previously Licensed or Illegal Outlet (shown when Un-Licensed)
+                  Obx(() => controller.selectedLicenseStatus.value == "Un-Licensed" ||
+                          controller.selectedLicenseStatus.value == "Unlicensed"
+                      ? Column(
+                          children: [
+                            _buildDropdown(
+                              label: "Previously Licensed or Illegal Outlet",
+                              items: ["Previously Licensed", "Illegal Outlet"],
+                              selectedItem: controller.selectedPreviouslyLicensed,
+                              prefixIcon: Icons.warning,
+                            ),
+                            const SizedBox(height: Tsizes.spaceBtwInputFields),
+                          ],
+                        )
+                      : const SizedBox.shrink()),
+
+                  // Regulatory Action Taken
+                  _buildTextField(
+                    controller: controller.regulatoryActionTakenController,
+                    label: "Regulatory action taken (no of arrests made)",
+                    prefixIcon: Iconsax.shield_security,
+                  ),
+                  const SizedBox(height: Tsizes.spaceBtwInputFields),
+
+                  // Consignments Impounded
+                  _buildTextField(
+                    controller: controller.consignmentsImpoundedController,
+                    label:
+                        "Consignments Impounded and Drug Categories (Vet, Human, Herbal, Medical Device)",
+                    prefixIcon: Iconsax.box,
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: Tsizes.spaceBtwSections / 2),
+                ],
+              ) : const SizedBox.shrink()),
 
               // Submit Button
               const SizedBox(height: 15),

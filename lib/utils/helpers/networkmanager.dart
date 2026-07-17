@@ -26,10 +26,7 @@ class NetworkManager extends GetxController {
     final normalizedResult = _resolveConnectivityResult(results);
     _connectionStatus.value = normalizedResult;
     if (_connectionStatus.value == ConnectivityResult.none) {
-      Loaders.errorSnackbar(
-        title: "Oups!",
-        message: "No Internet Connection",
-      );
+      print('NetworkManager: Connection lost');
     }
   }
 

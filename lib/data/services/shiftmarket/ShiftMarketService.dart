@@ -107,56 +107,70 @@ class ShiftMarketService {
     }
   }
 
-  /// Convert to API format for ShiftMarket
-  Map<String, dynamic> _convertToPascalCase(Map<String, dynamic> data) {
-    final Map<String, dynamic> converted = {};
+  /// Map local JSON keys to exactly what the API expects for ShiftMarket
+  Map<String, dynamic> _mapToApiFormat(Map<String, dynamic> data) {
+    final Map<String, dynamic> apiData = {};
 
-    if (data['inspectionDate'] is DateTime) {
-      converted['InspectionDate'] =
-          (data['inspectionDate'] as DateTime).toIso8601String();
-    } else {
-      converted['InspectionDate'] =
-          DateTime.parse(data['inspectionDate']).toIso8601String();
+    if (data['inspectionDate'] != null) {
+      if (data['inspectionDate'] is DateTime) {
+        apiData['inspectionDate'] =
+            (data['inspectionDate'] as DateTime).toIso8601String();
+      } else {
+        try {
+          apiData['inspectionDate'] =
+              DateTime.parse(data['inspectionDate'].toString()).toIso8601String();
+        } catch (e) {
+          apiData['inspectionDate'] = DateTime.now().toIso8601String();
+        }
+      }
     }
 
-    converted['InspectorName'] = data['inspectorName'];
+    apiData['inspectorName'] = data['inspectorName'];
     if (data.containsKey('inspectorId')) {
-      converted['InspectorId'] = data['inspectorId'];
+      apiData['inspectorId'] = data['inspectorId'];
     }
 
     final lat = data['latitude']?.toDouble() ?? 0.0;
     final lon = data['longitude']?.toDouble() ?? 0.0;
-    converted['Gps'] = data['gps'] ?? '$lat,$lon';
-    converted['Latitude'] = lat;
-    converted['Longitude'] = lon;
+    apiData['latitude'] = lat;
+    apiData['longitude'] = lon;
 
-    converted['IntRegion'] =
-        data['region'] != null ? _getRegionGuid(data['region']) : null;
-    converted['DistrictId'] =
-        data['district'] != null ? _getDistrictId(data['district']) : null;
+    apiData['intRegion'] =
+        data['region'] != null ? _getRegionGuid(data['region'].toString()) : null;
+    apiData['districtId'] =
+        data['district'] != null ? _getDistrictId(data['district'].toString()) : null;
 
-    converted['FacilityName'] = data['facilityName'];
-    converted['FacilityPersonType'] = 1;
-    converted['PersonName'] = data['personName'];
-    converted['Contact'] = data['contact'];
-    converted['Qualifications'] = data['qualifications'];
-    converted['CategoryOfpremises'] =
-        _getCategoryOfPremises(data['categoryOfPremises']);
+    apiData['facilityName'] = data['facilityName'];
+    // Map facility status from string (OPEN/CLOSED) to int
+    final statusStr = data['facilityStatus']?.toString().toUpperCase() ?? 'OPEN';
+    apiData['facilityStatus'] = statusStr.contains('CLOSE') ? 0 : 1;
+    // Map person found at facility
+    final personStr = data['personFoundAtFacility']?.toString().toUpperCase() ?? '';
+    apiData['facilityPersonType'] = personStr.contains('YES') ? 1 : 0;
+    apiData['personName'] = data['personName'];
+    apiData['contact'] = data['contact'];
+    apiData['qualifications'] = data['qualifications'];
+    apiData['categoryOfpremises'] =
+        _getCategoryOfPremises(data['categoryOfPremises']?.toString() ?? '');
 
     // License handling
-    converted['LicenseStatus'] = _mapLicenseStatus(data['licenseStatus']);
-    if (data.containsKey('licenseNo'))
-      converted['LicenseNo'] = data['licenseNo'];
+    apiData['licenseStatus'] = _mapLicenseStatus(data['licenseStatus']);
+    if (data.containsKey('licenseNo') && data['licenseNo'] != null) {
+      apiData['licenseNo'] = data['licenseNo'];
+    }
     if (data.containsKey('licenseExpiryDate') &&
-        (data['licenseExpiryDate'] as String).isNotEmpty) {
-      converted['LicenseExpiryDate'] = data['licenseExpiryDate'];
+        data['licenseExpiryDate'] != null && 
+        data['licenseExpiryDate'].toString().isNotEmpty) {
+      apiData['licenseExpDate'] = data['licenseExpiryDate'];
     }
 
-    converted['RegulatoryAction'] =
-        data['regulatoryActionTaken'] ?? data['regulatoryAction'];
-    converted['Consignment'] = data['consignmentsImpounded'];
+    // Actions
+    // Shift Market Specific fields might map to other API fields:
+    apiData['regulatoryAction'] = data['regulatoryActionTaken'];
+    apiData['consignmentsImpounded'] = data['consignmentsImpounded'];
+    apiData['unlicensed'] = data['previouslyLicensed'] ?? '';
 
-    return converted;
+    return apiData;
   }
 
   int _mapLicenseStatus(dynamic status) {
@@ -252,12 +266,10 @@ class ShiftMarketService {
       final uri = Uri.parse('$_baseUrl/ShiftMarket');
       print('🌐 DEBUG: ShiftMarket API URL: $uri');
 
-      // Convert camelCase to PascalCase for API
+      // Convert to API format
       final Map<String, dynamic> apiData =
-          _convertToPascalCase(shiftMarketData);
-      print('🔄 DEBUG: Converted ShiftMarket API data: $apiData');
-
-      print('📤 DEBUG: Sending POST request to ShiftMarket API...');
+          _mapToApiFormat(shiftMarketData);
+      print('Converted ShiftMarket API data: $apiData'); // Debug log    print('📤 DEBUG: Sending POST request to ShiftMarket API...');
       final response = await http
           .post(
             uri,

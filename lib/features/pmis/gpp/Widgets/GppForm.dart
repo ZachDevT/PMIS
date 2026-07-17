@@ -195,8 +195,7 @@ class GppForm extends StatelessWidget {
                     selectedItem: controller.selectedFacilityStatus,
                     prefixIcon: Icons.info,
                   ),
-                  if (controller.selectedFacilityStatus.value != "Closed")
-
+                  Obx(() => controller.selectedFacilityStatus.value != "Closed" ?
                     // Facility nullable values
                     Column(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -338,7 +337,7 @@ class GppForm extends StatelessWidget {
                           prefixIcon: Icons.recommend,
                         ),
                       ],
-                    ),
+                    ) : const SizedBox.shrink()),
 
                   const SizedBox(height: 14),
                   // Submit Button

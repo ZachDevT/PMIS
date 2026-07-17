@@ -94,7 +94,7 @@ class ShiftMarketModel {
           '1',
       licenseNo: json['licenseNo'] ?? json['LicenseNo'] ?? '',
       licenseExpiryDate:
-          json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? '',
+          json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? json['licenseExpDate'] ?? json['LicenseExpDate'] ?? '',
       previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
       regulatoryActionTaken: json['regulatoryAction'] ?? '',
       consignmentsImpounded: json['consignmentsImpounded'] ?? '',

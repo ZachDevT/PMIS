@@ -106,20 +106,32 @@ class RtsService {
     }
   }
 
-  /// Convert to API format for RTS
-  Map<String, dynamic> _convertToPascalCase(Map<String, dynamic> data) {
+  /// Map local JSON keys to exactly what the API expects for RTS
+  Map<String, dynamic> _mapToApiFormat(Map<String, dynamic> data) {
+    String inspectionDate = DateTime.now().toIso8601String();
+    try {
+      if (data['inspectionDate'] != null) {
+        inspectionDate = data['inspectionDate'] is DateTime 
+            ? (data['inspectionDate'] as DateTime).toIso8601String()
+            : DateTime.parse(data['inspectionDate'].toString()).toIso8601String();
+      }
+    } catch (e) {
+      // fallback to now
+    }
+  
     // Based on the existing RTS data structure from the API
     return {
-      'inspectionDate': data['inspectionDate'] is DateTime 
-          ? (data['inspectionDate'] as DateTime).toIso8601String()
-          : DateTime.parse(data['inspectionDate']).toIso8601String(),
+      'inspectionDate': inspectionDate,
       'inspectorName': data['inspectorName'],
+      'inspectorId': data['inspectorId'] ?? '',
       'latitude': data['latitude']?.toDouble() ?? 0.0,
       'longitude': data['longitude']?.toDouble() ?? 0.0,
-      'intRegion': data['region'] != null ? _getRegionGuid(data['region']) : null,
-      'districtId': data['district'] != null ? _getDistrictId(data['district']) : null,
-      'facilityName': data['venueLocation'],
-      'topic': data['topicOfDiscussion'],
+      'intRegion': data['region'] != null ? _getRegionGuid(data['region'].toString()) : null,
+      'districtId': data['district'] != null ? _getDistrictId(data['district'].toString()) : null,
+      'facilityName': data['venueLocation'] ?? data['facilityName'],
+      'topic': data['topicOfDiscussion'] ?? data['topic'],
+      // We will send numberOfParticipants in case the backend actually accepts it but wasn't documented
+      'numberOfParticipants': data['numberOfParticipants'] ?? 0,
     };
   }
 
@@ -168,10 +180,10 @@ class RtsService {
       final uri = Uri.parse('$_baseUrl/rts');
       print('🌐 DEBUG: API URL: $uri');
 
-      // Convert camelCase to PascalCase for API
-      final Map<String, dynamic> apiData = _convertToPascalCase(rtsData);
-      print('🔄 DEBUG: Converted RadioTalkShow API data: $apiData');
-
+      // Convert to API format
+      final Map<String, dynamic> apiData =
+          _mapToApiFormat(rtsData);
+      print('Converted RTS API data: $apiData');
       print('📤 DEBUG: Sending POST request to API...');
       final response = await http
           .post(

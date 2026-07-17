@@ -147,10 +147,12 @@ class SyncManager extends GetxController {
   /// Perform synchronization for all modules
   Future<Map<String, int>> performSync({bool showProgress = true}) async {
     if (_isSyncing.value) {
-      Loaders.warningSnackbar(
-        title: "Already Syncing",
-        message: "Synchronization is already in progress...",
-      );
+      if (showProgress) {
+        Loaders.warningSnackbar(
+          title: "Sync in Progress",
+          message: "A synchronization is already running...",
+        );
+      }
       return {};
     }
 
@@ -286,16 +288,12 @@ class SyncManager extends GetxController {
           );
         }
       } else {
-        // Silent sync - but still show result
+        // Truly silent sync - just log the result
         final totalSynced =
             syncResults.values.fold(0, (sum, count) => sum + count);
         if (totalSynced > 0) {
           print(
               '✅ Auto-sync completed: $totalSynced activities synced successfully');
-          Loaders.successSnackbar(
-            title: "Auto-Sync Complete",
-            message: "$totalSynced offline items synced successfully",
-          );
         }
       }
     } catch (e) {

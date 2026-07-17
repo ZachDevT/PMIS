@@ -410,11 +410,21 @@ class PmsaActivityCard extends StatelessWidget {
                               _getLicenseStatusText(activity.licenseStatus),
                               Iconsax.shield_tick),
                           if (activity.licenseStatus == 1) ...[  
-                          _buildModernDetailRow(
-                              'License Number',
-                              activity.licenseNo ?? 'Not provided',
-                              Iconsax.document),
+                            _buildModernDetailRow(
+                                'License Number',
+                                activity.licenseNo.isNotEmpty ? activity.licenseNo : 'Not provided',
+                                Iconsax.document),
+                            if (activity.licenseExpiryDate.isNotEmpty)
+                              _buildModernDetailRow(
+                                  'License Expiry Date',
+                                  activity.licenseExpiryDate,
+                                  Iconsax.calendar),
                           ],
+                          if (activity.previouslyLicensed.isNotEmpty)
+                            _buildModernDetailRow(
+                                'Previously Licensed / Illegal Outlet',
+                                activity.previouslyLicensed,
+                                Iconsax.document),
                         ],
                       ],
                     ),

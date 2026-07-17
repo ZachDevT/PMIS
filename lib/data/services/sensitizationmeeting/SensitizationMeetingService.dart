@@ -69,11 +69,83 @@ class SensitizationMeetingService {
     }
   }
 
+  /// Map local JSON keys to exactly what the API expects for Sensitization Meeting
+  Map<String, dynamic> _mapToApiFormat(Map<String, dynamic> data) {
+    // If it's already mapped (e.g., from toApiJson), it might not have 'id'
+    // but it will have 'participants' instead of 'numberOfParticipants'
+    final Map<String, dynamic> apiData = Map<String, dynamic>.from(data);
+
+    // Map 'region' to 'intRegion' if needed
+    if (apiData.containsKey('region') && !apiData.containsKey('intRegion')) {
+      apiData['intRegion'] = _getRegionGuid(apiData['region'].toString());
+    }
+    
+    // Map 'district' to 'districtId'
+    if (apiData.containsKey('district') && !apiData.containsKey('districtId')) {
+      apiData['districtId'] = _getDistrictId(apiData['district'].toString());
+    }
+    
+    // Map 'venueLocation' to 'facilityName'
+    if (apiData.containsKey('venueLocation') && !apiData.containsKey('facilityName')) {
+      apiData['facilityName'] = apiData['venueLocation'];
+    }
+    
+    // Map 'topicOfDiscussion' to 'topic'
+    if (apiData.containsKey('topicOfDiscussion') && !apiData.containsKey('topic')) {
+      apiData['topic'] = apiData['topicOfDiscussion'];
+    }
+    
+    // Map 'numberOfParticipants' to 'participants'
+    if (apiData.containsKey('numberOfParticipants') && !apiData.containsKey('participants')) {
+      apiData['participants'] = apiData['numberOfParticipants'];
+    }
+    
+    // Remove local-only keys to keep payload clean
+    apiData.remove('id');
+    apiData.remove('region');
+    apiData.remove('district');
+    apiData.remove('venueLocation');
+    apiData.remove('topicOfDiscussion');
+    apiData.remove('numberOfParticipants');
+
+    return apiData;
+  }
+
+  static String _getRegionGuid(String regionName) {
+    switch (regionName.toUpperCase()) {
+      case 'HEAD OFFICE':
+        return 'deaf2c98-3dbb-489f-bdea-9e5fd49eec78';
+      case 'CENTRAL':
+        return '87ddeda4-cef9-4e7b-ad44-34bb56081916';
+      case 'EASTERN':
+        return 'e9b78052-b51b-417f-b3b6-72b8ff3c4b9a';
+      case 'SOUTHERN':
+        return '0b44f4f9-1423-4688-afd4-2369147e0f8f';
+      case 'WESTERN':
+        return 'de9b2845-56c4-4a19-8a0f-607bfd5c8689';
+      default:
+        return 'deaf2c98-3dbb-489f-bdea-9e5fd49eec78';
+    }
+  }
+
+  static int _getDistrictId(String districtName) {
+    switch (districtName.toUpperCase()) {
+      case 'KAMPALA': return 1;
+      case 'MASAKA': return 2;
+      case 'KABALE': return 3;
+      case 'FORTPORTAL': return 4;
+      default: return 1;
+    }
+  }
+
   /// Post Sensitization Meeting data to the API
   Future<void> postSensitizationMeetingData(
       Map<String, dynamic> meetingData) async {
     try {
       final uri = Uri.parse('$_baseUrl/SM');
+      
+      final Map<String, dynamic> apiData = _mapToApiFormat(meetingData);
+      print('Converted Sensitization API data: $apiData'); // Debug log
 
       final response = await http
           .post(
@@ -82,7 +154,7 @@ class SensitizationMeetingService {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
             },
-            body: jsonEncode(meetingData),
+            body: jsonEncode(apiData),
           )
           .timeout(_timeoutDuration);
 

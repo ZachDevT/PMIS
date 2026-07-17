@@ -94,7 +94,7 @@ class PmsModel {
       otherCategoryPremise: json['other_CategoryPremise'] ?? '',
       licenseStatus: json['licenseStatus'] ?? 0,
       licenseNo: json['licenseNo'] ?? '',
-      licenseExpiryDate: json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? '',
+      licenseExpiryDate: json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? json['licenseExpDate'] ?? json['LicenseExpDate'] ?? '',
       unlicensed: json['unlicensed'] ?? 0,
       pmsActivity: json['pmsActivity'] ?? 0,
       sampleProductName: json['sample_ProductName'] ?? '',

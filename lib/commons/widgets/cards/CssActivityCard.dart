@@ -468,6 +468,11 @@ class CssActivityCard extends StatelessWidget {
                                   : 'Not provided',
                               Iconsax.calendar),
                           ],
+                          if (activity.previouslyLicensed.isNotEmpty)
+                            _buildModernDetailRow(
+                                'Previously Licensed / Illegal Outlet',
+                                activity.previouslyLicensed,
+                                Iconsax.document),
                         ],
                       ],
                     ),

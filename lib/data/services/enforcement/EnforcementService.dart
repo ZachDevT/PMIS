@@ -107,29 +107,34 @@ class EnforcementService {
     }
   }
 
-  /// Convert to API format for Enforcement
-  Map<String, dynamic> _convertToPascalCase(Map<String, dynamic> data) {
-    final Map<String, dynamic> converted = {};
+  /// Map local JSON keys to exactly what the API expects for Enforcement
+  Map<String, dynamic> _mapToApiFormat(Map<String, dynamic> data) {
+    final Map<String, dynamic> apiData = {};
 
     // Inspection date
-    if (data['inspectionDate'] is DateTime) {
-      converted['InspectionDate'] =
-          (data['inspectionDate'] as DateTime).toIso8601String();
-    } else {
-      converted['InspectionDate'] =
-          DateTime.parse(data['inspectionDate']).toIso8601String();
+    if (data['inspectionDate'] != null) {
+      if (data['inspectionDate'] is DateTime) {
+        apiData['inspectionDate'] =
+            (data['inspectionDate'] as DateTime).toIso8601String();
+      } else {
+        try {
+          apiData['inspectionDate'] =
+              DateTime.parse(data['inspectionDate'].toString()).toIso8601String();
+        } catch (e) {
+          apiData['inspectionDate'] = DateTime.now().toIso8601String();
+        }
+      }
     }
 
     // Basic fields
-    converted['InspectorName'] = data['inspectorName'];
-    converted['InspectorId'] = data['inspectorId'];
+    apiData['inspectorName'] = data['inspectorName'];
+    apiData['inspectorId'] = data['inspectorId'];
 
     // GPS / LatLng
     double lat = 0.0;
     double lon = 0.0;
-    if (data['gps'] != null && (data['gps'] as String).isNotEmpty) {
-      converted['Gps'] = data['gps'];
-      final gpsStr = data['gps'] as String;
+    if (data['gps'] != null && data['gps'].toString().isNotEmpty) {
+      final gpsStr = data['gps'].toString();
       final cleanGps = gpsStr
           .replaceAll('Lat:', '')
           .replaceAll('Lon:', '')
@@ -144,45 +149,50 @@ class EnforcementService {
     } else {
       lat = data['latitude']?.toDouble() ?? 0.0;
       lon = data['longitude']?.toDouble() ?? 0.0;
-      converted['Gps'] = '$lat,$lon';
     }
-    converted['Latitude'] = lat;
-    converted['Longitude'] = lon;
+    apiData['latitude'] = lat;
+    apiData['longitude'] = lon;
 
     // Region / District
-    converted['IntRegion'] =
-        data['region'] != null ? _getRegionGuid(data['region']) : null;
-    converted['DistrictId'] =
-        data['district'] != null ? _getDistrictId(data['district']) : null;
+    apiData['intRegion'] =
+        data['region'] != null ? _getRegionGuid(data['region'].toString()) : null;
+    apiData['districtId'] =
+        data['district'] != null ? _getDistrictId(data['district'].toString()) : null;
 
     // Facility details
-    converted['FacilityName'] = data['facilityName'];
-    converted['FacilityStatus'] = _getFacilityStatus(data['facilityStatus']);
-    converted['FacilityPersonType'] = 1;
-    converted['PersonName'] = data['personName'];
-    converted['Contact'] = data['contact'];
-    converted['Qualifications'] = data['qualifications'];
-    converted['CategoryOfpremises'] =
+    apiData['facilityName'] = data['facilityName'];
+    apiData['facilityStatus'] = _getFacilityStatus(data['facilityStatus']);
+    apiData['facilityPersonType'] = 1; // Default
+    apiData['personName'] = data['personName'];
+    apiData['contact'] = data['contact'];
+    apiData['qualifications'] = data['qualifications'];
+    apiData['categoryOfpremises'] =
         _getCategoryOfPremises(data['categoryOfPremises']);
+        
+    // In enforcement, "Category of Drugs" maps to "categoryOfpremisesOther" maybe?
+    // According to API, it has categoryOfpremisesOther, but no categoryOfDrugs.
+    // Or we just ignore it.
 
     // License handling
-    converted['LicenseStatus'] = _mapLicenseStatus(data['licenseStatus']);
-    if (data.containsKey('licenseNo'))
-      converted['LicenseNo'] = data['licenseNo'];
-    if (data.containsKey('licenseExpiryDate') &&
-        (data['licenseExpiryDate'] as String).isNotEmpty) {
-      converted['LicenseExpiryDate'] = data['licenseExpiryDate'];
+    apiData['licenseStatus'] = _mapLicenseStatus(data['licenseStatus']);
+    if (data.containsKey('licenseNo') && data['licenseNo'] != null) {
+      apiData['licenseNo'] = data['licenseNo'];
+    }
+    
+    // VERY IMPORTANT: The API expects licenseExpDate NOT licenseExpiryDate
+    if (data.containsKey('licenseExpiryDate') && data['licenseExpiryDate'] != null && data['licenseExpiryDate'].toString().isNotEmpty) {
+      apiData['licenseExpDate'] = data['licenseExpiryDate'];
     }
 
     // Category and enforcement action
-    converted['CategoryStatus'] = _mapCategoryStatus(data['categoryStatus']);
+    apiData['categoryStatus'] = _mapCategoryStatus(data['categoryStatus']);
+    
     final actionCode = _mapEnforcementAction(data['enforcementActionTaken']);
-    converted['EnfAction'] = actionCode.toString();
-    // Some backends expect 'enforcement' field name — include both
-    converted['Enforcement'] = actionCode.toString();
-    converted['Comments'] = data['comments'];
+    apiData['enfAction'] = actionCode.toString();
+    
+    apiData['comments'] = data['comments'];
 
-    return converted;
+    return apiData;
   }
 
   int _mapLicenseStatus(dynamic status) {
@@ -334,12 +344,10 @@ class EnforcementService {
       final uri = Uri.parse('$_baseUrl/Enforcement');
       print('🌐 DEBUG: Enforcement API URL: $uri');
 
-      // Convert camelCase to PascalCase for API
+      // Convert to API format
       final Map<String, dynamic> apiData =
-          _convertToPascalCase(enforcementData);
-      print('🔄 DEBUG: Converted Enforcement API data: $apiData');
-
-      print('📤 DEBUG: Sending POST request to Enforcement API...');
+          _mapToApiFormat(enforcementData);
+      print('Converted Enforcement API data: $apiData'); // Debug log    print('📤 DEBUG: Sending POST request to Enforcement API...');
       final response = await http
           .post(
             uri,

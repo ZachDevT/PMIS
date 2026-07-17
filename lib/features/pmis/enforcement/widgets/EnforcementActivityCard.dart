@@ -392,71 +392,102 @@ class EnforcementActivityCard extends StatelessWidget {
                             activity.facilityName, Iconsax.home),
                         _buildModernDetailRow(context, 'Facility Status',
                             activity.facilityStatus, Iconsax.info_circle),
-                        _buildModernDetailRow(context, 'Category of Premises',
-                            activity.categoryOfPremises, Iconsax.building),
-                        _buildModernDetailRow(
-                            context,
-                            'Person Found at Facility',
-                            activity.personFoundAtFacility,
-                            Iconsax.user),
-                        _buildModernDetailRow(context, 'Person Name',
-                            activity.personName, Iconsax.user),
-                        _buildModernDetailRow(
-                            context, 'Contact', activity.contact, Iconsax.call),
-                        _buildModernDetailRow(context, 'Qualifications',
-                            activity.qualifications, Iconsax.book),
+                        // Only show below fields when facility is NOT closed
+                        if (!activity.facilityStatus.toLowerCase().contains('closed')) ...[
+                          if (activity.categoryOfPremises.isNotEmpty)
+                            _buildModernDetailRow(context, 'Category of Premises',
+                                activity.categoryOfPremises, Iconsax.building),
+                          _buildModernDetailRow(
+                              context,
+                              'Person Found at Facility',
+                              activity.personFoundAtFacility.isNotEmpty ? activity.personFoundAtFacility : 'N/A',
+                              Iconsax.user),
+                          _buildModernDetailRow(context, 'Person Name',
+                              activity.personName.isNotEmpty ? activity.personName : 'N/A', Iconsax.user),
+                          _buildModernDetailRow(
+                              context, 'Contact', activity.contact.isNotEmpty ? activity.contact : 'N/A', Iconsax.call),
+                          if (activity.qualifications.isNotEmpty)
+                            _buildModernDetailRow(context, 'Qualifications',
+                                activity.qualifications, Iconsax.book),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 24),
-                     _buildModernDetailSection(
-                      context,
-                      'Compliance Information',
-                      Iconsax.shield_tick,
-                      [
-                        _buildModernDetailRow(context, 'License Status',
-                            activity.licenseStatus, Iconsax.document),
-                        if (activity.licenseStatus.toLowerCase().contains('licens') &&
-                            !activity.licenseStatus.toLowerCase().contains('un'))
-                          _buildModernDetailRow(context, 'License No.',
-                              activity.licenseNo?.isNotEmpty == true ? activity.licenseNo! : 'N/A',
-                              Iconsax.document_text),
-                         if (activity.licenseStatus.toLowerCase().contains('licens') &&
-                            !activity.licenseStatus.toLowerCase().contains('un'))
-                          _buildModernDetailRow(context, 'License Expiry Date',
-                              activity.licenseExpiryDate?.isNotEmpty == true ? activity.licenseExpiryDate! : 'N/A',
-                              Iconsax.calendar),
-                        if (activity.previouslyLicensed.isNotEmpty)
-                          _buildModernDetailRow(context, 'Previously Licensed',
-                              activity.previouslyLicensed, Iconsax.document),
-                        _buildModernDetailRow(context, 'Category Status',
-                            activity.categoryStatus, Iconsax.info_circle),
-                        if (activity.categoryOfDrugs.isNotEmpty)
-                          _buildModernDetailRow(context, 'Category of Drugs',
-                              activity.categoryOfDrugs, Iconsax.hospital),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    _buildModernDetailSection(
-                      context,
-                      'Enforcement Actions',
-                      Iconsax.shield_security,
-                      [
-                        _buildModernDetailRow(
-                            context,
-                            'Enforcement Action Taken',
-                            activity.enforcementActionTaken.isNotEmpty
-                                ? activity.enforcementActionTaken
-                                : 'None',
-                            Iconsax.warning_2),
-                        _buildModernDetailRow(
-                            context,
-                            'Comments',
-                            activity.comments.isNotEmpty
-                                ? activity.comments
-                                : 'No comments',
-                            Iconsax.message),
-                      ],
-                    ),
+                    // Only show compliance when facility is NOT closed
+                    if (!activity.facilityStatus.toLowerCase().contains('closed')) ...[
+                      _buildModernDetailSection(
+                        context,
+                        'Compliance Information',
+                        Iconsax.shield_tick,
+                        [
+                          if (activity.licenseStatus.isNotEmpty)
+                            _buildModernDetailRow(context, 'License Status',
+                                activity.licenseStatus, Iconsax.document),
+                          if (activity.licenseStatus.toLowerCase().contains('licens') &&
+                              !activity.licenseStatus.toLowerCase().contains('un')) ...[
+                            _buildModernDetailRow(context, 'License No.',
+                                activity.licenseNo?.isNotEmpty == true ? activity.licenseNo! : 'N/A',
+                                Iconsax.document_text),
+                            _buildModernDetailRow(context, 'License Expiry Date',
+                                activity.licenseExpiryDate?.isNotEmpty == true ? activity.licenseExpiryDate! : 'N/A',
+                                Iconsax.calendar),
+                          ],
+                          if (activity.previouslyLicensed.isNotEmpty)
+                            _buildModernDetailRow(context, 'Previously Licensed / Illegal Outlet',
+                                activity.previouslyLicensed, Iconsax.document),
+                          if (activity.categoryStatus.isNotEmpty)
+                            _buildModernDetailRow(context, 'Category Status',
+                                activity.categoryStatus, Iconsax.info_circle),
+                          if (activity.categoryOfDrugs.isNotEmpty)
+                            _buildModernDetailRow(context, 'Category of Drugs',
+                                activity.categoryOfDrugs, Iconsax.hospital),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      _buildModernDetailSection(
+                        context,
+                        'Enforcement Actions',
+                        Iconsax.shield_security,
+                        [
+                          _buildModernDetailRow(
+                              context,
+                              'Enforcement Action Taken',
+                              activity.enforcementActionTaken.isNotEmpty
+                                  ? activity.enforcementActionTaken
+                                  : 'None',
+                              Iconsax.warning_2),
+                          _buildModernDetailRow(
+                              context,
+                              'Comments',
+                              activity.comments.isNotEmpty
+                                  ? activity.comments
+                                  : 'No comments',
+                              Iconsax.message),
+                        ],
+                      ),
+                    ] else ...[
+                      _buildModernDetailSection(
+                        context,
+                        'Enforcement Actions',
+                        Iconsax.shield_security,
+                        [
+                          _buildModernDetailRow(
+                              context,
+                              'Enforcement Action Taken',
+                              activity.enforcementActionTaken.isNotEmpty
+                                  ? activity.enforcementActionTaken
+                                  : 'None',
+                              Iconsax.warning_2),
+                          _buildModernDetailRow(
+                              context,
+                              'Comments',
+                              activity.comments.isNotEmpty
+                                  ? activity.comments
+                                  : 'No comments',
+                              Iconsax.message),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     _buildModernDetailSection(
                       context,
