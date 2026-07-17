@@ -272,7 +272,21 @@ class RtsController extends GetxController {
           var result = await repository.postRtsData(activityData);
           print('✅ DEBUG: API response received: $result');
           
-          activities.add(rtsActivity);
+          // Extract ID if available
+          String? serverId;
+          if (result['rts'] != null && result['rts']['id'] != null) {
+            serverId = result['rts']['id'].toString();
+          }
+          
+          final syncedActivity = rtsActivity.copyWith(
+            id: serverId,
+            isSynced: true
+          );
+          
+          activities.add(syncedActivity);
+          // Save locally so we preserve numberOfParticipants which the server drops
+          await repository.saveActivityLocally(syncedActivity.toJson());
+          
           Loaders.successSnackbar(
               title: "Success", message: "RTS activity sent to API successfully!");
           Navigator.pop(Get.context!); // Close on success

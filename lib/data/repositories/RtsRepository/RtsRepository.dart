@@ -76,7 +76,22 @@ class RtsRepository {
   Future<void> saveActivityLocally(Map<String, dynamic> activityData) async {
     try {
       List storedActivities = box.read<List>('rts_activities') ?? [];
-      storedActivities.add(activityData);
+      final String? incomingId = activityData['id']?.toString();
+      
+      if (incomingId != null && incomingId.isNotEmpty) {
+        // Update existing record if id matches, otherwise append
+        final idx = storedActivities.indexWhere(
+          (e) => e['id']?.toString() == incomingId,
+        );
+        if (idx >= 0) {
+          storedActivities[idx] = activityData;
+        } else {
+          storedActivities.add(activityData);
+        }
+      } else {
+        storedActivities.add(activityData);
+      }
+      
       await box.write('rts_activities', storedActivities);
       print('RTS activity saved locally: ${activityData['id']}');
     } catch (e) {

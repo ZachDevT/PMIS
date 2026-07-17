@@ -132,19 +132,74 @@ class CssService {
 
   /// Map local JSON keys to exactly what the API expects for CSS
   Map<String, dynamic> _mapToApiFormat(Map<String, dynamic> data) {
-    final Map<String, dynamic> apiData = Map<String, dynamic>.from(data);
+    final Map<String, dynamic> apiData = {};
     
-    // Always remove ID for new records so the server generates a new one.
-    // Local SQLite IDs or timestamp IDs will cause the server to reject the POST.
-    apiData.remove('id');
-
-    // Map license expiry date
-    if (apiData.containsKey('licenseExpiryDate')) {
-      apiData['licenseExpDate'] = apiData['licenseExpiryDate'];
-      apiData.remove('licenseExpiryDate');
+    // Ensure inspectionDate is ISO8601
+    if (data['inspectionDate'] != null) {
+      if (data['inspectionDate'] is DateTime) {
+        apiData['inspectionDate'] = (data['inspectionDate'] as DateTime).toIso8601String();
+      } else {
+        try {
+          apiData['inspectionDate'] = DateTime.parse(data['inspectionDate'].toString()).toIso8601String();
+        } catch (e) {
+          apiData['inspectionDate'] = DateTime.now().toIso8601String();
+        }
+      }
     }
 
+    // Direct string maps
+    apiData['inspectorName'] = data['inspectorName'];
+    apiData['inspectorId'] = data['inspectorId'] ?? '';
+    
+    // Float coordinates
+    apiData['latitude'] = data['latitude']?.toDouble() ?? 0.0;
+    apiData['longitude'] = data['longitude']?.toDouble() ?? 0.0;
+    
+    // IDs and Integers
+    apiData['intRegion'] = data['intRegion'];
+    apiData['districtId'] = data['districtId'];
+    apiData['facilityStatus'] = data['facilityStatus'];
+    apiData['facilityPersonType'] = data['facilityPersonType'];
+    
+    // Text fields
+    apiData['facilityName'] = data['facilityName'];
+    apiData['personName'] = data['personName'];
+    apiData['contact'] = data['contact'];
+    apiData['qualifications'] = data['qualifications'];
+    
+    // Category & License
+    apiData['categoryOfpremises'] = data['categoryOfpremises'];
+    apiData['other_CategoryPremise'] = data['other_CategoryPremise'];
+    apiData['licenseStatus'] = data['licenseStatus'];
+    apiData['licenseNo'] = data['licenseNo'];
+    apiData['unlicensed'] = data['unlicensed'];
+    
+    // CSS specifics
+    apiData['categoryStatus'] = data['categoryStatus'];
+    apiData['premisesCondition'] = data['premisesCondition'];
+    apiData['recordKeeping'] = data['recordKeeping'];
+    apiData['classofDrugs'] = data['classofDrugs'];
+    apiData['unRegisteredDrug'] = data['unRegisteredDrug'];
+    apiData['unRegDrugQty'] = data['unRegDrugQty']?.toString() ?? '';
+    apiData['action'] = _mapAction(data['action']?.toString());
+
+    // Notice we DO NOT include `previouslyLicensed`, `licenseExpiryDate`, or `id`.
+    
     return apiData;
+  }
+
+  /// Map CSS Action from string to integer for the backend API
+  int? _mapAction(String? actionStr) {
+    if (actionStr == null || actionStr.isEmpty) return null;
+    
+    final lower = actionStr.toLowerCase();
+    // Since it's multi-select locally but single int in API, grab the most severe action
+    if (lower.contains('closed facility')) return 3;
+    if (lower.contains('suspect arrested')) return 2;
+    if (lower.contains('impounded')) return 1;
+    if (lower.contains('no action taken')) return 4;
+    
+    return null;
   }
 
   /// Post CSS data to the API
