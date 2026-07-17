@@ -124,9 +124,17 @@ class CssService {
     try {
       final Map<String, dynamic> decoded =
           jsonDecode(responseBody) as Map<String, dynamic>;
-      return decoded['message'] ?? decoded['error'] ?? 'An error occurred';
+      // Try common error message fields
+      final msg = decoded['message'] ?? decoded['error'] ?? decoded['title'];
+      if (msg != null) return msg.toString();
+      // If there are validation errors, stringify them
+      if (decoded['errors'] != null) {
+        return 'Validation error: ${decoded['errors'].toString()}';
+      }
+      return 'An error occurred';
     } catch (e) {
-      return 'An error occurred while processing the response';
+      print('CSS raw error body: $responseBody');
+      return 'An error occurred';
     }
   }
 

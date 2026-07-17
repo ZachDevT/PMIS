@@ -162,7 +162,9 @@ class EnforcementService {
     // Facility details
     apiData['facilityName'] = data['facilityName'];
     apiData['facilityStatus'] = _getFacilityStatus(data['facilityStatus']);
-    apiData['facilityPersonType'] = 1; // Default
+    // Map person found at facility
+    final personStr = data['personFoundAtFacility']?.toString().toUpperCase() ?? '';
+    apiData['facilityPersonType'] = personStr.isNotEmpty ? 1 : 0;
     apiData['personName'] = data['personName'];
     apiData['contact'] = data['contact'];
     apiData['qualifications'] = data['qualifications'];
@@ -210,23 +212,14 @@ class EnforcementService {
   int _mapEnforcementAction(dynamic action) {
     if (action is int) return action;
     if (action is String) {
-      switch (action.toLowerCase()) {
-        case 'warning':
-          return 1;
-        case 'fine':
-          return 2;
-        case 'closure':
-        case 'close':
-          return 3;
-        case 'impound':
-          return 4;
-        case 'seizure':
-          return 5;
-        case 'arrest':
-          return 6;
-        default:
-          return 0;
-      }
+      final lower = action.toLowerCase();
+      // Handle multi-select comma-separated values — pick the most severe action
+      if (lower.contains('arrest')) return 6;
+      if (lower.contains('seizure')) return 5;
+      if (lower.contains('impound')) return 4;
+      if (lower.contains('closure') || lower.contains('close')) return 3;
+      if (lower.contains('fine')) return 2;
+      if (lower.contains('warning')) return 1;
     }
     return 0;
   }
