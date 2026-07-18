@@ -183,7 +183,8 @@ class EnforcementService {
     
     // VERY IMPORTANT: The API expects licenseExpDate NOT licenseExpiryDate
     if (data.containsKey('licenseExpiryDate') && data['licenseExpiryDate'] != null && data['licenseExpiryDate'].toString().isNotEmpty) {
-      apiData['licenseExpDate'] = data['licenseExpiryDate'];
+      // Extract only the date part YYYY-MM-DD to satisfy DateOnly API requirement
+      apiData['licenseExpDate'] = data['licenseExpiryDate'].toString().split('T')[0].split(' ')[0];
     }
 
     // Category and enforcement action

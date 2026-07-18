@@ -129,9 +129,9 @@ class RtsService {
       'intRegion': data['region'] != null ? _getRegionGuid(data['region'].toString()) : null,
       'districtId': data['district'] != null ? _getDistrictId(data['district'].toString()) : null,
       'facilityName': data['venueLocation'] ?? data['facilityName'],
+      'venue': data['venueLocation'] ?? data['facilityName'],
       'topic': data['topicOfDiscussion'] ?? data['topic'],
-      // We will send numberOfParticipants in case the backend actually accepts it but wasn't documented
-      'numberOfParticipants': data['numberOfParticipants'] ?? 0,
+      'participants': data['numberOfParticipants'] ?? 0,
     };
   }
 

@@ -97,7 +97,7 @@ class CssModel {
       licenseStatus: json['licenseStatus'] ?? json['LicenseStatus'] ?? 0,
       licenseNo: json['licenseNo'] ?? json['LicenseNo'] ?? '',
       licenseExpiryDate:
-          json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? '',
+          json['licenseExpiryDate'] ?? json['licenseExpDate'] ?? json['LicenseExpiryDate'] ?? '',
       unlicensed: json['unlicensed'] ?? json['Unlicensed'] ?? 0,
       categoryStatus: json['categoryStatus'] ?? json['CategoryStatus'] ?? 0,
       premisesCondition: json['premisesCondition'] ?? 0,

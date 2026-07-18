@@ -163,7 +163,8 @@ class GppService {
     // IMPORTANT: API expects 'licenseExpDate' not 'licenseExpiryDate'
     final expiryDate = data['licenseExpiryDate'] ?? data['licenseExpDate'] ?? '';
     if (expiryDate.toString().isNotEmpty) {
-      apiData['licenseExpDate'] = expiryDate;
+      // Extract only the date part YYYY-MM-DD to satisfy DateOnly API requirement
+      apiData['licenseExpDate'] = expiryDate.toString().split('T')[0].split(' ')[0];
     }
 
     apiData['unlicensed'] = data['previouslyLicensed'] ?? '';

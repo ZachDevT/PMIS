@@ -91,7 +91,6 @@ class ShiftMarketController extends GetxController {
       if (selectedFacilityStatus.value == 'Closed') {
         selectedPersonFoundAtFacility.value = '';
         // clear visible controllers
-        facilityNameController.clear();
         regulatoryActionTakenController.clear();
         consignmentsImpoundedController.clear();
         selectedCategoryOfPremises.value = '';

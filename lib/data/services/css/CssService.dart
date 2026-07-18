@@ -180,6 +180,13 @@ class CssService {
     apiData['other_CategoryPremise'] = data['other_CategoryPremise'];
     apiData['licenseStatus'] = data['licenseStatus'];
     apiData['licenseNo'] = data['licenseNo'];
+    
+    // IMPORTANT: API expects 'licenseExpDate' in DateOnly format YYYY-MM-DD
+    final expiryDate = data['licenseExpiryDate'] ?? data['licenseExpDate'] ?? '';
+    if (expiryDate.toString().isNotEmpty) {
+      apiData['licenseExpDate'] = expiryDate.toString().split('T')[0].split(' ')[0];
+    }
+    
     apiData['unlicensed'] = data['unlicensed'];
     
     // CSS specifics

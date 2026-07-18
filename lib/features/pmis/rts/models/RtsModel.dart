@@ -65,9 +65,9 @@ class RtsModel {
       longitude: (json['longitude'] ?? 0.0).toDouble(),
       region: _getRegionName(json['intRegion']),
       district: _getDistrictName(json['districtId']),
-      venueLocation: json['facilityName'] ?? '',
+      venueLocation: json['venue'] ?? json['facilityName'] ?? '',
       topicOfDiscussion: json['topic'] ?? '',
-      numberOfParticipants: json['numberOfParticipants'] ?? 0,
+      numberOfParticipants: json['participants'] ?? json['numberOfParticipants'] ?? 0,
       radioCompanyName: json['radioCompanyName'],
       createdAt:
           json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
