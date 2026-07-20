@@ -7,6 +7,7 @@ import 'package:pmis/utils/helpers/helpers_functions.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pmis/commons/widgets/inputs/CommonDateTimeInput.dart';
+import 'package:pmis/features/pmis/location/controllers/LocationController.dart' as pmis_location;
 
 import 'package:pmis/commons/widgets/icons/circular_icon.dart';
 
@@ -94,23 +95,35 @@ class ShiftMarketForm extends StatelessWidget {
               const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
               // Region Dropdown
-              _buildDropdown(
-                label: "Region",
-                items: RegionDistrictConstants.regions,
-                selectedItem: controller.selectedRegion,
-                prefixIcon: Iconsax.map,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
+              Obx(() {
+                final locController = Get.isRegistered<pmis_location.LocationController>()
+                    ? pmis_location.LocationController.instance
+                    : null;
+                return _buildDropdown(
+                  label: "Region",
+                  items: locController?.regionNames ?? RegionDistrictConstants.regions,
+                  selectedItem: controller.selectedRegion,
+                  prefixIcon: Iconsax.map,
+                  validator: (value) => value!.isEmpty ? "Required" : null,
+                  onChanged: (_) { controller.selectedDistrict.value = ''; },
+                );
+              }),
               const SizedBox(height: Tsizes.spaceBtwInputFields),
 
               // District Dropdown
-              _buildDropdown(
-                label: "District",
-                items: RegionDistrictConstants.districts,
-                selectedItem: controller.selectedDistrict,
-                prefixIcon: Iconsax.location,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
+              Obx(() {
+                final locController = Get.isRegistered<pmis_location.LocationController>()
+                    ? pmis_location.LocationController.instance
+                    : null;
+                return _buildDropdown(
+                  label: "District",
+                  items: locController?.getDistrictsForRegion(controller.selectedRegion.value)
+                      ?? RegionDistrictConstants.districts,
+                  selectedItem: controller.selectedDistrict,
+                  prefixIcon: Iconsax.location,
+                  validator: (value) => value!.isEmpty ? "Required" : null,
+                );
+              }),
               const SizedBox(height: Tsizes.spaceBtwInputFields),
 
               // Market Name (renamed from Facility Name)
@@ -242,6 +255,7 @@ class ShiftMarketForm extends StatelessWidget {
     required RxString selectedItem,
     required IconData prefixIcon,
     String? Function(String?)? validator,
+    void Function(String?)? onChanged,
   }) {
     final dark = THelperFunctions.isDarkMode(Get.context!);
 
@@ -269,7 +283,10 @@ class ShiftMarketForm extends StatelessWidget {
                     ),
                   ))
               .toList(),
-          onChanged: (value) => selectedItem.value = value ?? '',
+          onChanged: (value) {
+            selectedItem.value = value ?? '';
+            onChanged?.call(value);
+          },
           validator: validator,
         ));
   }

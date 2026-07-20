@@ -5,6 +5,7 @@ import 'package:pmis/features/pmis/sensitizationmeeting/models/SensitizationMeet
 import 'package:pmis/utils/helpers/networkmanager.dart';
 import 'package:pmis/utils/popups/loaders.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
+import 'package:pmis/features/pmis/location/controllers/LocationController.dart' as pmis_location;
 import 'package:geolocator/geolocator.dart';
 import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
@@ -276,8 +277,9 @@ class SensitizationMeetingController extends GetxController {
   }
 
   List<String> getDistrictsForRegion(String regionName) {
-    // Since regions_districts.dart has a simple list, return all districts
-    // In a more complex system, you'd have a mapping of region to districts
+    if (Get.isRegistered<pmis_location.LocationController>()) {
+      return pmis_location.LocationController.instance.getDistrictsForRegion(regionName);
+    }
     return RegionDistrictConstants.districts;
   }
 

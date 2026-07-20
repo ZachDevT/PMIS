@@ -6,18 +6,19 @@ import 'package:pmis/commons/widgets/icons/circular_icon.dart';
 import 'package:pmis/features/pmis/gpp/controllers/GppController.dart';
 import 'package:pmis/utils/constants/colors.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
+import 'package:pmis/features/pmis/location/controllers/LocationController.dart' as pmis_location;
 
 class GppForm extends StatelessWidget {
   final GppController controller = Get.find<GppController>();
 
   GppForm({super.key});
 
-  // Reusable drop down component with icon and label.
   Widget buildDropdown({
     required String label,
     required List<String> items,
     required RxString selectedItem,
     required IconData prefixIcon,
+    void Function(String?)? onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -49,6 +50,7 @@ class GppForm extends StatelessWidget {
                 .toList(),
             onChanged: (val) {
               selectedItem.value = val ?? "";
+              onChanged?.call(val);
             },
           ),
         ),
@@ -148,18 +150,30 @@ class GppForm extends StatelessWidget {
                   const Text("Location Details",
                       style:
                           TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                  buildDropdown(
-                    label: "Region",
-                    items: RegionDistrictConstants.regions,
-                    selectedItem: controller.selectedRegion,
-                    prefixIcon: Icons.map,
-                  ),
-                  buildDropdown(
-                    label: "District",
-                    items: RegionDistrictConstants.districts,
-                    selectedItem: controller.selectedDistrict,
-                    prefixIcon: Icons.location_city,
-                  ),
+                  Obx(() {
+                    final locController = Get.isRegistered<pmis_location.LocationController>()
+                        ? pmis_location.LocationController.instance
+                        : null;
+                    return buildDropdown(
+                      label: "Region",
+                      items: locController?.regionNames ?? RegionDistrictConstants.regions,
+                      selectedItem: controller.selectedRegion,
+                      prefixIcon: Icons.map,
+                      onChanged: (_) { controller.selectedDistrict.value = ''; },
+                    );
+                  }),
+                  Obx(() {
+                    final locController = Get.isRegistered<pmis_location.LocationController>()
+                        ? pmis_location.LocationController.instance
+                        : null;
+                    return buildDropdown(
+                      label: "District",
+                      items: locController?.getDistrictsForRegion(controller.selectedRegion.value)
+                          ?? RegionDistrictConstants.districts,
+                      selectedItem: controller.selectedDistrict,
+                      prefixIcon: Icons.location_city,
+                    );
+                  }),
                   // SECTION: Facility Details
                   const Text("Facility Details",
                       style:

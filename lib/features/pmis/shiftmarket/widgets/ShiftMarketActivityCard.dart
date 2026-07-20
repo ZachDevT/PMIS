@@ -421,7 +421,6 @@ class ShiftMarketActivityCard extends StatelessWidget {
                               Iconsax.box),
                         ],
                       ),
-                    ],
                     const SizedBox(height: 24),
                     _buildModernDetailSection(
                       context,

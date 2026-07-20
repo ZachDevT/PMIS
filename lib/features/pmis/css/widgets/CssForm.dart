@@ -4,6 +4,7 @@ import 'package:pmis/commons/widgets/inputs/TMultiSelectDropdown.dart';
 import 'package:get/get.dart';
 import 'package:pmis/commons/widgets/icons/circular_icon.dart';
 import 'package:pmis/features/pmis/css/controllers/CssController.dart';
+import 'package:pmis/features/pmis/location/controllers/LocationController.dart' as pmis_location;
 import 'package:pmis/utils/constants/colors.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 
@@ -18,6 +19,7 @@ class CssForm extends StatelessWidget {
     required List<String> items,
     required RxString selectedItem,
     required IconData prefixIcon,
+    void Function(String?)? onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -49,6 +51,7 @@ class CssForm extends StatelessWidget {
                 .toList(),
             onChanged: (val) {
               selectedItem.value = val ?? "";
+              onChanged?.call(val);
             },
           ),
         ),
@@ -143,18 +146,38 @@ class CssForm extends StatelessWidget {
                   ),
 
                   // Location Details
-                  buildDropdown(
-                    label: "Region",
-                    items: RegionDistrictConstants.regions,
-                    selectedItem: controller.selectedRegion,
-                    prefixIcon: Icons.map,
-                  ),
-                  buildDropdown(
-                    label: "District",
-                    items: RegionDistrictConstants.districts,
-                    selectedItem: controller.selectedDistrict,
-                    prefixIcon: Icons.location_city,
-                  ),
+                  Obx(() {
+                    final locController = Get.isRegistered<pmis_location.LocationController>()
+                        ? pmis_location.LocationController.instance
+                        : null;
+                    final regionList = locController != null && locController.regions.isNotEmpty
+                        ? locController.regionNames
+                        : RegionDistrictConstants.regions;
+                    return buildDropdown(
+                      label: "Region",
+                      items: regionList,
+                      selectedItem: controller.selectedRegion,
+                      prefixIcon: Icons.map,
+                      onChanged: (_) {
+                        // Clear district when region changes
+                        controller.selectedDistrict.value = '';
+                      },
+                    );
+                  }),
+                  Obx(() {
+                    final locController = Get.isRegistered<pmis_location.LocationController>()
+                        ? pmis_location.LocationController.instance
+                        : null;
+                    final districtList = locController != null
+                        ? locController.getDistrictsForRegion(controller.selectedRegion.value)
+                        : RegionDistrictConstants.districts;
+                    return buildDropdown(
+                      label: "District",
+                      items: districtList,
+                      selectedItem: controller.selectedDistrict,
+                      prefixIcon: Icons.location_city,
+                    );
+                  }),
 
                   // Facility Details
                   buildTextField(
