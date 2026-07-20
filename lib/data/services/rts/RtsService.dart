@@ -132,6 +132,7 @@ class RtsService {
       'venue': data['venueLocation'] ?? data['facilityName'],
       'topic': data['topicOfDiscussion'] ?? data['topic'],
       'participants': data['numberOfParticipants'] ?? 0,
+      'radioCompanyName': data['radioCompanyName'],
     };
   }
 

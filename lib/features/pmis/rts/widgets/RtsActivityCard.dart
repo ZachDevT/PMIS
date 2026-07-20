@@ -141,9 +141,9 @@ class RtsActivityCard extends StatelessWidget {
                   ),
                   const SizedBox(width: Tsizes.spaceBtwItems),
                   _buildDetailItem(
-                    icon: Iconsax.people,
-                    label: "Participants",
-                    value: activity.numberOfParticipants.toString(),
+                    icon: Iconsax.radio,
+                    label: "Radio Company",
+                    value: activity.radioCompanyName ?? 'N/A',
                     dark: dark,
                   ),
                 ],
@@ -166,8 +166,8 @@ class RtsActivityCard extends StatelessWidget {
                       color: dark ? Tcolors.grey : Tcolors.darkGrey,
                     ),
                   ),
-                  const Spacer(),
-                  if (activity.radioCompanyName != null)
+                   const Spacer(),
+                  if (activity.radioCompanyName != null && activity.radioCompanyName!.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),

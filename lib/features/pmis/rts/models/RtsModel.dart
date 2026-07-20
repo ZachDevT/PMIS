@@ -68,7 +68,7 @@ class RtsModel {
       venueLocation: json['venue'] ?? json['facilityName'] ?? '',
       topicOfDiscussion: json['topic'] ?? '',
       numberOfParticipants: json['participants'] ?? json['numberOfParticipants'] ?? 0,
-      radioCompanyName: json['radioCompanyName'],
+      radioCompanyName: json['radioCompanyName'] ?? json['RadioCompanyName'] ?? json['radio_company_name'],
       createdAt:
           json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
       updatedAt:
