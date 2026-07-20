@@ -1,4 +1,5 @@
 import 'package:pmis/utils/helpers/networkmanager.dart';
+import 'package:pmis/features/pmis/location/controllers/LocationController.dart' as pmis_location;
 import 'package:pmis/utils/helpers/sync_manager.dart';
 import 'package:pmis/utils/controllers/app_init_controller.dart';
 import 'package:pmis/data/services/auth/AuthService.dart';
@@ -39,6 +40,9 @@ class GeneralBindings extends Bindings {
   void dependencies() {
     // Core services
     Get.lazyPut<NetworkManager>(() => NetworkManager());
+    
+    // Core Locations
+    Get.put(pmis_location.LocationController(), permanent: true);
 
     // Auth services
     Get.lazyPut<AuthService>(() => AuthService());

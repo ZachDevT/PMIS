@@ -4,7 +4,7 @@ library;
 
 class RegionDistrictConstants {
   // Region constants
-  static const List<String> regions = [
+  static List<String> regions = [
     "Head Office",
     "CENTRAL",
     "EASTERN",
@@ -14,7 +14,7 @@ class RegionDistrictConstants {
   ];
 
   // All districts
-  static const List<String> allDistricts = [
+  static List<String> allDistricts = [
     "Kampala",
     "Wakiso",
     "Mukono",
@@ -34,7 +34,7 @@ class RegionDistrictConstants {
   static List<String> get districts => allDistricts;
 
   // District-to-Region mapping
-  static const Map<String, String> districtToRegion = {
+  static Map<String, String> districtToRegion = {
     "Kampala": "CENTRAL",
     "Wakiso": "CENTRAL",
     "Mukono": "CENTRAL",
@@ -51,7 +51,7 @@ class RegionDistrictConstants {
   };
 
   // Region GUID mapping for API integration
-  static const Map<String, String> regionGuids = {
+  static Map<String, String> regionGuids = {
     "Head Office": "deaf2c98-3dbb-489f-bdea-9e5fd49eec78",
     "CENTRAL": "deaf2c98-3dbb-489f-bdea-9e5fd49eec78",
     "EASTERN": "57a2afce-98b8-48b2-984e-cc04e3d84264",
@@ -61,7 +61,7 @@ class RegionDistrictConstants {
   };
 
   // District ID mapping for API integration
-  static const Map<String, int> districtIds = {
+  static Map<String, int> districtIds = {
     "Kampala": 1,
     "Wakiso": 2,
     "Mukono": 3,
