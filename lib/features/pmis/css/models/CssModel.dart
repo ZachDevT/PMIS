@@ -169,17 +169,33 @@ class CssModel {
   String _getCategoryOfPremisesText(int category) {
     switch (category) {
       case 1:
-        return 'Retail Pharmacy';
+        return 'Wholesale Pharmacy - Human';
       case 2:
-        return 'Drug Shop';
+        return 'Wholesale Pharmacy - Vet';
       case 3:
-        return 'Hospital';
+        return 'Retail Pharmacy - Human';
       case 4:
-        return 'HCIV';
+        return 'Retail Pharmacy - Vet';
       case 5:
-        return 'HCIII';
+        return 'Drug Shop';
       case 6:
+        return 'External Stores';
+      case 7:
+        return 'Hospital';
+      case 8:
+        return 'HCIV';
+      case 9:
+        return 'HCIII';
+      case 10:
         return 'Clinic';
+      case 11:
+        return 'Herbal Selling Outlet';
+      case 12:
+        return 'Shift Market';
+      case 13:
+        return 'Pharmaceutical/Medical Device Manufacturing Premise';
+      case 14:
+        return 'Other';
       default:
         return 'Unknown';
     }
@@ -218,11 +234,13 @@ class CssModel {
   String _getPremisesConditionText(int condition) {
     switch (condition) {
       case 1:
-        return 'Good';
+        return 'Poor';
       case 2:
         return 'Fair';
       case 3:
-        return 'Poor';
+        return 'Good';
+      case 4:
+        return 'Excellent';
       default:
         return 'Unknown';
     }
@@ -232,11 +250,13 @@ class CssModel {
     if (keeping == null) return 'Not specified';
     switch (keeping) {
       case 1:
-        return 'Good';
+        return 'Poor';
       case 2:
         return 'Fair';
       case 3:
-        return 'Poor';
+        return 'Good';
+      case 4:
+        return 'Excellent';
       default:
         return 'Unknown';
     }

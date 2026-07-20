@@ -90,29 +90,33 @@ class CssActivityCard extends StatelessWidget {
   String _getCategoryOfPremisesText(int category) {
     switch (category) {
       case 1:
-        return 'Wholesale Pharmacy';
+        return 'Wholesale Pharmacy - Human';
       case 2:
-        return 'Retail Pharmacy';
+        return 'Wholesale Pharmacy - Vet';
       case 3:
-        return 'Drug Shop';
+        return 'Retail Pharmacy - Human';
       case 4:
-        return 'External Stores';
+        return 'Retail Pharmacy - Vet';
       case 5:
-        return 'Hospital';
+        return 'Drug Shop';
       case 6:
-        return 'HCIV';
+        return 'External Stores';
       case 7:
-        return 'HCIII';
+        return 'Hospital';
       case 8:
-        return 'Clinic';
+        return 'HCIV';
       case 9:
-        return 'Herbal Selling Outlet';
+        return 'HCIII';
       case 10:
-        return 'Shift Market';
+        return 'Clinic';
       case 11:
-        return 'Manufacturing Premise';
+        return 'Herbal Selling Outlet';
       case 12:
-        return 'Others';
+        return 'Shift Market';
+      case 13:
+        return 'Pharmaceutical/Medical Device Manufacturing Premise';
+      case 14:
+        return 'Other';
       default:
         return 'Not specified';
     }
@@ -121,11 +125,13 @@ class CssActivityCard extends StatelessWidget {
   String _getPremisesConditionText(int condition) {
     switch (condition) {
       case 1:
-        return 'Good';
+        return 'Poor';
       case 2:
         return 'Fair';
       case 3:
-        return 'Poor';
+        return 'Good';
+      case 4:
+        return 'Excellent';
       default:
         return 'Unknown';
     }
@@ -135,11 +141,13 @@ class CssActivityCard extends StatelessWidget {
     if (keeping == null) return 'Not specified';
     switch (keeping) {
       case 1:
-        return 'Good';
+        return 'Poor';
       case 2:
         return 'Fair';
       case 3:
-        return 'Poor';
+        return 'Good';
+      case 4:
+        return 'Excellent';
       default:
         return 'Unknown';
     }

@@ -168,31 +168,31 @@ class ShiftMarketModel {
     if (category == null) return '';
     switch (category) {
       case 1:
-        return 'WHOLESALE PHARMACY';
+        return 'WHOLESALE PHARMACY - HUMAN';
       case 2:
-        return 'RETAIL PHARMACY';
+        return 'WHOLESALE PHARMACY - VET';
       case 3:
-        return 'DRUG SHOP';
+        return 'RETAIL PHARMACY - HUMAN';
       case 4:
-        return 'EXTERNAL STORES';
+        return 'RETAIL PHARMACY - VET';
       case 5:
-        return 'HOSPITAL';
+        return 'DRUG SHOP';
       case 6:
-        return 'HCIV';
+        return 'EXTERNAL STORES';
       case 7:
-        return 'HCIII';
+        return 'HOSPITAL';
       case 8:
-        return 'CLINIC';
+        return 'HCIV';
       case 9:
-        return 'HERBAL SELLING OUTLET';
+        return 'HCIII';
       case 10:
-        return 'SHIFT MARKET';
+        return 'CLINIC';
       case 11:
-        return 'PHARMACEUTICAL/MEDICAL DEVICE MANUFACTURING PREMISE';
+        return 'HERBAL SELLING OUTLET';
       case 12:
-        return 'RTS(RADIO TALK SHOW)';
+        return 'SHIFT MARKET';
       case 13:
-        return 'ENFORCEMENT';
+        return 'PHARMACEUTICAL/MEDICAL DEVICE MANUFACTURING PREMISE';
       case 14:
         return 'OTHER';
       default:

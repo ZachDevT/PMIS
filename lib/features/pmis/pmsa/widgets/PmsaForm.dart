@@ -236,8 +236,10 @@ class PmsaForm extends StatelessWidget {
                         buildDropdown(
                           label: "Category of Facility",
                           items: [
-                            "Wholesale Pharmacy",
-                            "Retail Pharmacy",
+                            "Wholesale Pharmacy - Human",
+                            "Wholesale Pharmacy - Vet",
+                            "Retail Pharmacy - Human",
+                            "Retail Pharmacy - Vet",
                             "Drug Shop",
                             "External Stores",
                             "Hospital",
@@ -247,7 +249,7 @@ class PmsaForm extends StatelessWidget {
                             "Herbal Selling Outlet",
                             "Shift Market",
                             "Pharmaceutical/Medical Device Manufacturing Premise",
-                            "Others"
+                            "Other"
                           ],
                           selectedItem: controller.selectedCategoryOfFacility,
                           prefixIcon: Icons.category,

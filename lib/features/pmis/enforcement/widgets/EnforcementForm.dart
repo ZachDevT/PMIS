@@ -189,7 +189,7 @@ class EnforcementForm extends StatelessWidget {
                           label: "Category of Premises",
                           items: controller.categoryOfPremisesOptions,
                           selectedItem: controller.selectedCategoryOfPremises,
-                          prefixIcon: Iconsax.category,
+                          prefixIcon: Icons.category,
                           validator: (value) => value!.isEmpty ? "Required" : null,
                         ),
                         Obx(() => controller.selectedCategoryOfPremises.value == "Other" 

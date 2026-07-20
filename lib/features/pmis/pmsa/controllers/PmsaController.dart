@@ -310,7 +310,7 @@ class PmsaController extends GetxController {
         qualifications: qualificationsController.text,
         categoryOfpremises:
             _getCategoryOfPremises(selectedCategoryOfFacility.value),
-        otherCategoryPremise: selectedCategoryOfFacility.value == "Others" ? "Other category" : "",
+        otherCategoryPremise: selectedCategoryOfFacility.value == "Other" ? "Other category" : "",
         licenseStatus: _getLicenseStatus(licensedStatus.value),
         licenseNo: licensedStatus.value == "Licensed" ? licenseNoController.text : "",
         licenseExpiryDate: licensedStatus.value == "Licensed" ? licenseExpiryDateController.text : "",
@@ -432,32 +432,37 @@ class PmsaController extends GetxController {
 
   int _getCategoryOfPremises(String category) {
     switch (category) {
-      case "Wholesale Pharmacy":
+      case "Wholesale Pharmacy - Human":
         return 1;
-      case "Retail Pharmacy":
+      case "Wholesale Pharmacy - Vet":
         return 2;
-      case "Drug Shop":
+      case "Retail Pharmacy - Human":
         return 3;
-      case "External Stores":
+      case "Retail Pharmacy - Vet":
         return 4;
-      case "Hospital":
+      case "Drug Shop":
         return 5;
-      case "HCIV":
+      case "External Stores":
         return 6;
-      case "HCIII":
+      case "Hospital":
         return 7;
-      case "Clinic":
+      case "HCIV":
         return 8;
-      case "Herbal Selling Outlet":
+      case "HCIII":
         return 9;
-      case "Shift Market":
+      case "Clinic":
         return 10;
-      case "Pharmaceutical/Medical Device Manufacturing Premise":
+      case "Herbal Selling Outlet":
         return 11;
-      case "Others":
+      case "Shift Market":
         return 12;
+      case "Pharmaceutical/Medical Device Manufacturing Premise":
+        return 13;
+      case "Other":
+      case "Others":
+        return 14;
       default:
-        return 2; // Default to Retail Pharmacy
+        return 3; // Default to Retail Pharmacy - Human
     }
   }
 

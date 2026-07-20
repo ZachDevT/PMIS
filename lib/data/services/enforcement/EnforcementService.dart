@@ -297,31 +297,31 @@ class EnforcementService {
   /// Get category of premises code
   int _getCategoryOfPremises(String category) {
     switch (category.toUpperCase()) {
-      case 'WHOLESALE PHARMACY':
+      case 'WHOLESALE PHARMACY - HUMAN':
         return 1;
-      case 'RETAIL PHARMACY':
+      case 'WHOLESALE PHARMACY - VET':
         return 2;
-      case 'DRUG SHOP':
+      case 'RETAIL PHARMACY - HUMAN':
         return 3;
-      case 'EXTERNAL STORES':
+      case 'RETAIL PHARMACY - VET':
         return 4;
-      case 'HOSPITAL':
+      case 'DRUG SHOP':
         return 5;
-      case 'HCIV':
+      case 'EXTERNAL STORES':
         return 6;
-      case 'HCIII':
+      case 'HOSPITAL':
         return 7;
-      case 'CLINIC':
+      case 'HCIV':
         return 8;
-      case 'HERBAL SELLING OUTLET':
+      case 'HCIII':
         return 9;
-      case 'SHIFT MARKET':
+      case 'CLINIC':
         return 10;
-      case 'PHARMACEUTICAL/MEDICAL DEVICE MANUFACTURING PREMISE':
+      case 'HERBAL SELLING OUTLET':
         return 11;
-      case 'RTS(RADIO TALK SHOW)':
+      case 'SHIFT MARKET':
         return 12;
-      case 'ENFORCEMENT':
+      case 'PHARMACEUTICAL/MEDICAL DEVICE MANUFACTURING PREMISE':
         return 13;
       case 'OTHER':
         return 14;

@@ -651,17 +651,33 @@ class GdpActivityCard extends StatelessWidget {
   String _getCategoryOfPremisesText(int category) {
     switch (category) {
       case 1:
-        return 'Retail Pharmacy';
+        return 'Wholesale Pharmacy - Human';
       case 2:
-        return 'Drug Shop';
+        return 'Wholesale Pharmacy - Vet';
       case 3:
-        return 'Hospital';
+        return 'Retail Pharmacy - Human';
       case 4:
-        return 'HCIV';
+        return 'Retail Pharmacy - Vet';
       case 5:
-        return 'HCIII';
+        return 'Drug Shop';
       case 6:
+        return 'External Stores';
+      case 7:
+        return 'Hospital';
+      case 8:
+        return 'HCIV';
+      case 9:
+        return 'HCIII';
+      case 10:
         return 'Clinic';
+      case 11:
+        return 'Herbal Selling Outlet';
+      case 12:
+        return 'Shift Market';
+      case 13:
+        return 'Pharmaceutical/Medical Device Manufacturing Premise';
+      case 14:
+        return 'Other';
       default:
         return 'Unknown';
     }

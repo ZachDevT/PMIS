@@ -228,8 +228,10 @@ class GdpForm extends StatelessWidget {
                           buildDropdown(
                             label: "Category of Facility",
                             items: [
-                              "Wholesale Pharmacy",
-                              "Retail Pharmacy",
+                              "Wholesale Pharmacy - Human",
+                              "Wholesale Pharmacy - Vet",
+                              "Retail Pharmacy - Human",
+                              "Retail Pharmacy - Vet",
                               "Drug Shop",
                               "External Stores",
                               "Hospital",
@@ -239,12 +241,12 @@ class GdpForm extends StatelessWidget {
                               "Herbal Selling Outlet",
                               "Shift Market",
                               "Pharmaceutical/Medical Device Manufacturing Premise",
-                              "Others"
+                              "Other"
                             ],
                             selectedItem: controller.selectedCategoryOfFacility,
                             prefixIcon: Icons.category,
                           ),
-                          if (controller.selectedCategoryOfFacility.value == "Others") ...[
+                          if (controller.selectedCategoryOfFacility.value == "Other") ...[
                             buildTextField(
                               controller: controller.otherCategoryPremiseController,
                               label: "Specify Category of Premises",

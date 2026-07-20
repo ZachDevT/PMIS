@@ -64,8 +64,10 @@ class ShiftMarketController extends GetxController {
 
   // Category of Premises options
   final List<String> categoryOfPremisesOptions = [
-    "Wholesale Pharmacy",
-    "Retail Pharmacy",
+    "Wholesale Pharmacy - Human",
+    "Wholesale Pharmacy - Vet",
+    "Retail Pharmacy - Human",
+    "Retail Pharmacy - Vet",
     "Drug Shop",
     "External Stores",
     "Hospital",
@@ -75,8 +77,6 @@ class ShiftMarketController extends GetxController {
     "Herbal Selling Outlet",
     "Shift Market",
     "Pharmaceutical/Medical Device Manufacturing Premise",
-    "RTS(Radio talk Show)",
-    "Enforcement",
     "Other"
   ];
 
