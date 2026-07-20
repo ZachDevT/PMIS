@@ -236,7 +236,8 @@ class PmsService {
     if (activity.toLowerCase().contains('follow')) return 2;
     if (activity.toLowerCase().contains('complaint')) return 3;
     if (activity.toLowerCase().contains('other')) return 4;
-    return 1; // Default
+    if (activity.toLowerCase().contains('none')) return 5;
+    return 5; // Default to None
   }
 
   String _getRegionGuid(String regionName) {

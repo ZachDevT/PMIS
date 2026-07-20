@@ -184,7 +184,7 @@ class PmsModel {
       case 2: return 'Follow-up on Recall';
       case 3: return 'Complaint investigation';
       case 4: return 'Others';
-      case 0: return 'None';
+      case 5: return 'None';
       default: return 'None';
     }
   }

@@ -111,7 +111,7 @@ class PmsaActivityCard extends StatelessWidget {
         return 'Complaint investigation';
       case 4:
         return 'Others';
-      case 0:
+      case 5:
         return 'None';
       default:
         return 'None';

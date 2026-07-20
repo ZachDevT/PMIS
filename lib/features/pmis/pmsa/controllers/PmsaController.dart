@@ -507,9 +507,9 @@ class PmsaController extends GetxController {
       case "Others":
         return 4;
       case "None":
-        return 0;
+        return 5;
       default:
-        return 0;
+        return 5;
     }
   }
 
