@@ -392,44 +392,14 @@ class ShiftMarketActivityCard extends StatelessWidget {
                       [
                         _buildModernDetailRow(context, 'Market Name',
                             activity.facilityName, Iconsax.home),
-                        _buildModernDetailRow(context, 'Facility Status',
-                            activity.facilityStatus, Iconsax.info_circle),
-                        // Only show below fields when facility is NOT closed
-                        if (!activity.facilityStatus.toLowerCase().contains('closed')) ...[
-                          _buildModernDetailRow(context, 'Person Found at Facility',
-                              activity.personFoundAtFacility.isNotEmpty ? activity.personFoundAtFacility : 'N/A', Iconsax.user),
-                          if (activity.categoryOfPremises.isNotEmpty)
-                            _buildModernDetailRow(context, 'Category of Premises',
-                                activity.categoryOfPremises, Iconsax.building),
-                        ],
+                        _buildModernDetailRow(context, 'Person Found at Facility',
+                            activity.personFoundAtFacility.isNotEmpty ? activity.personFoundAtFacility : 'N/A', Iconsax.user),
+                        if (activity.categoryOfPremises.isNotEmpty)
+                          _buildModernDetailRow(context, 'Category of Premises',
+                              activity.categoryOfPremises, Iconsax.building),
                       ],
                     ),
-                    // Only show compliance info when facility is NOT closed
-                    if (!activity.facilityStatus.toLowerCase().contains('closed')) ...[
-                      const SizedBox(height: 24),
-                      _buildModernDetailSection(
-                        context,
-                        'Compliance Information',
-                        Iconsax.shield_tick,
-                        [
-                          if (activity.licenseStatus.isNotEmpty)
-                            _buildModernDetailRow(context, 'License Status',
-                                activity.licenseStatus, Iconsax.document),
-                          if (activity.licenseStatus.toLowerCase().contains('licens') &&
-                              !activity.licenseStatus.toLowerCase().contains('un')) ...[
-                            _buildModernDetailRow(context, 'License No.',
-                                activity.licenseNo?.isNotEmpty == true ? activity.licenseNo! : 'N/A',
-                                Iconsax.document_text),
-                            _buildModernDetailRow(context, 'License Expiry Date',
-                                activity.licenseExpiryDate?.isNotEmpty == true ? activity.licenseExpiryDate! : 'N/A',
-                                Iconsax.calendar),
-                          ],
-                          if (activity.previouslyLicensed.isNotEmpty)
-                            _buildModernDetailRow(context, 'Previously Licensed / Illegal Outlet',
-                                activity.previouslyLicensed, Iconsax.document),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
+                    const SizedBox(height: 24),
                       _buildModernDetailSection(
                         context,
                         'Regulatory Actions',

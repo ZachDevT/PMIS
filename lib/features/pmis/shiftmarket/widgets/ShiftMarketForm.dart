@@ -122,23 +122,7 @@ class ShiftMarketForm extends StatelessWidget {
               ),
               const SizedBox(height: Tsizes.spaceBtwSections / 2),
 
-              // Facility Details Section
-              _buildSectionHeader("Facility Details", dark),
-              const SizedBox(height: Tsizes.spaceBtwItems / 2),
-              // Facility Status
-              _buildDropdown(
-                label: "Facility Status",
-                items: ["Open", "Closed"],
-                selectedItem: controller.selectedFacilityStatus,
-                prefixIcon: Iconsax.info_circle,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
-
-              // Conditionally show details when facility is Open
-              Obx(() => controller.selectedFacilityStatus.value != "Closed" ? Column(
-                children: [
-                  const SizedBox(height: Tsizes.spaceBtwSections / 2),
+              const SizedBox(height: Tsizes.spaceBtwSections / 2),
 
                   // Category and Actions Section
                   _buildSectionHeader("Category and Actions", dark),
@@ -162,82 +146,7 @@ class ShiftMarketForm extends StatelessWidget {
                   ),
                   const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-                  // License Status
-                  _buildDropdown(
-                    label: "License Status",
-                    items: ["Licensed", "Un-Licensed", "Not-Applicable"],
-                    selectedItem: controller.selectedLicenseStatus,
-                    prefixIcon: Iconsax.shield_tick,
-                  ),
                   const SizedBox(height: Tsizes.spaceBtwInputFields),
-
-                  // Show License fields when Licensed
-                  Obx(() {
-                    if (controller.selectedLicenseStatus.value == 'Licensed') {
-                      return Column(
-                        children: [
-                          _buildTextField(
-                            controller: controller.licenseNoController,
-                            label: "License No.",
-                            prefixIcon: Iconsax.crown,
-                            validator: (value) =>
-                                value!.isEmpty ? "Required" : null,
-                          ),
-                          const SizedBox(height: Tsizes.spaceBtwInputFields),
-                          TextFormField(
-                            controller: controller.licenseExpiryController,
-                            readOnly: true,
-                            validator: (value) =>
-                                value == null || value.isEmpty ? "Required" : null,
-                            decoration: InputDecoration(
-                              labelText: 'License Expiry Date',
-                              prefixIcon: const Icon(Iconsax.calendar),
-                              border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(Tsizes.borderRadiusLg),
-                              ),
-                              filled: true,
-                              fillColor: THelperFunctions.isDarkMode(Get.context!)
-                                  ? Tcolors.darkGrey
-                                  : Colors.white,
-                            ),
-                            onTap: () async {
-                              DateTime? picked = await showDatePicker(
-                                context: Get.context!,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime(2100),
-                              );
-                              if (picked != null) {
-                                controller.licenseExpiryController.text =
-                                    picked.toIso8601String().split('T').first;
-                              }
-                            },
-                          ),
-                          const SizedBox(height: Tsizes.spaceBtwInputFields),
-                        ],
-                      );
-                    }
-
-                    return const SizedBox.shrink();
-                  }),
-                  const SizedBox(height: Tsizes.spaceBtwInputFields),
-
-                  // Previously Licensed or Illegal Outlet (shown when Un-Licensed)
-                  Obx(() => controller.selectedLicenseStatus.value == "Un-Licensed" ||
-                          controller.selectedLicenseStatus.value == "Unlicensed"
-                      ? Column(
-                          children: [
-                            _buildDropdown(
-                              label: "Previously Licensed or Illegal Outlet",
-                              items: ["Previously Licensed", "Illegal Outlet"],
-                              selectedItem: controller.selectedPreviouslyLicensed,
-                              prefixIcon: Icons.warning,
-                            ),
-                            const SizedBox(height: Tsizes.spaceBtwInputFields),
-                          ],
-                        )
-                      : const SizedBox.shrink()),
 
                   // Regulatory Action Taken
                   _buildTextField(
@@ -255,11 +164,7 @@ class ShiftMarketForm extends StatelessWidget {
                     prefixIcon: Iconsax.box,
                     maxLines: 3,
                   ),
-                  const SizedBox(height: Tsizes.spaceBtwSections / 2),
-                ],
-              ) : const SizedBox.shrink()),
-
-              // Submit Button
+              const SizedBox(height: Tsizes.spaceBtwSections / 2),              // Submit Button
               const SizedBox(height: 15),
               SizedBox(
                 width: double.infinity,
