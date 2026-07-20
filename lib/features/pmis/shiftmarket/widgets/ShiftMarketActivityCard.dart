@@ -45,152 +45,144 @@ class ShiftMarketActivityCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-              // Header Row
-              Row(
-                children: [
+            // Header Row
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Tcolors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(Tsizes.borderRadiusSm),
+                  ),
+                  child: Icon(
+                    Iconsax.shop,
+                    color: Tcolors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: Tsizes.spaceBtwItems),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        activity.facilityName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: dark ? Tcolors.white : Tcolors.dark,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "${activity.region} • ${activity.district}",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: dark ? Tcolors.grey : Tcolors.darkGrey,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                if (!activity.isSynced)
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Tcolors.primary.withOpacity(0.1),
+                      color: Tcolors.warning.withOpacity(0.1),
                       borderRadius:
                           BorderRadius.circular(Tsizes.borderRadiusSm),
                     ),
-                    child: Icon(
-                      Iconsax.shop,
-                      color: Tcolors.primary,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: Tsizes.spaceBtwItems),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          activity.facilityName,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: dark ? Tcolors.white : Tcolors.dark,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "${activity.region} • ${activity.district}",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: dark ? Tcolors.grey : Tcolors.darkGrey,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (!activity.isSynced)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Tcolors.warning.withOpacity(0.1),
-                        borderRadius:
-                            BorderRadius.circular(Tsizes.borderRadiusSm),
-                      ),
-                      child: const Text(
-                        "Pending",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Tcolors.warning,
-                          fontWeight: FontWeight.w500,
-                        ),
+                    child: const Text(
+                      "Pending",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Tcolors.warning,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(height: Tsizes.spaceBtwItems),
+                  ),
+              ],
+            ),
+            const SizedBox(height: Tsizes.spaceBtwItems),
 
-              // Details Row
-              Row(
-                children: [
-                  _buildDetailItem(
-                    icon: Iconsax.user,
-                    label: "Inspector",
-                    value: activity.inspectorName,
-                    dark: dark,
-                  ),
-                  const SizedBox(width: Tsizes.spaceBtwItems),
-                  _buildDetailItem(
-                    icon: Iconsax.location,
-                    label: "Region",
-                    value: activity.region,
-                    dark: dark,
-                  ),
-                ],
-              ),
-              const SizedBox(height: Tsizes.spaceBtwItems / 2),
+            // Details Row
+            Row(
+              children: [
+                _buildDetailItem(
+                  icon: Iconsax.user,
+                  label: "Inspector",
+                  value: activity.inspectorName,
+                  dark: dark,
+                ),
+                const SizedBox(width: Tsizes.spaceBtwItems),
+                _buildDetailItem(
+                  icon: Iconsax.location,
+                  label: "Region",
+                  value: activity.region,
+                  dark: dark,
+                ),
+              ],
+            ),
+            const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
-              Row(
-                children: [
-                  _buildDetailItem(
-                    icon: Iconsax.map,
-                    label: "District",
-                    value: activity.district,
-                    dark: dark,
-                  ),
-                  const SizedBox(width: Tsizes.spaceBtwItems),
-                  _buildDetailItem(
-                    icon: Iconsax.user,
-                    label: "Person Found",
-                    value: activity.personFoundAtFacility,
-                    dark: dark,
-                  ),
-                ],
-              ),
-              const SizedBox(height: Tsizes.spaceBtwItems / 2),
+            Row(
+              children: [
+                _buildDetailItem(
+                  icon: Iconsax.map,
+                  label: "District",
+                  value: activity.district,
+                  dark: dark,
+                ),
+              ],
+            ),
+            const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
-              // Date and Time
-              Row(
-                children: [
-                  Icon(
-                    Iconsax.calendar,
-                    size: 16,
+            // Date and Time
+            Row(
+              children: [
+                Icon(
+                  Iconsax.calendar,
+                  size: 16,
+                  color: dark ? Tcolors.grey : Tcolors.darkGrey,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _formatDate(activity.inspectionDate),
+                  style: TextStyle(
+                    fontSize: 14,
                     color: dark ? Tcolors.grey : Tcolors.darkGrey,
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    _formatDate(activity.inspectionDate),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: dark ? Tcolors.grey : Tcolors.darkGrey,
+                ),
+                const Spacer(),
+                if (activity.regulatoryActionTaken.isNotEmpty)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Tcolors.error.withOpacity(0.1),
+                      borderRadius:
+                          BorderRadius.circular(Tsizes.borderRadiusSm),
+                    ),
+                    child: const Text(
+                      "Action Taken",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Tcolors.error,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                  const Spacer(),
-                  if (activity.regulatoryActionTaken.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Tcolors.error.withOpacity(0.1),
-                        borderRadius:
-                            BorderRadius.circular(Tsizes.borderRadiusSm),
-                      ),
-                      child: const Text(
-                        "Action Taken",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Tcolors.error,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildDetailItem({
@@ -392,35 +384,33 @@ class ShiftMarketActivityCard extends StatelessWidget {
                       [
                         _buildModernDetailRow(context, 'Market Name',
                             activity.facilityName, Iconsax.home),
-                        _buildModernDetailRow(context, 'Person Found at Facility',
-                            activity.personFoundAtFacility.isNotEmpty ? activity.personFoundAtFacility : 'N/A', Iconsax.user),
                         if (activity.categoryOfPremises.isNotEmpty)
                           _buildModernDetailRow(context, 'Category of Premises',
                               activity.categoryOfPremises, Iconsax.building),
                       ],
                     ),
                     const SizedBox(height: 24),
-                      _buildModernDetailSection(
-                        context,
-                        'Regulatory Actions',
-                        Iconsax.shield_security,
-                        [
-                          _buildModernDetailRow(
-                              context,
-                              'Regulatory Action Taken',
-                              activity.regulatoryActionTaken.isNotEmpty
-                                  ? activity.regulatoryActionTaken
-                                  : 'None',
-                              Iconsax.warning_2),
-                          _buildModernDetailRow(
-                              context,
-                              'Consignments Impounded',
-                              activity.consignmentsImpounded.isNotEmpty
-                                  ? activity.consignmentsImpounded
-                                  : 'None',
-                              Iconsax.box),
-                        ],
-                      ),
+                    _buildModernDetailSection(
+                      context,
+                      'Regulatory Actions',
+                      Iconsax.shield_security,
+                      [
+                        _buildModernDetailRow(
+                            context,
+                            'Regulatory Action Taken',
+                            activity.regulatoryActionTaken.isNotEmpty
+                                ? activity.regulatoryActionTaken
+                                : 'None',
+                            Iconsax.warning_2),
+                        _buildModernDetailRow(
+                            context,
+                            'Consignments Impounded',
+                            activity.consignmentsImpounded.isNotEmpty
+                                ? activity.consignmentsImpounded
+                                : 'None',
+                            Iconsax.box),
+                      ],
+                    ),
                     const SizedBox(height: 24),
                     _buildModernDetailSection(
                       context,

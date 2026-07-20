@@ -14,38 +14,40 @@ class CssRepository extends GetxController {
       // Check connectivity before making API call
       final networkManager = Get.find<NetworkManager>();
       final isOnline = await networkManager.isconnected();
-      
+
       if (!isOnline) {
         print('No internet connection, returning local data');
         List storedActivities = box.read<List>('css_activities') ?? [];
-        return storedActivities.map((e) => Map<String, dynamic>.from(e)).toList();
+        return storedActivities
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
       }
-      
+
       // Try to fetch from API - wrap in additional try-catch for SocketException
       try {
         List<Map<String, dynamic>> onlineData = [];
-      try {
-        onlineData = await _service.getCssData();
-      } catch(e) {
-        print('Service fetch error: $e');
-      }
-      
-      // Merge with local unsynced activities
-      List storedActivities = box.read<List>('css_activities') ?? [];
-      
-      final Map<String, Map<String, dynamic>> mergedMap = {};
-      for (var item in onlineData) {
-        if (item['id'] != null) {
-          mergedMap[item['id'].toString()] = item;
+        try {
+          onlineData = await _service.getCssData();
+        } catch (e) {
+          print('Service fetch error: $e');
         }
-      }
-      for (var item in storedActivities) {
-        if (item['id'] != null) {
-          mergedMap[item['id'].toString()] = Map<String, dynamic>.from(item);
+
+        // Merge with local unsynced activities
+        List storedActivities = box.read<List>('css_activities') ?? [];
+
+        final Map<String, Map<String, dynamic>> mergedMap = {};
+        for (var item in onlineData) {
+          if (item['id'] != null) {
+            mergedMap[item['id'].toString()] = item;
+          }
         }
-      }
-      
-      return mergedMap.values.toList();
+        for (var item in storedActivities) {
+          final local = Map<String, dynamic>.from(item);
+          local['_localId'] ??= 'css-${DateTime.now().microsecondsSinceEpoch}';
+          mergedMap['local:${local['_localId']}'] = local;
+        }
+
+        return mergedMap.values.toList();
       } on TimeoutException catch (e) {
         print('TimeoutException in CSS service: ${e.message}');
         return [];
@@ -70,9 +72,9 @@ class CssRepository extends GetxController {
       return [];
     } catch (e) {
       // Handle any other errors gracefully, including TimeoutException that might not be caught above
-      if (e.toString().contains('TimeoutException') || 
+      if (e.toString().contains('TimeoutException') ||
           e.toString().contains('Future not completed') ||
-          e.toString().contains('SocketException') || 
+          e.toString().contains('SocketException') ||
           e.toString().contains('Failed host lookup') ||
           e.toString().contains('No address associated')) {
         print('Error (detected in catch): ${e.toString()}');
@@ -91,7 +93,9 @@ class CssRepository extends GetxController {
   Future<void> saveActivityLocally(Map<String, dynamic> activityData) async {
     try {
       List storedActivities = box.read<List>('css_activities') ?? [];
-      storedActivities.add(activityData);
+      final local = Map<String, dynamic>.from(activityData);
+      local['_localId'] ??= 'css-${DateTime.now().microsecondsSinceEpoch}';
+      storedActivities.add(local);
       await box.write('css_activities', storedActivities);
       print('CSS activity saved locally: ${activityData['id']}');
     } catch (e) {
@@ -104,23 +108,25 @@ class CssRepository extends GetxController {
     try {
       List storedActivities = box.read<List>('css_activities') ?? [];
       List<Map<String, dynamic>> failedSyncs = [];
-      
+      List<Map<String, dynamic>> successfulSyncs = [];
+
       if (storedActivities.isNotEmpty) {
         for (var activityData in storedActivities) {
           try {
             await _service.postCssData(activityData);
+            successfulSyncs.add(Map<String, dynamic>.from(activityData));
             print('CSS activity synced successfully: ${activityData['id']}');
           } catch (e) {
             print('Failed to sync CSS activity ${activityData['id']}: $e');
             failedSyncs.add(activityData);
           }
         }
-        
+
         // Remove successfully synced activities, keep failed ones
         await box.write('css_activities', failedSyncs);
       }
-      
-      return storedActivities.map((e) => e as Map<String, dynamic>).toList();
+
+      return successfulSyncs;
     } catch (e) {
       print('Error syncing local CSS activities: $e');
       return [];

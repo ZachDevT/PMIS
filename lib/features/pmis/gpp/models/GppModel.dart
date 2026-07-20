@@ -11,6 +11,7 @@ class GppActivity {
   final String personName;
   final String contact;
   final String qualifications;
+  final int? qualificationId;
   final int categoryOfpremises;
   final int licenseStatus;
   final int categoryStatus;
@@ -37,6 +38,7 @@ class GppActivity {
     required this.personName,
     required this.contact,
     required this.qualifications,
+    this.qualificationId,
     required this.categoryOfpremises,
     required this.licenseStatus,
     required this.categoryStatus,
@@ -53,7 +55,8 @@ class GppActivity {
 
   factory GppActivity.fromJson(Map<String, dynamic> json) => GppActivity(
         id: json['id'] ?? 0,
-        inspectionDate: DateTime.parse(json['inspectionDate'] ?? DateTime.now().toIso8601String()),
+        inspectionDate: DateTime.parse(
+            json['inspectionDate'] ?? DateTime.now().toIso8601String()),
         inspectorName: json['inspectorName'] ?? '',
         gps: (json['gps'] != null && json['gps'].toString().isNotEmpty)
             ? json['gps'].toString()
@@ -75,6 +78,8 @@ class GppActivity {
                 : (json['QualificationId'] != null
                     ? _getQualificationName(json['QualificationId'])
                     : '')),
+        qualificationId:
+            _asInt(json['qualificationId'] ?? json['QualificationId']),
         categoryOfpremises: json['categoryOfpremises'] ?? 1,
         licenseStatus: json['licenseStatus'] ?? 1,
         categoryStatus: json['categoryStatus'] ?? 1,
@@ -85,20 +90,33 @@ class GppActivity {
         latitude: (json['latitude'] ?? 0.0).toDouble(),
         longitude: (json['longitude'] ?? 0.0).toDouble(),
         licenseNo: json['licenseNo'],
-        licenseExpiryDate: json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? json['licenseExpDate'] ?? json['LicenseExpDate'] ?? null,
-        previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
+        licenseExpiryDate: json['licenseExpiryDate'] ??
+            json['LicenseExpiryDate'] ??
+            json['licenseExpDate'] ??
+            json['LicenseExpDate'] ??
+            null,
+        previouslyLicensed:
+            json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
       );
+
+  static int? _asInt(dynamic value) =>
+      value is int ? value : int.tryParse(value?.toString() ?? '');
 
   static String _getQualificationName(dynamic id) {
     if (id == null) return '';
     final intId = id is int ? id : int.tryParse(id.toString());
     if (intId == null) return '';
     switch (intId) {
-      case 1: return 'Pharmacist';
-      case 2: return 'Nurse';
-      case 3: return 'Dispenser';
-      case 4: return 'Attendant';
-      default: return 'Other ($intId)';
+      case 1:
+        return 'Pharmacist';
+      case 2:
+        return 'Nurse';
+      case 3:
+        return 'Dispenser';
+      case 4:
+        return 'Attendant';
+      default:
+        return 'Other ($intId)';
     }
   }
 
@@ -115,6 +133,7 @@ class GppActivity {
         'personName': personName,
         'contact': contact,
         'qualifications': qualifications,
+        'qualificationId': qualificationId,
         'categoryOfpremises': categoryOfpremises,
         'licenseStatus': licenseStatus,
         'categoryStatus': categoryStatus,
@@ -132,73 +151,105 @@ class GppActivity {
   // Helper methods to convert numeric values to text
   String _getFacilityStatusText(int status) {
     switch (status) {
-      case 1: return 'Open';
-      case 0: return 'Closed';
-      default: return 'Unknown';
+      case 1:
+        return 'Open';
+      case 0:
+        return 'Closed';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getPersonTypeText(int type) {
     switch (type) {
-      case 1: return 'In-charge';
-      case 2: return 'Attendant/Operator';
-      default: return 'Unknown';
+      case 1:
+        return 'In-charge';
+      case 2:
+        return 'Attendant/Operator';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getCategoryOfPremisesText(int category) {
     switch (category) {
-      case 1: return 'Retail Pharmacy';
-      case 2: return 'Drug Shop';
-      case 3: return 'Hospital';
-      case 4: return 'HCIV';
-      case 5: return 'HCIII';
-      case 6: return 'Clinic';
-      default: return 'Unknown';
+      case 1:
+        return 'Retail Pharmacy';
+      case 2:
+        return 'Drug Shop';
+      case 3:
+        return 'Hospital';
+      case 4:
+        return 'HCIV';
+      case 5:
+        return 'HCIII';
+      case 6:
+        return 'Clinic';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getLicenseStatusText(int status) {
     switch (status) {
-      case 1: return 'Licensed';
-      case 2: return 'Un-Licensed';
-      case 3: return 'Not-Applicable';
-      default: return 'Unknown';
+      case 1:
+        return 'Licensed';
+      case 2:
+        return 'Un-Licensed';
+      case 3:
+        return 'Not-Applicable';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getCategoryStatusText(int status) {
     switch (status) {
-      case 1: return 'Medical Device';
-      case 2: return 'Veterinary drugs';
-      case 3: return 'Human drugs';
-      case 4: return 'Public Healthcare products';
-      case 5: return 'Herbal drugs';
-      default: return 'Unknown';
+      case 1:
+        return 'Medical Device';
+      case 2:
+        return 'Veterinary drugs';
+      case 3:
+        return 'Human drugs';
+      case 4:
+        return 'Public Healthcare products';
+      case 5:
+        return 'Herbal drugs';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getFacilityTypeText(int type) {
     switch (type) {
-      case 1: return 'Public Facility';
-      case 2: return 'Private Facility';
-      default: return 'Unknown';
+      case 1:
+        return 'Public Facility';
+      case 2:
+        return 'Private Facility';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getCertStatusText(int status) {
     switch (status) {
-      case 1: return 'Certified';
-      case 2: return 'Not certified';
-      default: return 'Unknown';
+      case 1:
+        return 'Certified';
+      case 2:
+        return 'Not certified';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getRecommendedForGppText(int recommendation) {
     switch (recommendation) {
-      case 1: return 'Not Recommended for GPP';
-      case 2: return 'Recommended for GPP';
-      default: return 'Unknown';
+      case 1:
+        return 'Not Recommended for GPP';
+      case 2:
+        return 'Recommended for GPP';
+      default:
+        return 'Unknown';
     }
   }
 }

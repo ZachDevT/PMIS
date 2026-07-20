@@ -21,9 +21,9 @@ class GdpRepository {
     } catch (e) {
       print('Error fetching GDP activities: $e');
     }
-    
+
     List storedActivities = box.read<List>('gdp_activities') ?? [];
-    
+
     final Map<String, Map<String, dynamic>> mergedMap = {};
     for (var item in onlineData) {
       if (item['id'] != null) {
@@ -31,11 +31,11 @@ class GdpRepository {
       }
     }
     for (var item in storedActivities) {
-      if (item['id'] != null) {
-        mergedMap[item['id'].toString()] = Map<String, dynamic>.from(item);
-      }
+      final local = Map<String, dynamic>.from(item);
+      local['_localId'] ??= 'gdp-${DateTime.now().microsecondsSinceEpoch}';
+      mergedMap['local:${local['_localId']}'] = local;
     }
-    
+
     return mergedMap.values.toList();
   }
 
@@ -43,7 +43,9 @@ class GdpRepository {
   Future<void> saveActivityLocally(Map<String, dynamic> activityData) async {
     try {
       List storedActivities = box.read<List>('gdp_activities') ?? [];
-      storedActivities.add(activityData);
+      final local = Map<String, dynamic>.from(activityData);
+      local['_localId'] ??= 'gdp-${DateTime.now().microsecondsSinceEpoch}';
+      storedActivities.add(local);
       await box.write('gdp_activities', storedActivities);
       print('GDP activity saved locally: ${activityData['id']}');
     } catch (e) {
@@ -56,23 +58,25 @@ class GdpRepository {
     try {
       List storedActivities = box.read<List>('gdp_activities') ?? [];
       List<Map<String, dynamic>> failedSyncs = [];
-      
+      List<Map<String, dynamic>> successfulSyncs = [];
+
       if (storedActivities.isNotEmpty) {
         for (var activityData in storedActivities) {
           try {
             await _gdpService.postGdpData(activityData);
+            successfulSyncs.add(Map<String, dynamic>.from(activityData));
             print('GDP activity synced successfully: ${activityData['id']}');
           } catch (e) {
             print('Failed to sync GDP activity ${activityData['id']}: $e');
             failedSyncs.add(activityData);
           }
         }
-        
+
         // Remove successfully synced activities, keep failed ones
         await box.write('gdp_activities', failedSyncs);
       }
-      
-      return storedActivities.map((e) => e as Map<String, dynamic>).toList();
+
+      return successfulSyncs;
     } catch (e) {
       print('Error syncing local GDP activities: $e');
       return [];
@@ -86,8 +90,7 @@ class GdpRepository {
       print('GDP Activity added successfully');
     } catch (e) {
       print('Error adding GDP activity: $e');
-      // Optionally save locally if network call fails.
-      await saveActivityLocally(activityData);
+      rethrow;
     }
   }
 

@@ -13,6 +13,7 @@ class PmsModel {
   final String personName;
   final String contact;
   final String qualifications;
+  final int? qualificationId;
   final int categoryOfpremises;
   final String otherCategoryPremise;
   final int licenseStatus;
@@ -43,6 +44,7 @@ class PmsModel {
     required this.personName,
     required this.contact,
     required this.qualifications,
+    this.qualificationId,
     required this.categoryOfpremises,
     required this.otherCategoryPremise,
     required this.licenseStatus,
@@ -67,17 +69,19 @@ class PmsModel {
     print('Raw InspectorName: ${json['InspectorName']}');
     print('Raw inspectorId: ${json['inspectorId']}');
     print('Raw InspectorId: ${json['InspectorId']}');
-    
+
     final inspectorName = json['inspectorName'] ?? json['InspectorName'] ?? '';
     final inspectorId = json['inspectorId'] ?? json['InspectorId'] ?? '';
-    
+
     print('Final inspectorName: $inspectorName');
     print('Final inspectorId: $inspectorId');
     print('=== End PMS Model Debug ===');
-    
+
     return PmsModel(
       id: json['id'] ?? 0,
-      inspectionDate: DateTime.parse(json['inspectionDate'] ?? json['InspectionDate'] ?? DateTime.now().toIso8601String()),
+      inspectionDate: DateTime.parse(json['inspectionDate'] ??
+          json['InspectionDate'] ??
+          DateTime.now().toIso8601String()),
       inspectorName: inspectorName,
       inspectorId: inspectorId,
       latitude: (json['latitude'] ?? json['Latitude'] ?? 0).toDouble(),
@@ -90,11 +94,20 @@ class PmsModel {
       personName: json['personName'] ?? '',
       contact: json['contact'] ?? '',
       qualifications: json['qualifications'] ?? '',
+      qualificationId: json['qualificationId'] is int
+          ? json['qualificationId']
+          : int.tryParse(
+              (json['qualificationId'] ?? json['QualificationId'] ?? '')
+                  .toString()),
       categoryOfpremises: json['categoryOfpremises'] ?? 0,
       otherCategoryPremise: json['other_CategoryPremise'] ?? '',
       licenseStatus: json['licenseStatus'] ?? 0,
       licenseNo: json['licenseNo'] ?? '',
-      licenseExpiryDate: json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? json['licenseExpDate'] ?? json['LicenseExpDate'] ?? '',
+      licenseExpiryDate: json['licenseExpiryDate'] ??
+          json['LicenseExpiryDate'] ??
+          json['licenseExpDate'] ??
+          json['LicenseExpDate'] ??
+          '',
       unlicensed: json['unlicensed'] ?? 0,
       pmsActivity: json['pmsActivity'] ?? 0,
       sampleProductName: json['sample_ProductName'] ?? '',
@@ -103,7 +116,8 @@ class PmsModel {
       followupComment: json['followup_Comment'] ?? '',
       complaintProduct: json['complaint_Product'] ?? '',
       otherActivity: json['other_Activity'] ?? '',
-      previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
+      previouslyLicensed:
+          json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
     );
   }
 
@@ -123,6 +137,7 @@ class PmsModel {
       'personName': personName,
       'contact': contact,
       'qualifications': qualifications,
+      'qualificationId': qualificationId,
       'categoryOfpremises': categoryOfpremises,
       'other_CategoryPremise': otherCategoryPremise,
       'licenseStatus': licenseStatus,
@@ -143,49 +158,72 @@ class PmsModel {
   // Helper methods to convert numeric values to text
   String _getFacilityStatusText(int status) {
     switch (status) {
-      case 1: return 'Open';
-      case 0: return 'Closed';
-      default: return 'Unknown';
+      case 1:
+        return 'Open';
+      case 0:
+        return 'Closed';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getPersonTypeText(int type) {
     switch (type) {
-      case 1: return 'In-charge';
-      case 2: return 'Attendant/Operator';
-      default: return 'Unknown';
+      case 1:
+        return 'In-charge';
+      case 2:
+        return 'Attendant/Operator';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getCategoryOfPremisesText(int category) {
     switch (category) {
-      case 1: return 'Retail Pharmacy';
-      case 2: return 'Drug Shop';
-      case 3: return 'Hospital';
-      case 4: return 'HCIV';
-      case 5: return 'HCIII';
-      case 6: return 'Clinic';
-      default: return 'Unknown';
+      case 1:
+        return 'Retail Pharmacy';
+      case 2:
+        return 'Drug Shop';
+      case 3:
+        return 'Hospital';
+      case 4:
+        return 'HCIV';
+      case 5:
+        return 'HCIII';
+      case 6:
+        return 'Clinic';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getLicenseStatusText(int status) {
     switch (status) {
-      case 1: return 'Licensed';
-      case 2: return 'Un-Licensed';
-      case 3: return 'Not-Applicable';
-      default: return 'Unknown';
+      case 1:
+        return 'Licensed';
+      case 2:
+        return 'Un-Licensed';
+      case 3:
+        return 'Not-Applicable';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getPmsActivityText(int activity) {
     switch (activity) {
-      case 1: return 'Sampling';
-      case 2: return 'Follow-up on Recall';
-      case 3: return 'Complaint investigation';
-      case 4: return 'Others';
-      case 5: return 'None';
-      default: return 'None';
+      case 1:
+        return 'Sampling';
+      case 2:
+        return 'Follow-up on Recall';
+      case 3:
+        return 'Complaint investigation';
+      case 4:
+        return 'Others';
+      case 5:
+        return 'None';
+      default:
+        return 'None';
     }
   }
 
@@ -234,6 +272,7 @@ class PmsModel {
       personName: personName ?? this.personName,
       contact: contact ?? this.contact,
       qualifications: qualifications ?? this.qualifications,
+      qualificationId: qualificationId,
       categoryOfpremises: categoryOfpremises ?? this.categoryOfpremises,
       otherCategoryPremise: otherCategoryPremise ?? this.otherCategoryPremise,
       licenseStatus: licenseStatus ?? this.licenseStatus,

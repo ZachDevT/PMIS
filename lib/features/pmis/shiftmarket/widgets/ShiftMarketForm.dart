@@ -7,7 +7,8 @@ import 'package:pmis/utils/helpers/helpers_functions.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pmis/commons/widgets/inputs/CommonDateTimeInput.dart';
-import 'package:pmis/features/pmis/location/controllers/LocationController.dart' as pmis_location;
+import 'package:pmis/features/pmis/location/controllers/LocationController.dart'
+    as pmis_location;
 
 import 'package:pmis/commons/widgets/icons/circular_icon.dart';
 
@@ -53,146 +54,160 @@ class ShiftMarketForm extends StatelessWidget {
                     _buildSectionHeader("Basic Information", dark),
                     const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
-              // Inspection Date and Time
-              CommonDateTimeInput(
-                dateController: controller.inspectionDateController,
-                timeController: controller.inspectionTimeController,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
-
-              // Inspector Name
-              _buildTextField(
-                controller: controller.inspectorNameController,
-                    readOnly: true,
-                label: "Inspector Name",
-                prefixIcon: Iconsax.user,
-                
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
-
-              // GPS Location
-              _buildTextField(
-                controller: controller.gpsLocationController,
-                label: "GPS Location",
-                prefixIcon: Iconsax.gps,
-                readOnly: true,
-                suffix: Obx(() => controller.isGettingLocation.value
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : IconButton(
-                        icon: const Icon(Iconsax.location),
-                        onPressed: () => controller.getCurrentLocation(),
-                      )),
-              ),
-              const SizedBox(height: Tsizes.spaceBtwSections / 2),
-
-              // Location Details Section
-              _buildSectionHeader("Location Details", dark),
-              const SizedBox(height: Tsizes.spaceBtwItems / 2),
-
-              // Region Dropdown
-              Obx(() {
-                final locController = Get.isRegistered<pmis_location.LocationController>()
-                    ? pmis_location.LocationController.instance
-                    : null;
-                return _buildDropdown(
-                  label: "Region",
-                  items: locController?.regionNames ?? RegionDistrictConstants.regions,
-                  selectedItem: controller.selectedRegion,
-                  prefixIcon: Iconsax.map,
-                  validator: (value) => value!.isEmpty ? "Required" : null,
-                  onChanged: (_) { controller.selectedDistrict.value = ''; },
-                );
-              }),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
-
-              // District Dropdown
-              Obx(() {
-                final locController = Get.isRegistered<pmis_location.LocationController>()
-                    ? pmis_location.LocationController.instance
-                    : null;
-                return _buildDropdown(
-                  label: "District",
-                  items: locController?.getDistrictsForRegion(controller.selectedRegion.value)
-                      ?? RegionDistrictConstants.districts,
-                  selectedItem: controller.selectedDistrict,
-                  prefixIcon: Iconsax.location,
-                  validator: (value) => value!.isEmpty ? "Required" : null,
-                );
-              }),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
-
-              // Market Name (renamed from Facility Name)
-              _buildTextField(
-                controller: controller.facilityNameController,
-                label: "Market Name",
-                prefixIcon: Iconsax.home,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwSections / 2),
-
-              const SizedBox(height: Tsizes.spaceBtwSections / 2),
-
-                  // Category and Actions Section
-                  _buildSectionHeader("Category and Actions", dark),
-                  const SizedBox(height: Tsizes.spaceBtwItems / 2),
-
-                  // Category of Premises
-                  TextFormField(
-                    initialValue: "Shift Market",
-                    readOnly: true,
-                    decoration: InputDecoration(
-                      labelText: "Category of Premises",
-                      prefixIcon: const Icon(Iconsax.category),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(Tsizes.borderRadiusLg),
-                      ),
-                      filled: true,
-                      fillColor: THelperFunctions.isDarkMode(Get.context!)
-                          ? Tcolors.darkGrey
-                          : Colors.white,
+                    // Inspection Date and Time
+                    CommonDateTimeInput(
+                      dateController: controller.inspectionDateController,
+                      timeController: controller.inspectionTimeController,
                     ),
-                  ),
-                  const SizedBox(height: Tsizes.spaceBtwInputFields),
+                    const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-                  const SizedBox(height: Tsizes.spaceBtwInputFields),
+                    // Inspector Name
+                    _buildTextField(
+                      controller: controller.inspectorNameController,
+                      readOnly: true,
+                      label: "Inspector Name",
+                      prefixIcon: Iconsax.user,
+                      validator: (value) => value!.isEmpty ? "Required" : null,
+                    ),
+                    const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-                  // Regulatory Action Taken
-                  _buildTextField(
-                    controller: controller.regulatoryActionTakenController,
-                    label: "Regulatory action taken (no of arrests made)",
-                    prefixIcon: Iconsax.shield_security,
-                  ),
-                  const SizedBox(height: Tsizes.spaceBtwInputFields),
+                    // GPS Location
+                    _buildTextField(
+                      controller: controller.gpsLocationController,
+                      label: "GPS Location",
+                      prefixIcon: Iconsax.gps,
+                      readOnly: true,
+                      suffix: Obx(() => controller.isGettingLocation.value
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : IconButton(
+                              icon: const Icon(Iconsax.location),
+                              onPressed: () => controller.getCurrentLocation(),
+                            )),
+                    ),
+                    const SizedBox(height: Tsizes.spaceBtwSections / 2),
 
-                  // Consignments Impounded
-                  _buildTextField(
-                    controller: controller.consignmentsImpoundedController,
-                    label:
-                        "Consignments Impounded and Drug Categories (Vet, Human, Herbal, Medical Device)",
-                    prefixIcon: Iconsax.box,
-                    maxLines: 3,
-                  ),
-              const SizedBox(height: Tsizes.spaceBtwSections / 2),              // Submit Button
-              const SizedBox(height: 15),
-              SizedBox(
-                width: double.infinity,
-                child: Obx(() => controller.isSubmitting.value
-                    ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : ElevatedButton.icon(
-                        onPressed: () => controller.submitActivity(),
-                        icon:
-                            const Icon(Icons.check_circle, color: Colors.white),
-                        label: const Text("Submit"),
-                      )),
-              ),
-              const SizedBox(height: 40),
+                    // Location Details Section
+                    _buildSectionHeader("Location Details", dark),
+                    const SizedBox(height: Tsizes.spaceBtwItems / 2),
+
+                    // District Dropdown
+                    Obx(() {
+                      final locController =
+                          Get.isRegistered<pmis_location.LocationController>()
+                              ? pmis_location.LocationController.instance
+                              : null;
+                      return _buildDropdown(
+                        label: "District",
+                        items: locController?.districts
+                                .map((d) => d.name)
+                                .toList() ??
+                            RegionDistrictConstants.allDistricts,
+                        selectedItem: controller.selectedDistrict,
+                        prefixIcon: Iconsax.location,
+                        validator: (value) =>
+                            value!.isEmpty ? "Required" : null,
+                        onChanged: (district) {
+                          controller.selectedRegion.value = locController
+                                  ?.getRegionForDistrict(district ?? '') ??
+                              RegionDistrictConstants
+                                  .districtToRegion[district ?? ''] ??
+                              '';
+                        },
+                      );
+                    }),
+                    const SizedBox(height: Tsizes.spaceBtwInputFields),
+
+                    Obx(() {
+                      final locController =
+                          Get.isRegistered<pmis_location.LocationController>()
+                              ? pmis_location.LocationController.instance
+                              : null;
+                      return _buildDropdown(
+                        label: "Region",
+                        items: locController?.regionNames ??
+                            RegionDistrictConstants.regions,
+                        selectedItem: controller.selectedRegion,
+                        prefixIcon: Iconsax.map,
+                        validator: (value) =>
+                            value!.isEmpty ? "Required" : null,
+                        enabled: false,
+                      );
+                    }),
+                    const SizedBox(height: Tsizes.spaceBtwInputFields),
+
+                    // Market Name (renamed from Facility Name)
+                    _buildTextField(
+                      controller: controller.facilityNameController,
+                      label: "Market Name",
+                      prefixIcon: Iconsax.home,
+                      validator: (value) => value!.isEmpty ? "Required" : null,
+                    ),
+                    const SizedBox(height: Tsizes.spaceBtwSections / 2),
+
+                    const SizedBox(height: Tsizes.spaceBtwSections / 2),
+
+                    // Category and Actions Section
+                    _buildSectionHeader("Category and Actions", dark),
+                    const SizedBox(height: Tsizes.spaceBtwItems / 2),
+
+                    // Category of Premises
+                    TextFormField(
+                      initialValue: "Shift Market",
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: "Category of Premises",
+                        prefixIcon: const Icon(Iconsax.category),
+                        border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(Tsizes.borderRadiusLg),
+                        ),
+                        filled: true,
+                        fillColor: THelperFunctions.isDarkMode(Get.context!)
+                            ? Tcolors.darkGrey
+                            : Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: Tsizes.spaceBtwInputFields),
+
+                    const SizedBox(height: Tsizes.spaceBtwInputFields),
+
+                    // Regulatory Action Taken
+                    _buildTextField(
+                      controller: controller.regulatoryActionTakenController,
+                      label: "Regulatory action taken (no of arrests made)",
+                      prefixIcon: Iconsax.shield_security,
+                    ),
+                    const SizedBox(height: Tsizes.spaceBtwInputFields),
+
+                    // Consignments Impounded
+                    _buildTextField(
+                      controller: controller.consignmentsImpoundedController,
+                      label:
+                          "Consignments Impounded and Drug Categories (Vet, Human, Herbal, Medical Device)",
+                      prefixIcon: Iconsax.box,
+                      maxLines: 3,
+                    ),
+                    const SizedBox(
+                        height: Tsizes.spaceBtwSections / 2), // Submit Button
+                    const SizedBox(height: 15),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Obx(() => controller.isSubmitting.value
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : ElevatedButton.icon(
+                              onPressed: () => controller.submitActivity(),
+                              icon: const Icon(Icons.check_circle,
+                                  color: Colors.white),
+                              label: const Text("Submit"),
+                            )),
+                    ),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
@@ -256,6 +271,7 @@ class ShiftMarketForm extends StatelessWidget {
     required IconData prefixIcon,
     String? Function(String?)? validator,
     void Function(String?)? onChanged,
+    bool enabled = true,
   }) {
     final dark = THelperFunctions.isDarkMode(Get.context!);
 
@@ -283,10 +299,12 @@ class ShiftMarketForm extends StatelessWidget {
                     ),
                   ))
               .toList(),
-          onChanged: (value) {
-            selectedItem.value = value ?? '';
-            onChanged?.call(value);
-          },
+          onChanged: enabled
+              ? (value) {
+                  selectedItem.value = value ?? '';
+                  onChanged?.call(value);
+                }
+              : null,
           validator: validator,
         ));
   }

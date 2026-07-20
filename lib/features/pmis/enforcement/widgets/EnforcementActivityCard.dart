@@ -45,152 +45,151 @@ class EnforcementActivityCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-              // Header Row
-              Row(
-                children: [
+            // Header Row
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Tcolors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(Tsizes.borderRadiusSm),
+                  ),
+                  child: Icon(
+                    Iconsax.shield_security,
+                    color: Tcolors.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: Tsizes.spaceBtwItems),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        activity.facilityName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: dark ? Tcolors.white : Tcolors.dark,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "${activity.region} • ${activity.district}",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: dark ? Tcolors.grey : Tcolors.darkGrey,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                if (!activity.isSynced)
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Tcolors.primary.withOpacity(0.1),
+                      color: Tcolors.warning.withOpacity(0.1),
                       borderRadius:
                           BorderRadius.circular(Tsizes.borderRadiusSm),
                     ),
-                    child: Icon(
-                      Iconsax.shield_security,
-                      color: Tcolors.primary,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: Tsizes.spaceBtwItems),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          activity.facilityName,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: dark ? Tcolors.white : Tcolors.dark,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "${activity.region} • ${activity.district}",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: dark ? Tcolors.grey : Tcolors.darkGrey,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (!activity.isSynced)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Tcolors.warning.withOpacity(0.1),
-                        borderRadius:
-                            BorderRadius.circular(Tsizes.borderRadiusSm),
-                      ),
-                      child: const Text(
-                        "Pending",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Tcolors.warning,
-                          fontWeight: FontWeight.w500,
-                        ),
+                    child: const Text(
+                      "Pending",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Tcolors.warning,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(height: Tsizes.spaceBtwItems),
+                  ),
+              ],
+            ),
+            const SizedBox(height: Tsizes.spaceBtwItems),
 
-              // Details Row
-              Row(
-                children: [
-                  _buildDetailItem(
-                    icon: Iconsax.user,
-                    label: "Person",
-                    value: activity.personName,
-                    dark: dark,
-                  ),
-                  const SizedBox(width: Tsizes.spaceBtwItems),
-                  _buildDetailItem(
-                    icon: Iconsax.location,
-                    label: "Region",
-                    value: activity.region,
-                    dark: dark,
-                  ),
-                ],
-              ),
-              const SizedBox(height: Tsizes.spaceBtwItems / 2),
+            // Details Row
+            Row(
+              children: [
+                _buildDetailItem(
+                  icon: Iconsax.user,
+                  label: "Person",
+                  value: activity.personName,
+                  dark: dark,
+                ),
+                const SizedBox(width: Tsizes.spaceBtwItems),
+                _buildDetailItem(
+                  icon: Iconsax.location,
+                  label: "Region",
+                  value: activity.region,
+                  dark: dark,
+                ),
+              ],
+            ),
+            const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
-              Row(
-                children: [
-                  _buildDetailItem(
-                    icon: Iconsax.map,
-                    label: "District",
-                    value: activity.district,
-                    dark: dark,
-                  ),
-                  const SizedBox(width: Tsizes.spaceBtwItems),
-                  _buildDetailItem(
-                    icon: Iconsax.info_circle,
-                    label: "Status",
-                    value: activity.facilityStatus,
-                    dark: dark,
-                  ),
-                ],
-              ),
-              const SizedBox(height: Tsizes.spaceBtwItems / 2),
+            Row(
+              children: [
+                _buildDetailItem(
+                  icon: Iconsax.map,
+                  label: "District",
+                  value: activity.district,
+                  dark: dark,
+                ),
+                const SizedBox(width: Tsizes.spaceBtwItems),
+                _buildDetailItem(
+                  icon: Iconsax.info_circle,
+                  label: "Status",
+                  value: activity.facilityStatus,
+                  dark: dark,
+                ),
+              ],
+            ),
+            const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
-              // Date and Action
-              Row(
-                children: [
-                  Icon(
-                    Iconsax.calendar,
-                    size: 16,
+            // Date and Action
+            Row(
+              children: [
+                Icon(
+                  Iconsax.calendar,
+                  size: 16,
+                  color: dark ? Tcolors.grey : Tcolors.darkGrey,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _formatDate(activity.inspectionDate),
+                  style: TextStyle(
+                    fontSize: 14,
                     color: dark ? Tcolors.grey : Tcolors.darkGrey,
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    _formatDate(activity.inspectionDate),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: dark ? Tcolors.grey : Tcolors.darkGrey,
+                ),
+                const Spacer(),
+                if (activity.enforcementActionTaken.isNotEmpty)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Tcolors.error.withOpacity(0.1),
+                      borderRadius:
+                          BorderRadius.circular(Tsizes.borderRadiusSm),
+                    ),
+                    child: Text(
+                      activity.enforcementActionTaken,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Tcolors.error,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                  const Spacer(),
-                  if (activity.enforcementActionTaken.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Tcolors.error.withOpacity(0.1),
-                        borderRadius:
-                            BorderRadius.circular(Tsizes.borderRadiusSm),
-                      ),
-                      child: Text(
-                        activity.enforcementActionTaken,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Tcolors.error,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildDetailItem({
@@ -393,19 +392,36 @@ class EnforcementActivityCard extends StatelessWidget {
                         _buildModernDetailRow(context, 'Facility Status',
                             activity.facilityStatus, Iconsax.info_circle),
                         // Only show below fields when facility is NOT closed
-                        if (!activity.facilityStatus.toLowerCase().contains('closed')) ...[
+                        if (!activity.facilityStatus
+                            .toLowerCase()
+                            .contains('closed')) ...[
                           if (activity.categoryOfPremises.isNotEmpty)
-                            _buildModernDetailRow(context, 'Category of Premises',
-                                activity.categoryOfPremises, Iconsax.building),
+                            _buildModernDetailRow(
+                                context,
+                                'Category of Premises',
+                                activity.categoryOfPremises,
+                                Iconsax.building),
                           _buildModernDetailRow(
                               context,
                               'Person Found at Facility',
-                              activity.personFoundAtFacility.isNotEmpty ? activity.personFoundAtFacility : 'N/A',
+                              activity.personFoundAtFacility.isNotEmpty
+                                  ? activity.personFoundAtFacility
+                                  : 'N/A',
                               Iconsax.user),
-                          _buildModernDetailRow(context, 'Person Name',
-                              activity.personName.isNotEmpty ? activity.personName : 'N/A', Iconsax.user),
                           _buildModernDetailRow(
-                              context, 'Contact', activity.contact.isNotEmpty ? activity.contact : 'N/A', Iconsax.call),
+                              context,
+                              'Person Name',
+                              activity.personName.isNotEmpty
+                                  ? activity.personName
+                                  : 'N/A',
+                              Iconsax.user),
+                          _buildModernDetailRow(
+                              context,
+                              'Contact',
+                              activity.contact.isNotEmpty
+                                  ? activity.contact
+                                  : 'N/A',
+                              Iconsax.call),
                           if (activity.qualifications.isNotEmpty)
                             _buildModernDetailRow(context, 'Qualifications',
                                 activity.qualifications, Iconsax.book),
@@ -414,7 +430,9 @@ class EnforcementActivityCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     // Only show compliance when facility is NOT closed
-                    if (!activity.facilityStatus.toLowerCase().contains('closed')) ...[
+                    if (!activity.facilityStatus
+                        .toLowerCase()
+                        .contains('closed')) ...[
                       _buildModernDetailSection(
                         context,
                         'Compliance Information',
@@ -423,18 +441,33 @@ class EnforcementActivityCard extends StatelessWidget {
                           if (activity.licenseStatus.isNotEmpty)
                             _buildModernDetailRow(context, 'License Status',
                                 activity.licenseStatus, Iconsax.document),
-                          if (activity.licenseStatus.toLowerCase().contains('licens') &&
-                              !activity.licenseStatus.toLowerCase().contains('un')) ...[
-                            _buildModernDetailRow(context, 'License No.',
-                                activity.licenseNo?.isNotEmpty == true ? activity.licenseNo! : 'N/A',
+                          if (activity.licenseStatus
+                                  .toLowerCase()
+                                  .contains('licens') &&
+                              !activity.licenseStatus
+                                  .toLowerCase()
+                                  .contains('un')) ...[
+                            _buildModernDetailRow(
+                                context,
+                                'License No.',
+                                activity.licenseNo?.isNotEmpty == true
+                                    ? activity.licenseNo!
+                                    : 'N/A',
                                 Iconsax.document_text),
-                            _buildModernDetailRow(context, 'License Expiry Date',
-                                activity.licenseExpiryDate?.isNotEmpty == true ? activity.licenseExpiryDate! : 'N/A',
+                            _buildModernDetailRow(
+                                context,
+                                'License Expiry Date',
+                                activity.licenseExpiryDate?.isNotEmpty == true
+                                    ? activity.licenseExpiryDate!
+                                    : 'N/A',
                                 Iconsax.calendar),
                           ],
                           if (activity.previouslyLicensed.isNotEmpty)
-                            _buildModernDetailRow(context, 'Previously Licensed / Illegal Outlet',
-                                activity.previouslyLicensed, Iconsax.document),
+                            _buildModernDetailRow(
+                                context,
+                                'Previously Licensed / Illegal Outlet',
+                                activity.previouslyLicensed,
+                                Iconsax.document),
                           if (activity.categoryStatus.isNotEmpty)
                             _buildModernDetailRow(context, 'Category Status',
                                 activity.categoryStatus, Iconsax.info_circle),

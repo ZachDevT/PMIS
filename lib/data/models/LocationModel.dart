@@ -16,6 +16,12 @@ class RegionModel {
       regionName: json['regionName'] ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'intRegion': intRegion,
+        'regionCode': regionCode,
+        'regionName': regionName,
+      };
 }
 
 class DistrictModel {
@@ -36,4 +42,10 @@ class DistrictModel {
       regionId: json['regionId'] ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'regionId': regionId,
+      };
 }

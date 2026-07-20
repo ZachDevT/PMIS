@@ -6,7 +6,8 @@ import 'package:pmis/utils/constants/sizes.dart';
 import 'package:pmis/utils/helpers/helpers_functions.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:pmis/features/pmis/location/controllers/LocationController.dart' as pmis_location;
+import 'package:pmis/features/pmis/location/controllers/LocationController.dart'
+    as pmis_location;
 
 import 'package:pmis/commons/widgets/icons/circular_icon.dart';
 
@@ -48,143 +49,155 @@ class RtsForm extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-            // Basic Information Section
-            _buildSectionHeader("Basic Information", dark),
-            const SizedBox(height: Tsizes.spaceBtwItems / 2),
+                    // Basic Information Section
+                    _buildSectionHeader("Basic Information", dark),
+                    const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
-              // Inspection Date
-              _buildTextField(
-                controller: controller.inspectionDateController,
-                label: "Inspection Date",
-                prefixIcon: Iconsax.calendar,
-                readOnly: true,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
+                    // Inspection Date
+                    _buildTextField(
+                      controller: controller.inspectionDateController,
+                      label: "Inspection Date",
+                      prefixIcon: Iconsax.calendar,
+                      readOnly: true,
+                      validator: (value) => value!.isEmpty ? "Required" : null,
+                    ),
+                    const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-              // Inspector Name
-              _buildTextField(
-                controller: controller.inspectorNameController,
-                    readOnly: true,
-                label: "Inspector Name",
-                prefixIcon: Iconsax.user,
-                
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
+                    // Inspector Name
+                    _buildTextField(
+                      controller: controller.inspectorNameController,
+                      readOnly: true,
+                      label: "Inspector Name",
+                      prefixIcon: Iconsax.user,
+                      validator: (value) => value!.isEmpty ? "Required" : null,
+                    ),
+                    const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-              // GPS Location
-              _buildTextField(
-                controller: controller.gpsLocationController,
-                label: "GPS Location",
-                prefixIcon: Iconsax.gps,
-                readOnly: true,
-                suffix: Obx(() => controller.isGettingLocation.value
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : IconButton(
-                        icon: const Icon(Iconsax.location),
-                        onPressed: () => controller.getCurrentLocation(),
-                      )),
-              ),
-              const SizedBox(height: Tsizes.spaceBtwSections / 2),
+                    // GPS Location
+                    _buildTextField(
+                      controller: controller.gpsLocationController,
+                      label: "GPS Location",
+                      prefixIcon: Iconsax.gps,
+                      readOnly: true,
+                      suffix: Obx(() => controller.isGettingLocation.value
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : IconButton(
+                              icon: const Icon(Iconsax.location),
+                              onPressed: () => controller.getCurrentLocation(),
+                            )),
+                    ),
+                    const SizedBox(height: Tsizes.spaceBtwSections / 2),
 
-              // Location Details Section
-              _buildSectionHeader("Location Details", dark),
-              const SizedBox(height: Tsizes.spaceBtwItems / 2),
+                    // Location Details Section
+                    _buildSectionHeader("Location Details", dark),
+                    const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
-              // Region Dropdown
-              Obx(() {
-                final locController = Get.isRegistered<pmis_location.LocationController>()
-                    ? pmis_location.LocationController.instance
-                    : null;
-                return _buildDropdown(
-                  label: "Region",
-                  items: locController?.regionNames ?? RegionDistrictConstants.regions,
-                  selectedItem: controller.selectedRegion,
-                  prefixIcon: Iconsax.map,
-                  validator: (value) => value!.isEmpty ? "Required" : null,
-                  onChanged: (_) { controller.selectedDistrict.value = ''; },
-                );
-              }),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
+                    // District Dropdown
+                    Obx(() {
+                      final locController =
+                          Get.isRegistered<pmis_location.LocationController>()
+                              ? pmis_location.LocationController.instance
+                              : null;
+                      return _buildDropdown(
+                        label: "District",
+                        items: locController?.districts
+                                .map((d) => d.name)
+                                .toList() ??
+                            RegionDistrictConstants.allDistricts,
+                        selectedItem: controller.selectedDistrict,
+                        prefixIcon: Iconsax.location,
+                        validator: (value) =>
+                            value!.isEmpty ? "Required" : null,
+                        onChanged: (district) {
+                          controller.selectedRegion.value = locController
+                                  ?.getRegionForDistrict(district ?? '') ??
+                              RegionDistrictConstants
+                                  .districtToRegion[district ?? ''] ??
+                              '';
+                        },
+                      );
+                    }),
+                    const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-              // District Dropdown
-              Obx(() {
-                final locController = Get.isRegistered<pmis_location.LocationController>()
-                    ? pmis_location.LocationController.instance
-                    : null;
-                return _buildDropdown(
-                  label: "District",
-                  items: locController?.getDistrictsForRegion(controller.selectedRegion.value)
-                      ?? RegionDistrictConstants.districts,
-                  selectedItem: controller.selectedDistrict,
-                  prefixIcon: Iconsax.location,
-                  validator: (value) => value!.isEmpty ? "Required" : null,
-                );
-              }),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
+                    Obx(() {
+                      final locController =
+                          Get.isRegistered<pmis_location.LocationController>()
+                              ? pmis_location.LocationController.instance
+                              : null;
+                      return _buildDropdown(
+                        label: "Region",
+                        items: locController?.regionNames ??
+                            RegionDistrictConstants.regions,
+                        selectedItem: controller.selectedRegion,
+                        prefixIcon: Iconsax.map,
+                        validator: (value) =>
+                            value!.isEmpty ? "Required" : null,
+                        enabled: false,
+                      );
+                    }),
+                    const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-              // Venue/Location
-              _buildTextField(
-                controller: controller.venueLocationController,
-                label: "Venue/Location",
-                prefixIcon: Iconsax.location,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwSections / 2),
+                    // Venue/Location
+                    _buildTextField(
+                      controller: controller.venueLocationController,
+                      label: "Venue/Location",
+                      prefixIcon: Iconsax.location,
+                      validator: (value) => value!.isEmpty ? "Required" : null,
+                    ),
+                    const SizedBox(height: Tsizes.spaceBtwSections / 2),
 
-              // RTS Specific Information Section
-              _buildSectionHeader("Radio Talk Show Details", dark),
-              const SizedBox(height: Tsizes.spaceBtwItems / 2),
+                    // RTS Specific Information Section
+                    _buildSectionHeader("Radio Talk Show Details", dark),
+                    const SizedBox(height: Tsizes.spaceBtwItems / 2),
 
-              // Radio Company Name
-              _buildTextField(
-                controller: controller.radioCompanyNameController,
-                label: "Name of Radio Company",
-                prefixIcon: Iconsax.radio,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
+                    // Radio Company Name
+                    _buildTextField(
+                      controller: controller.radioCompanyNameController,
+                      label: "Name of Radio Company",
+                      prefixIcon: Iconsax.radio,
+                    ),
+                    const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-              // Topic of Discussion
-              _buildTextField(
-                controller: controller.topicOfDiscussionController,
-                label: "Topic of Discussion",
-                prefixIcon: Iconsax.message,
-                maxLines: 3,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwInputFields),
+                    // Topic of Discussion
+                    _buildTextField(
+                      controller: controller.topicOfDiscussionController,
+                      label: "Topic of Discussion",
+                      prefixIcon: Iconsax.message,
+                      maxLines: 3,
+                      validator: (value) => value!.isEmpty ? "Required" : null,
+                    ),
+                    const SizedBox(height: Tsizes.spaceBtwInputFields),
 
-              // Number of Participants
-              _buildTextField(
-                controller: controller.numberOfParticipantsController,
-                label: "Number of Participants",
-                prefixIcon: Iconsax.people,
-                keyboardType: TextInputType.number,
-                validator: (value) => value!.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: Tsizes.spaceBtwSections * 2),
+                    // Number of Participants
+                    _buildTextField(
+                      controller: controller.numberOfParticipantsController,
+                      label: "Number of Participants",
+                      prefixIcon: Iconsax.people,
+                      keyboardType: TextInputType.number,
+                      validator: (value) => value!.isEmpty ? "Required" : null,
+                    ),
+                    const SizedBox(height: Tsizes.spaceBtwSections * 2),
 
-              // Submit Button
-              const SizedBox(height: 15),
-              SizedBox(
-                width: double.infinity,
-                child: Obx(() => controller.isSubmitting.value
-                    ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : ElevatedButton.icon(
-                        onPressed: () => controller.submitActivity(),
-                        icon:
-                            const Icon(Icons.check_circle, color: Colors.white),
-                        label: const Text("Submit"),
-                      )),
-              ),
-              const SizedBox(height: 40),
+                    // Submit Button
+                    const SizedBox(height: 15),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Obx(() => controller.isSubmitting.value
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : ElevatedButton.icon(
+                              onPressed: () => controller.submitActivity(),
+                              icon: const Icon(Icons.check_circle,
+                                  color: Colors.white),
+                              label: const Text("Submit"),
+                            )),
+                    ),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
@@ -245,6 +258,7 @@ class RtsForm extends StatelessWidget {
     required IconData prefixIcon,
     String? Function(String?)? validator,
     void Function(String?)? onChanged,
+    bool enabled = true,
   }) {
     final dark = THelperFunctions.isDarkMode(Get.context!);
 
@@ -272,10 +286,12 @@ class RtsForm extends StatelessWidget {
                     ),
                   ))
               .toList(),
-          onChanged: (value) {
-            selectedItem.value = value ?? '';
-            onChanged?.call(value);
-          },
+          onChanged: enabled
+              ? (value) {
+                  selectedItem.value = value ?? '';
+                  onChanged?.call(value);
+                }
+              : null,
           validator: validator,
         ));
   }

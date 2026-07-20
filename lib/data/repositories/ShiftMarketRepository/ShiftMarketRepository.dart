@@ -15,23 +15,25 @@ class ShiftMarketRepository {
       // Check connectivity before making API call
       final networkManager = Get.find<NetworkManager>();
       final isOnline = await networkManager.isconnected();
-      
+
       if (!isOnline) {
         print('No internet connection, returning local data');
         List storedActivities = box.read<List>('shiftmarket_activities') ?? [];
-        return storedActivities.map((e) => Map<String, dynamic>.from(e)).toList();
+        return storedActivities
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
       }
-      
+
       List<Map<String, dynamic>> onlineData = [];
       try {
         onlineData = await _service.getShiftMarketData();
-      } catch(e) {
+      } catch (e) {
         print('Service fetch error: $e');
       }
-      
+
       // Merge with local unsynced activities
       List storedActivities = box.read<List>('shiftmarket_activities') ?? [];
-      
+
       final Map<String, Map<String, dynamic>> mergedMap = {};
       for (var item in onlineData) {
         if (item['id'] != null) {
@@ -41,11 +43,12 @@ class ShiftMarketRepository {
         }
       }
       for (var item in storedActivities) {
-        if (item['id'] != null) {
-          mergedMap[item['id'].toString()] = Map<String, dynamic>.from(item);
-        }
+        final local = Map<String, dynamic>.from(item);
+        local['_localId'] ??=
+            'shiftmarket-${DateTime.now().microsecondsSinceEpoch}';
+        mergedMap['local:${local['_localId']}'] = local;
       }
-      
+
       return mergedMap.values.toList();
     } on TimeoutException catch (e) {
       print('Timeout error fetching Shift Market data: ${e.message}');
@@ -57,7 +60,8 @@ class ShiftMarketRepository {
       print('Network exception: ${e.message}');
       return [];
     } catch (e) {
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
         print('Timeout error detected: ${e.toString()}');
         return [];
       }
@@ -67,7 +71,8 @@ class ShiftMarketRepository {
   }
 
   /// Post Shift Market data to the API
-  Future<Map<String, dynamic>> postShiftMarketData(Map<String, dynamic> shiftMarketData) {
+  Future<Map<String, dynamic>> postShiftMarketData(
+      Map<String, dynamic> shiftMarketData) {
     return _service.postShiftMarketData(shiftMarketData);
   }
 
@@ -75,7 +80,10 @@ class ShiftMarketRepository {
   Future<void> saveActivityLocally(Map<String, dynamic> activityData) async {
     try {
       List storedActivities = box.read<List>('shiftmarket_activities') ?? [];
-      storedActivities.add(activityData);
+      final local = Map<String, dynamic>.from(activityData);
+      local['_localId'] ??=
+          'shiftmarket-${DateTime.now().microsecondsSinceEpoch}';
+      storedActivities.add(local);
       await box.write('shiftmarket_activities', storedActivities);
       print('Shift Market activity saved locally: ${activityData['id']}');
     } catch (e) {
@@ -88,23 +96,27 @@ class ShiftMarketRepository {
     try {
       List storedActivities = box.read<List>('shiftmarket_activities') ?? [];
       List<Map<String, dynamic>> failedSyncs = [];
-      
+      List<Map<String, dynamic>> successfulSyncs = [];
+
       if (storedActivities.isNotEmpty) {
         for (var activityData in storedActivities) {
           try {
             await _service.postShiftMarketData(activityData);
-            print('Shift Market activity synced successfully: ${activityData['id']}');
+            successfulSyncs.add(Map<String, dynamic>.from(activityData));
+            print(
+                'Shift Market activity synced successfully: ${activityData['id']}');
           } catch (e) {
-            print('Failed to sync Shift Market activity ${activityData['id']}: $e');
+            print(
+                'Failed to sync Shift Market activity ${activityData['id']}: $e');
             failedSyncs.add(activityData);
           }
         }
-        
+
         // Remove successfully synced activities, keep failed ones
         await box.write('shiftmarket_activities', failedSyncs);
       }
-      
-      return storedActivities.map((e) => e as Map<String, dynamic>).toList();
+
+      return successfulSyncs;
     } catch (e) {
       print('Error syncing local Shift Market activities: $e');
       return [];

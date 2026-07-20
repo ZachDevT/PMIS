@@ -524,6 +524,7 @@ class AppSettingsScreen extends StatelessWidget {
   String _getSyncStatus() {
     try {
       final syncManager = Get.find<SyncManager>();
+      syncManager.refreshPendingCount();
       return syncManager.totalPendingItems > 0
           ? '${syncManager.totalPendingItems} items pending'
           : 'All data synced';
@@ -536,6 +537,7 @@ class AppSettingsScreen extends StatelessWidget {
     try {
       final syncManager = Get.find<SyncManager>();
       syncManager.initialize();
+      syncManager.refreshPendingCount();
 
       if (syncManager.isSyncing) {
         Loaders.warningSnackbar(

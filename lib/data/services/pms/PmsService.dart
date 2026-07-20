@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
 
 class PmsService {
   static const _baseUrl = 'http://pmis.nda.or.ug/api';
@@ -34,7 +35,8 @@ class PmsService {
     } catch (e) {
       if (e is ApiException) rethrow;
       // Check if it's a timeout error
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
         throw const TimeoutException('Request timeout. Please try again.');
       }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
@@ -59,8 +61,10 @@ class PmsService {
           if (pmsData.isNotEmpty) {
             print('First record keys: ${pmsData.first.keys.toList()}');
             print('First record data: ${pmsData.first}');
-            print('Inspector Name from API: ${pmsData.first['inspectorName'] ?? pmsData.first['InspectorName'] ?? 'NOT FOUND'}');
-            print('Inspector ID from API: ${pmsData.first['inspectorId'] ?? pmsData.first['InspectorId'] ?? 'NOT FOUND'}');
+            print(
+                'Inspector Name from API: ${pmsData.first['inspectorName'] ?? pmsData.first['InspectorName'] ?? 'NOT FOUND'}');
+            print(
+                'Inspector ID from API: ${pmsData.first['inspectorId'] ?? pmsData.first['InspectorId'] ?? 'NOT FOUND'}');
           }
           print('=== End PMS API Debug ===');
 
@@ -122,7 +126,8 @@ class PmsService {
     final Map<String, dynamic> apiData = {};
 
     // Combine date and time if available
-    String dateTimeStr = data['inspectionDate']?.toString() ?? DateTime.now().toIso8601String();
+    String dateTimeStr =
+        data['inspectionDate']?.toString() ?? DateTime.now().toIso8601String();
     if (data.containsKey('inspectionTime') && data['inspectionTime'] != null) {
       try {
         final date = DateTime.parse(dateTimeStr);
@@ -141,10 +146,12 @@ class PmsService {
     // Inspector ID is not in PmsaModel, maybe we can pass empty string if missing
     apiData['inspectorId'] = data['inspectorId'] ?? '';
 
-    // GPS / LatLng
-    double lat = 0.0;
-    double lon = 0.0;
-    if (data['gpsLocation'] != null && data['gpsLocation'].toString().isNotEmpty) {
+    // Prefer canonical values written by PmsModel.toJson. Legacy form keys are
+    // retained only as a migration fallback for older queued records.
+    double lat = (data['latitude'] as num?)?.toDouble() ?? 0.0;
+    double lon = (data['longitude'] as num?)?.toDouble() ?? 0.0;
+    if (data['gpsLocation'] != null &&
+        data['gpsLocation'].toString().isNotEmpty) {
       final gpsStr = data['gpsLocation'].toString();
       final cleanGps = gpsStr.replaceAll(RegExp(r'[a-zA-Z:]'), '').trim();
       final parts = cleanGps.split(',');
@@ -158,45 +165,65 @@ class PmsService {
 
     // Region / District
     // Map string values to their UUID / int counterparts (using dummy mappings or keeping as string if API accepts name)
-    // The previous implementation mapped these properly? 
+    // The previous implementation mapped these properly?
     // Actually, PmsaModel stores the name. We might need to map them back to UUID/ID.
-    apiData['intRegion'] = data['region'] ?? ''; 
-    apiData['districtId'] = 0; // Or a mapping function
-    // For now we pass as is, assuming backend might try to parse or we need mapping functions.
-    // Let's implement the mapping functions we saw in EnforcementService:
-    apiData['intRegion'] = _getRegionGuid(data['region']?.toString() ?? '');
-    apiData['districtId'] = _getDistrictId(data['district']?.toString() ?? '');
+    apiData['intRegion'] =
+        data['intRegion'] ?? _getRegionGuid(data['region']?.toString() ?? '');
+    apiData['districtId'] = _asInt(data['districtId']) ??
+        _getDistrictId(data['district']?.toString() ?? '');
 
     apiData['facilityName'] = data['facilityName'];
-    apiData['facilityStatus'] = _getFacilityStatus(data['facilityStatus']?.toString() ?? '');
-    apiData['facilityPersonType'] = _getPersonType(data['personFoundAtFacility']?.toString() ?? '');
-    apiData['personName'] = data['name'];
+    apiData['facilityStatus'] = _asInt(data['facilityStatus']) ??
+        _getFacilityStatus(data['facilityStatus']?.toString() ?? '');
+    apiData['facilityPersonType'] = _asInt(data['facilityPersonType']) ??
+        _getPersonType(data['personFoundAtFacility']?.toString() ?? '');
+    apiData['personName'] = data['personName'] ?? data['name'] ?? '';
     apiData['contact'] = data['contact'];
-    apiData['qualifications'] = data['qualifications'];
-    
-    apiData['categoryOfpremises'] = _getCategoryOfPremises(data['categoryOfFacility']?.toString() ?? '');
-    apiData['other_CategoryPremise'] = data['categoryOfDrugs']; 
+    apiData['qualificationId'] = data['qualificationId'] ??
+        QualificationController.instance
+            .idForName(data['qualifications']?.toString() ?? '');
 
-    apiData['licenseStatus'] = _mapLicenseStatus(data['licensedStatus']?.toString() ?? '');
+    apiData['categoryOfpremises'] = _asInt(data['categoryOfpremises']) ??
+        _getCategoryOfPremises(data['categoryOfFacility']?.toString() ?? '');
+    apiData['other_CategoryPremise'] =
+        data['other_CategoryPremise'] ?? data['categoryOfDrugs'] ?? '';
+
+    apiData['licenseStatus'] = _asInt(data['licenseStatus']) ??
+        _mapLicenseStatus(data['licensedStatus']?.toString() ?? '');
     apiData['licenseNo'] = data['licenseNo'] ?? '';
     if (data.containsKey('licenseExpiryDate') &&
-        data['licenseExpiryDate'] != null && 
+        data['licenseExpiryDate'] != null &&
         data['licenseExpiryDate'].toString().isNotEmpty) {
       apiData['licenseExpDate'] = data['licenseExpiryDate'];
     }
-    apiData['unlicensed'] = data['previouslyLicensed']; // Map to previouslyLicensed
+    apiData['unlicensed'] =
+        _asInt(data['unlicensed']) ?? _asInt(data['previouslyLicensed']) ?? 0;
 
-    apiData['pmsActivity'] = _getPmsActivityCode(data['pmsaActivityCarriesOut']?.toString() ?? '');
-    
-    apiData['sample_ProductName'] = data['productSampledName'];
-    apiData['sample_No'] = int.tryParse(data['numberOfSamplesCollected']?.toString() ?? '0') ?? 0;
-    apiData['sample_Batch'] = data['batchNumberOfSample'];
-    
-    apiData['followup_Comment'] = data['commentOnOverallFollowUp'];
-    apiData['complaint_Product'] = data['productComplaintInvestigated'];
-    apiData['other_Activity'] = data['specifyActivity'];
+    apiData['pmsActivity'] = _asInt(data['pmsActivity']) ??
+        _getPmsActivityCode(data['pmsaActivityCarriesOut']?.toString() ?? '');
+
+    apiData['sample_ProductName'] =
+        data['sample_ProductName'] ?? data['productSampledName'] ?? '';
+    apiData['sample_No'] = _asInt(data['sample_No']) ??
+        int.tryParse(data['numberOfSamplesCollected']?.toString() ?? '0') ??
+        0;
+    apiData['sample_Batch'] =
+        data['sample_Batch'] ?? data['batchNumberOfSample'] ?? '';
+
+    apiData['followup_Comment'] =
+        data['followup_Comment'] ?? data['commentOnOverallFollowUp'] ?? '';
+    apiData['complaint_Product'] =
+        data['complaint_Product'] ?? data['productComplaintInvestigated'] ?? '';
+    apiData['other_Activity'] =
+        data['other_Activity'] ?? data['specifyActivity'] ?? '';
 
     return apiData;
+  }
+
+  int? _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '');
   }
 
   int _getFacilityStatus(String status) {
@@ -306,7 +333,8 @@ class PmsService {
     } catch (e) {
       if (e is ApiException) rethrow;
       // Check if it's a timeout error
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
         throw const TimeoutException('Request timeout. Please try again.');
       }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');

@@ -13,6 +13,7 @@ class CssModel {
   final String personName;
   final String contact;
   final String qualifications;
+  final int? qualificationId;
   final int categoryOfpremises;
   final String otherCategoryPremise;
   final int licenseStatus;
@@ -43,6 +44,7 @@ class CssModel {
     required this.personName,
     required this.contact,
     required this.qualifications,
+    this.qualificationId,
     required this.categoryOfpremises,
     required this.otherCategoryPremise,
     required this.licenseStatus,
@@ -92,12 +94,19 @@ class CssModel {
       personName: json['personName'] ?? '',
       contact: json['contact'] ?? '',
       qualifications: json['qualifications'] ?? '',
+      qualificationId: json['qualificationId'] is int
+          ? json['qualificationId']
+          : int.tryParse(
+              (json['qualificationId'] ?? json['QualificationId'] ?? '')
+                  .toString()),
       categoryOfpremises: json['categoryOfpremises'] ?? 0,
       otherCategoryPremise: json['other_CategoryPremise'] ?? '',
       licenseStatus: json['licenseStatus'] ?? json['LicenseStatus'] ?? 0,
       licenseNo: json['licenseNo'] ?? json['LicenseNo'] ?? '',
-      licenseExpiryDate:
-          json['licenseExpiryDate'] ?? json['licenseExpDate'] ?? json['LicenseExpiryDate'] ?? '',
+      licenseExpiryDate: json['licenseExpiryDate'] ??
+          json['licenseExpDate'] ??
+          json['LicenseExpiryDate'] ??
+          '',
       unlicensed: json['unlicensed'] ?? json['Unlicensed'] ?? 0,
       categoryStatus: json['categoryStatus'] ?? json['CategoryStatus'] ?? 0,
       premisesCondition: json['premisesCondition'] ?? 0,
@@ -105,7 +114,8 @@ class CssModel {
       classofDrugs: json['classofDrugs'] ?? 0,
       unRegisteredDrug: json['unRegisteredDrug'] ?? 0,
       unRegDrugQty: json['unRegDrugQty'] ?? '',
-      previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
+      previouslyLicensed:
+          json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
       action: json['action']?.toString() ?? '',
     );
   }
@@ -126,6 +136,7 @@ class CssModel {
       'personName': personName,
       'contact': contact,
       'qualifications': qualifications,
+      'qualificationId': qualificationId,
       'categoryOfpremises': categoryOfpremises,
       'other_CategoryPremise': otherCategoryPremise,
       'licenseStatus': licenseStatus,
@@ -353,6 +364,7 @@ class CssModel {
       personName: personName ?? this.personName,
       contact: contact ?? this.contact,
       qualifications: qualifications ?? this.qualifications,
+      qualificationId: qualificationId,
       categoryOfpremises: categoryOfpremises ?? this.categoryOfpremises,
       otherCategoryPremise: otherCategoryPremise ?? this.otherCategoryPremise,
       licenseStatus: licenseStatus ?? this.licenseStatus,

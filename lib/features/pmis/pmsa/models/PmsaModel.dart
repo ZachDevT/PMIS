@@ -72,7 +72,8 @@ class PmsaActivity {
       qualifications: json['qualifications'],
       categoryOfFacility: json['categoryOfFacility'],
       licensedStatus: json['licensedStatus'] ?? '',
-      previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
+      previouslyLicensed:
+          json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
       pmsaActivityCarriesOut: json['pmsaActivityCarriesOut'] ?? '',
       categoryOfDrugs: json['categoryOfDrugs'],
       categoryOfProductSamples: json['categoryOfProductSamples'],

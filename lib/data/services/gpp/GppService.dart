@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
 
 class GppService {
   static const _baseUrl = 'http://pmis.nda.or.ug/api';
@@ -34,7 +35,8 @@ class GppService {
     } catch (e) {
       if (e is ApiException) rethrow;
       // Check if it's a timeout error
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
         throw const TimeoutException('Request timeout. Please try again.');
       }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
@@ -144,13 +146,9 @@ class GppService {
     apiData['personName'] = data['personName'];
     apiData['contact'] = data['contact'];
 
-    // Qualifications: map text -> qualificationId for GPP
-    final q = data['qualifications']?.toString().toLowerCase() ?? '';
-    int qId = 1; // Default to Pharmacist
-    if (q.contains('nurse')) qId = 2;
-    else if (q.contains('dispenser')) qId = 3;
-    else if (q.contains('attendant')) qId = 4;
-    apiData['qualificationId'] = qId;
+    apiData['qualificationId'] = data['qualificationId'] ??
+        QualificationController.instance
+            .idForName(data['qualifications']?.toString() ?? '');
 
     // Category
     apiData['categoryOfpremises'] = data['categoryOfpremises'] ?? 0;
@@ -161,13 +159,16 @@ class GppService {
     apiData['licenseNo'] = data['licenseNo'] ?? '';
 
     // IMPORTANT: API expects 'licenseExpDate' not 'licenseExpiryDate'
-    final expiryDate = data['licenseExpiryDate'] ?? data['licenseExpDate'] ?? '';
+    final expiryDate =
+        data['licenseExpiryDate'] ?? data['licenseExpDate'] ?? '';
     if (expiryDate.toString().isNotEmpty) {
       // Extract only the date part YYYY-MM-DD to satisfy DateOnly API requirement
-      apiData['licenseExpDate'] = expiryDate.toString().split('T')[0].split(' ')[0];
+      apiData['licenseExpDate'] =
+          expiryDate.toString().split('T')[0].split(' ')[0];
     }
 
-    apiData['unlicensed'] = data['previouslyLicensed'] ?? '';
+    apiData['unlicensed'] =
+        _binaryValue(data['unlicensed'] ?? data['previouslyLicensed']);
 
     // GPP-specific
     apiData['categoryStatus'] = data['categoryStatus'] ?? 0;
@@ -176,6 +177,12 @@ class GppService {
     apiData['recommendedforGPP'] = data['recommendedforGPP'] ?? 0;
 
     return apiData;
+  }
+
+  int _binaryValue(dynamic value) {
+    if (value is num) return value.toInt();
+    final text = value?.toString().trim().toLowerCase() ?? '';
+    return text == 'yes' || text == 'true' || text == '1' ? 1 : 0;
   }
 
   /// Post GPP data to the API
@@ -212,7 +219,8 @@ class GppService {
     } catch (e) {
       if (e is ApiException) rethrow;
       // Check if it's a timeout error
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
         throw const TimeoutException('Request timeout. Please try again.');
       }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');

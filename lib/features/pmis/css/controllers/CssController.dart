@@ -33,6 +33,8 @@ class CssController extends GetxController {
   final nameController = TextEditingController();
   final contactController = TextEditingController();
   final qualificationsController = TextEditingController();
+  final selectedQualification = ''.obs;
+  final selectedQualificationId = Rxn<int>();
   final otherCategoryPremiseController = TextEditingController();
   final licenseNoController = TextEditingController();
   final licenseExpiryDateController = TextEditingController();
@@ -223,7 +225,7 @@ class CssController extends GetxController {
         if (selectedPersonFound.value.isEmpty) emptyFields.add("Person Found");
         if (nameController.text.isEmpty) emptyFields.add("Name");
         if (contactController.text.isEmpty) emptyFields.add("Contact");
-        if (qualificationsController.text.isEmpty) {
+        if (selectedQualification.value.isEmpty) {
           emptyFields.add("Qualifications");
         }
       }
@@ -267,7 +269,8 @@ class CssController extends GetxController {
 
       var newActivity = CssModel(
         id: 0, // Will be set by API
-        inspectionDate: DateTime.parse("${inspectionDateController.text} ${inspectionTimeController.text}"),
+        inspectionDate: DateTime.parse(
+            "${inspectionDateController.text} ${inspectionTimeController.text}"),
         inspectorName: inspectorNameController.text,
         inspectorId: inspectorIdController.text,
         latitude: currentLatitude.value,
@@ -279,7 +282,8 @@ class CssController extends GetxController {
         facilityPersonType: _getPersonType(selectedPersonFound.value),
         personName: nameController.text,
         contact: contactController.text,
-        qualifications: qualificationsController.text,
+        qualifications: selectedQualification.value,
+        qualificationId: selectedQualificationId.value,
         categoryOfpremises:
             _getCategoryOfPremises(selectedCategoryOfFacility.value),
         otherCategoryPremise: selectedCategoryOfFacility.value == "Others"
@@ -360,6 +364,8 @@ class CssController extends GetxController {
     nameController.clear();
     contactController.clear();
     qualificationsController.clear();
+    selectedQualification.value = '';
+    selectedQualificationId.value = null;
     otherCategoryPremiseController.clear();
     licenseNoController.clear();
     licenseExpiryDateController.clear();
@@ -377,7 +383,7 @@ class CssController extends GetxController {
     selectedRecordKeeping.value = '';
     selectedActionTaken.clear();
     selectedPreviouslyLicensed.value = '';
-  
+
     _autoFillDefaults();
   }
 
@@ -549,8 +555,6 @@ class CssController extends GetxController {
     }
   }
 
-  
-
   // Helper methods for filter text conversion
   String _getFacilityStatusText(int status) {
     switch (status) {
@@ -629,7 +633,8 @@ class CssController extends GetxController {
         permission = await Geolocator.requestPermission();
       }
 
-      if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+      if (permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse) {
         // 3. Try to get current position with low accuracy and 4s timeout
         Position? position;
         try {

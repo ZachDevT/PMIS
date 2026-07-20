@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
 
 class GdpService {
   static const _baseUrl = 'http://pmis.nda.or.ug/api';
@@ -34,7 +35,8 @@ class GdpService {
     } catch (e) {
       if (e is ApiException) rethrow;
       // Check if it's a timeout error
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
         throw const TimeoutException('Request timeout. Please try again.');
       }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
@@ -59,8 +61,10 @@ class GdpService {
           if (gdpData.isNotEmpty) {
             print('First record keys: ${gdpData.first.keys.toList()}');
             print('First record data: ${gdpData.first}');
-            print('Inspector Name from API: ${gdpData.first['inspectorName'] ?? gdpData.first['InspectorName'] ?? 'NOT FOUND'}');
-            print('Inspector ID from API: ${gdpData.first['inspectorId'] ?? gdpData.first['InspectorId'] ?? 'NOT FOUND'}');
+            print(
+                'Inspector Name from API: ${gdpData.first['inspectorName'] ?? gdpData.first['InspectorName'] ?? 'NOT FOUND'}');
+            print(
+                'Inspector ID from API: ${gdpData.first['inspectorId'] ?? gdpData.first['InspectorId'] ?? 'NOT FOUND'}');
           }
           print('=== End GDP API Debug ===');
 
@@ -154,7 +158,9 @@ class GdpService {
     // Person
     apiData['personName'] = data['personName'];
     apiData['contact'] = data['contact'];
-    apiData['qualifications'] = data['qualifications'];
+    apiData['qualificationId'] = data['qualificationId'] ??
+        QualificationController.instance
+            .idForName(data['qualifications']?.toString() ?? '');
 
     // Category
     apiData['categoryOfpremises'] = data['categoryOfpremises'] ?? 0;
@@ -165,13 +171,16 @@ class GdpService {
     apiData['licenseNo'] = data['licenseNo'] ?? '';
 
     // IMPORTANT: API expects 'licenseExpDate' not 'licenseExpiryDate'
-    final expiryDate = data['licenseExpiryDate'] ?? data['licenseExpDate'] ?? '';
+    final expiryDate =
+        data['licenseExpiryDate'] ?? data['licenseExpDate'] ?? '';
     if (expiryDate.toString().isNotEmpty) {
       // Extract only the date part YYYY-MM-DD to satisfy DateOnly API requirement
-      apiData['licenseExpDate'] = expiryDate.toString().split('T')[0].split(' ')[0];
+      apiData['licenseExpDate'] =
+          expiryDate.toString().split('T')[0].split(' ')[0];
     }
 
-    apiData['unlicensed'] = data['previouslyLicensed'] ?? '';
+    apiData['unlicensed'] =
+        _binaryValue(data['unlicensed'] ?? data['previouslyLicensed']);
 
     // GDP-specific
     apiData['categoryStatus'] = data['categoryStatus'] ?? 0;
@@ -180,6 +189,12 @@ class GdpService {
     apiData['recommendedforGDP'] = data['recommendedforGDP'] ?? 0;
 
     return apiData;
+  }
+
+  int _binaryValue(dynamic value) {
+    if (value is num) return value.toInt();
+    final text = value?.toString().trim().toLowerCase() ?? '';
+    return text == 'yes' || text == 'true' || text == '1' ? 1 : 0;
   }
 
   /// Post GDP data to the API
@@ -216,7 +231,8 @@ class GdpService {
     } catch (e) {
       if (e is ApiException) rethrow;
       // Check if it's a timeout error
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
         throw const TimeoutException('Request timeout. Please try again.');
       }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
@@ -277,4 +293,3 @@ class GdpService {
     }
   }
 }
-

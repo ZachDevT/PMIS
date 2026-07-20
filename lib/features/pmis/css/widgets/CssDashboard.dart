@@ -114,7 +114,8 @@ class CssDashboardSection extends StatelessWidget {
                   final smController = Get.find<ShiftMarketController>();
                   final enfController = Get.find<EnforcementController>();
                   final rtsController = Get.find<RtsController>();
-                  final sensController = Get.find<SensitizationMeetingController>();
+                  final sensController =
+                      Get.find<SensitizationMeetingController>();
 
                   final kpiData = [
                     {
@@ -199,8 +200,10 @@ class CssDashboardSection extends StatelessWidget {
                       return GestureDetector(
                         onTap: () {
                           // Navigate to the corresponding feature page
-                          final navigationController = Get.find<NavigationController>();
-                          navigationController.selectedIndex.value = kpi['screenIndex'] as int;
+                          final navigationController =
+                              Get.find<NavigationController>();
+                          navigationController.selectedIndex.value =
+                              kpi['screenIndex'] as int;
                         },
                         child: _buildEnhancedKpiCard(
                           context,
@@ -250,7 +253,8 @@ class CssDashboardSection extends StatelessWidget {
                   final smController = Get.find<ShiftMarketController>();
                   final enfController = Get.find<EnforcementController>();
                   final rtsController = Get.find<RtsController>();
-                  final sensController = Get.find<SensitizationMeetingController>();
+                  final sensController =
+                      Get.find<SensitizationMeetingController>();
 
                   final chartData = _generateYearlyChartData(
                     cssController.activities,
@@ -493,7 +497,8 @@ class CssDashboardSection extends StatelessWidget {
 
         // Only count activities from October (10), November (11), December (12)
         if (inspectionDate.month >= 10 && inspectionDate.month <= 12) {
-          monthlyCount[inspectionDate.month] = (monthlyCount[inspectionDate.month] ?? 0) + 1;
+          monthlyCount[inspectionDate.month] =
+              (monthlyCount[inspectionDate.month] ?? 0) + 1;
         }
       }
     }

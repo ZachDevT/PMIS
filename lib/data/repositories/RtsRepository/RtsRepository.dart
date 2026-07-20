@@ -4,8 +4,13 @@ import 'package:pmis/data/services/rts/RtsService.dart';
 import 'package:pmis/utils/helpers/networkmanager.dart';
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
 import 'dart:io';
+import 'dart:math';
 
 class RtsRepository {
+  static final _random = Random();
+
+  static String _newLocalId() =>
+      '${DateTime.now().microsecondsSinceEpoch}-${_random.nextInt(1 << 32)}';
   final RtsService _service = Get.find<RtsService>();
   final box = GetStorage();
 
@@ -15,23 +20,25 @@ class RtsRepository {
       // Check connectivity before making API call
       final networkManager = Get.find<NetworkManager>();
       final isOnline = await networkManager.isconnected();
-      
+
       if (!isOnline) {
         print('No internet connection, returning local data');
         List storedActivities = box.read<List>('rts_activities') ?? [];
-        return storedActivities.map((e) => Map<String, dynamic>.from(e)).toList();
+        return storedActivities
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
       }
-      
+
       List<Map<String, dynamic>> onlineData = [];
       try {
         onlineData = await _service.getRtsData();
-      } catch(e) {
+      } catch (e) {
         print('Service fetch error: $e');
       }
-      
+
       // Merge with local unsynced activities
       List storedActivities = box.read<List>('rts_activities') ?? [];
-      
+
       final Map<String, Map<String, dynamic>> mergedMap = {};
       for (var item in onlineData) {
         if (item['id'] != null) {
@@ -42,11 +49,15 @@ class RtsRepository {
         }
       }
       for (var item in storedActivities) {
-        if (item['id'] != null) {
-          mergedMap[item['id'].toString()] = Map<String, dynamic>.from(item);
-        }
+        final localItem = Map<String, dynamic>.from(item);
+        final hasServerId = localItem['id'] != null;
+        if (!hasServerId) localItem['_localId'] ??= _newLocalId();
+        final key = hasServerId
+            ? 'server:${localItem['id']}'
+            : 'local:${localItem['_localId']}';
+        mergedMap[key] = localItem;
       }
-      
+
       return mergedMap.values.toList();
     } on TimeoutException catch (e) {
       print('Timeout error fetching RTS data: ${e.message}');
@@ -58,7 +69,8 @@ class RtsRepository {
       print('Network exception: ${e.message}');
       return [];
     } catch (e) {
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
         print('Timeout error detected: ${e.toString()}');
         return [];
       }
@@ -76,24 +88,34 @@ class RtsRepository {
   Future<void> saveActivityLocally(Map<String, dynamic> activityData) async {
     try {
       List storedActivities = box.read<List>('rts_activities') ?? [];
-      final String? incomingId = activityData['id']?.toString();
-      
+      final localActivity = Map<String, dynamic>.from(activityData);
+      localActivity['_localId'] ??= _newLocalId();
+      final String? incomingId = localActivity['id']?.toString();
+      final String localId = localActivity['_localId'].toString();
+
       if (incomingId != null && incomingId.isNotEmpty) {
         // Update existing record if id matches, otherwise append
         final idx = storedActivities.indexWhere(
           (e) => e['id']?.toString() == incomingId,
         );
         if (idx >= 0) {
-          storedActivities[idx] = activityData;
+          storedActivities[idx] = localActivity;
         } else {
-          storedActivities.add(activityData);
+          storedActivities.add(localActivity);
         }
       } else {
-        storedActivities.add(activityData);
+        final idx = storedActivities.indexWhere(
+          (e) => e['_localId']?.toString() == localId,
+        );
+        if (idx >= 0) {
+          storedActivities[idx] = localActivity;
+        } else {
+          storedActivities.add(localActivity);
+        }
       }
-      
+
       await box.write('rts_activities', storedActivities);
-      print('RTS activity saved locally: ${activityData['id']}');
+      print('RTS activity saved locally: $localId');
     } catch (e) {
       print('Error saving RTS activity locally: $e');
     }
@@ -104,23 +126,25 @@ class RtsRepository {
     try {
       List storedActivities = box.read<List>('rts_activities') ?? [];
       List<Map<String, dynamic>> failedSyncs = [];
-      
+      List<Map<String, dynamic>> successfulSyncs = [];
+
       if (storedActivities.isNotEmpty) {
         for (var activityData in storedActivities) {
           try {
             await _service.postRtsData(activityData);
+            successfulSyncs.add(Map<String, dynamic>.from(activityData));
             print('RTS activity synced successfully: ${activityData['id']}');
           } catch (e) {
             print('Failed to sync RTS activity ${activityData['id']}: $e');
             failedSyncs.add(activityData);
           }
         }
-        
+
         // Remove successfully synced activities, keep failed ones
         await box.write('rts_activities', failedSyncs);
       }
-      
-      return storedActivities.map((e) => e as Map<String, dynamic>).toList();
+
+      return successfulSyncs;
     } catch (e) {
       print('Error syncing local RTS activities: $e');
       return [];

@@ -46,6 +46,8 @@ class PmsaController extends GetxController {
   final nameController = TextEditingController();
   final contactController = TextEditingController();
   final qualificationsController = TextEditingController();
+  final selectedQualification = ''.obs;
+  final selectedQualificationId = Rxn<int>();
 
   // Section: Facility Category & Licensing
   var selectedCategoryOfFacility = ''.obs;
@@ -83,7 +85,7 @@ class PmsaController extends GetxController {
     Future.microtask(() => loadActivities());
     getCurrentLocation(); // Get current location on init
     _autoFillDefaults(); // Prepopulate inspector info
-    
+
     // Initialize filtered activities
     ever(activities, (_) => filterActivities());
     ever(searchQuery, (_) => filterActivities());
@@ -101,7 +103,7 @@ class PmsaController extends GetxController {
     inspectionTimeController.text =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00';
     numberOfSamplesCollectedController.text = "0";
-    
+
     // Prepopulate inspector name and ID from logged-in user
     if (Get.isRegistered<AuthController>()) {
       final authController = Get.find<AuthController>();
@@ -118,12 +120,13 @@ class PmsaController extends GetxController {
       if (data.isNotEmpty) {
         print('PMSA Controller: First record: ${data.first}');
       }
-      var pmsActivities =
-          data.map((item) => PmsModel.fromJson(item)).toList();
+      var pmsActivities = data.map((item) => PmsModel.fromJson(item)).toList();
       print('PMSA Controller: Parsed activities: ${pmsActivities.length}');
       if (pmsActivities.isNotEmpty) {
-        print('PMSA Controller: First parsed activity inspectorName: ${pmsActivities.first.inspectorName}');
-        print('PMSA Controller: First parsed activity inspectorId: ${pmsActivities.first.inspectorId}');
+        print(
+            'PMSA Controller: First parsed activity inspectorName: ${pmsActivities.first.inspectorName}');
+        print(
+            'PMSA Controller: First parsed activity inspectorId: ${pmsActivities.first.inspectorId}');
       }
       activities.assignAll(pmsActivities);
       print('=== End PMSA Controller: Loading Activities ===');
@@ -137,9 +140,8 @@ class PmsaController extends GetxController {
   /// Filter activities based on search query and selected filters
   void filterActivities() {
     // Get current user info
-    final authController = Get.isRegistered<AuthController>() 
-        ? Get.find<AuthController>() 
-        : null;
+    final authController =
+        Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
     final isAdmin = authController?.isAdmin ?? false;
     final userId = authController?.userId ?? '';
 
@@ -153,9 +155,15 @@ class PmsaController extends GetxController {
 
       // Search query filter
       bool matchesSearch = searchQuery.value.isEmpty ||
-          activity.facilityName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          activity.personName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          _getRegionName(activity.intRegion).toLowerCase().contains(searchQuery.value.toLowerCase());
+          activity.facilityName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          activity.personName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          _getRegionName(activity.intRegion)
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase());
 
       // Region filter
       bool matchesRegion = filterRegion.value.isEmpty ||
@@ -163,11 +171,13 @@ class PmsaController extends GetxController {
 
       // Facility status filter
       bool matchesFacilityStatus = filterFacilityStatus.value.isEmpty ||
-          _getFacilityStatusText(activity.facilityStatus) == filterFacilityStatus.value;
+          _getFacilityStatusText(activity.facilityStatus) ==
+              filterFacilityStatus.value;
 
       // License status filter
       bool matchesLicenseStatus = filterLicenseStatus.value.isEmpty ||
-          _getLicenseStatusText(activity.licenseStatus) == filterLicenseStatus.value;
+          _getLicenseStatusText(activity.licenseStatus) ==
+              filterLicenseStatus.value;
 
       // PMS activity filter
       bool matchesPmsActivity = filterPmsActivity.value.isEmpty ||
@@ -216,7 +226,7 @@ class PmsaController extends GetxController {
       if (selectedFacilityStatus.value.isEmpty) {
         emptyFields.add("Facility Status");
       }
-      
+
       // Only require these fields if facility is not closed
       if (selectedFacilityStatus.value != "Closed") {
         if (selectedCategoryOfFacility.value.isEmpty) {
@@ -240,41 +250,45 @@ class PmsaController extends GetxController {
         if (contactController.text.isEmpty) {
           emptyFields.add("Contact");
         }
-        if (qualificationsController.text.isEmpty) {
+        if (selectedQualification.value.isEmpty) {
           emptyFields.add("Qualifications");
         }
       }
       // Activity-specific validations (only if facility is not closed and activity is not "None")
-      if (selectedFacilityStatus.value != "Closed" && pmsaActivityCarriesOut.value != "None") {
+      if (selectedFacilityStatus.value != "Closed" &&
+          pmsaActivityCarriesOut.value != "None") {
         String activity = pmsaActivityCarriesOut.value;
-        
+
         // Common fields for Sampling, Complaint investigation, and Follow-up on Recall
-        if (activity == "Sampling" || activity == "Complaint investigation" || activity == "Follow-up on Recall") {
+        if (activity == "Sampling" ||
+            activity == "Complaint investigation" ||
+            activity == "Follow-up on Recall") {
           if (productSampledNameController.text.isEmpty) {
             emptyFields.add("Name of Product");
           }
-          if (numberOfSamplesCollectedController.text.isEmpty || numberOfSamplesCollectedController.text == "0") {
+          if (numberOfSamplesCollectedController.text.isEmpty ||
+              numberOfSamplesCollectedController.text == "0") {
             emptyFields.add("Quantity");
           }
           if (batchNumberOfSampleController.text.isEmpty) {
             emptyFields.add("Batch Number");
           }
         }
-        
+
         // Specific fields for Complaint investigation
         if (activity == "Complaint investigation") {
           if (postMarketComplaintNotedController.text.isEmpty) {
             emptyFields.add("State any post market complaint noted");
           }
         }
-        
+
         // Specific fields for Follow-up on Recall
         if (activity == "Follow-up on Recall") {
           if (commentOnOverallFollowUpController.text.isEmpty) {
             emptyFields.add("Comment on Over all Follow up");
           }
         }
-        
+
         // Specific field for Others
         if (activity == "Others") {
           if (specifyActivityController.text.isEmpty) {
@@ -295,7 +309,8 @@ class PmsaController extends GetxController {
       // Create a new PMS activity from the form inputs.
       var newActivity = PmsModel(
         id: 0, // Will be set by API
-        inspectionDate: DateTime.parse("${inspectionDateController.text} ${inspectionTimeController.text}"),
+        inspectionDate: DateTime.parse(
+            "${inspectionDateController.text} ${inspectionTimeController.text}"),
         inspectorName: inspectorNameController.text,
         inspectorId: inspectorIdController.text,
         latitude: currentLatitude.value,
@@ -307,21 +322,26 @@ class PmsaController extends GetxController {
         facilityPersonType: _getPersonType(personFoundAtFacility.value),
         personName: nameController.text,
         contact: contactController.text,
-        qualifications: qualificationsController.text,
+        qualifications: selectedQualification.value,
+        qualificationId: selectedQualificationId.value,
         categoryOfpremises:
             _getCategoryOfPremises(selectedCategoryOfFacility.value),
-        otherCategoryPremise: selectedCategoryOfFacility.value == "Other" ? "Other category" : "",
+        otherCategoryPremise:
+            selectedCategoryOfFacility.value == "Other" ? "Other category" : "",
         licenseStatus: _getLicenseStatus(licensedStatus.value),
-        licenseNo: licensedStatus.value == "Licensed" ? licenseNoController.text : "",
-        licenseExpiryDate: licensedStatus.value == "Licensed" ? licenseExpiryDateController.text : "",
+        licenseNo:
+            licensedStatus.value == "Licensed" ? licenseNoController.text : "",
+        licenseExpiryDate: licensedStatus.value == "Licensed"
+            ? licenseExpiryDateController.text
+            : "",
         unlicensed: licensedStatus.value == "Un-Licensed" ? 1 : 0,
         pmsActivity: _getPmsActivity(pmsaActivityCarriesOut.value),
         sampleProductName: productSampledNameController.text,
         sampleNo: int.tryParse(numberOfSamplesCollectedController.text) ?? 0,
         sampleBatch: batchNumberOfSampleController.text,
         followupComment: commentOnOverallFollowUpController.text,
-        complaintProduct: postMarketComplaintNotedController.text.isNotEmpty 
-            ? postMarketComplaintNotedController.text 
+        complaintProduct: postMarketComplaintNotedController.text.isNotEmpty
+            ? postMarketComplaintNotedController.text
             : productComplaintInvestigatedController.text,
         otherActivity: specifyActivityController.text,
         previouslyLicensed: selectedFacilityStatus.value == "Closed"
@@ -332,7 +352,7 @@ class PmsaController extends GetxController {
       // Check connectivity status.
       bool online = await NetworkManager.instance.isconnected();
       var activityData = newActivity.toJson();
-      
+
       if (online) {
         try {
           print('Sending PMS data: $activityData'); // Debug log
@@ -345,7 +365,7 @@ class PmsaController extends GetxController {
           await repository.saveActivityLocally(activityData);
           activities.add(newActivity);
           Loaders.errorSnackbar(
-              title: "Network Error", 
+              title: "Network Error",
               message: "Failed to send online. Saved locally for sync.");
         }
       } else {
@@ -379,6 +399,8 @@ class PmsaController extends GetxController {
     nameController.clear();
     contactController.clear();
     qualificationsController.clear();
+    selectedQualification.value = '';
+    selectedQualificationId.value = null;
     selectedRegion.value = '';
     selectedDistrict.value = '';
     selectedFacilityStatus.value = '';
@@ -395,7 +417,7 @@ class PmsaController extends GetxController {
     productComplaintInvestigatedController.clear();
     postMarketComplaintNotedController.clear();
     specifyActivityController.clear();
-  
+
     _autoFillDefaults();
   }
 
@@ -516,29 +538,42 @@ class PmsaController extends GetxController {
   // Helper methods for filter text conversion
   String _getFacilityStatusText(int status) {
     switch (status) {
-      case 1: return "Open";
-      case 0: return "Closed";
-      default: return "Open";
+      case 1:
+        return "Open";
+      case 0:
+        return "Closed";
+      default:
+        return "Open";
     }
   }
 
   String _getLicenseStatusText(int status) {
     switch (status) {
-      case 1: return "Licensed";
-      case 2: return "Un-Licensed";
-      case 3: return "Not-Applicable";
-      default: return "Licensed";
+      case 1:
+        return "Licensed";
+      case 2:
+        return "Un-Licensed";
+      case 3:
+        return "Not-Applicable";
+      default:
+        return "Licensed";
     }
   }
 
   String _getPmsActivityText(int activity) {
     switch (activity) {
-      case 1: return "Sampling";
-      case 2: return "Follow-up on Recall";
-      case 3: return "Complaint investigation";
-      case 4: return "Others";
-      case 0: return "None";
-      default: return "None";
+      case 1:
+        return "Sampling";
+      case 2:
+        return "Follow-up on Recall";
+      case 3:
+        return "Complaint investigation";
+      case 4:
+        return "Others";
+      case 0:
+        return "None";
+      default:
+        return "None";
     }
   }
 
@@ -578,7 +613,8 @@ class PmsaController extends GetxController {
         permission = await Geolocator.requestPermission();
       }
 
-      if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+      if (permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse) {
         // 3. Try to get current position with low accuracy and 4s timeout
         Position? position;
         try {

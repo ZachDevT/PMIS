@@ -11,6 +11,7 @@ class GdpModel {
   final String personName;
   final String contact;
   final String qualifications;
+  final int? qualificationId;
   final int categoryOfpremises;
   final int licenseStatus;
   final int categoryStatus;
@@ -37,6 +38,7 @@ class GdpModel {
     required this.personName,
     required this.contact,
     required this.qualifications,
+    this.qualificationId,
     required this.categoryOfpremises,
     required this.licenseStatus,
     required this.categoryStatus,
@@ -59,17 +61,19 @@ class GdpModel {
     print('Raw InspectorName: ${json['InspectorName']}');
     print('Raw inspectorId: ${json['inspectorId']}');
     print('Raw InspectorId: ${json['InspectorId']}');
-    
+
     final inspectorName = json['inspectorName'] ?? json['InspectorName'] ?? '';
     final inspectorId = json['inspectorId'] ?? json['InspectorId'] ?? '';
-    
+
     print('Final inspectorName: $inspectorName');
     print('Final inspectorId: $inspectorId');
     print('=== End GDP Model Debug ===');
-    
+
     return GdpModel(
       id: json['id'] ?? 0,
-      inspectionDate: DateTime.parse(json['inspectionDate'] ?? json['InspectionDate'] ?? DateTime.now().toIso8601String()),
+      inspectionDate: DateTime.parse(json['inspectionDate'] ??
+          json['InspectionDate'] ??
+          DateTime.now().toIso8601String()),
       inspectorName: inspectorName,
       gps: (json['gps'] != null && json['gps'].toString().isNotEmpty)
           ? json['gps'].toString()
@@ -86,6 +90,11 @@ class GdpModel {
       personName: json['personName'] ?? '',
       contact: json['contact'] ?? '',
       qualifications: json['qualifications'] ?? '',
+      qualificationId: json['qualificationId'] is int
+          ? json['qualificationId']
+          : int.tryParse(
+              (json['qualificationId'] ?? json['QualificationId'] ?? '')
+                  .toString()),
       categoryOfpremises: json['categoryOfpremises'] ?? 0,
       licenseStatus: json['licenseStatus'] ?? 0,
       categoryStatus: json['categoryStatus'] ?? 0,
@@ -96,8 +105,13 @@ class GdpModel {
       latitude: (json['latitude'] ?? json['Latitude'] ?? 0).toDouble(),
       longitude: (json['longitude'] ?? json['Longitude'] ?? 0).toDouble(),
       licenseNo: json['licenseNo'] ?? json['LicenseNo'] ?? '',
-      licenseExpiryDate: json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? json['licenseExpDate'] ?? json['LicenseExpDate'] ?? '',
-      previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
+      licenseExpiryDate: json['licenseExpiryDate'] ??
+          json['LicenseExpiryDate'] ??
+          json['licenseExpDate'] ??
+          json['LicenseExpDate'] ??
+          '',
+      previouslyLicensed:
+          json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
     );
   }
 
@@ -115,6 +129,7 @@ class GdpModel {
       'personName': personName,
       'contact': contact,
       'qualifications': qualifications,
+      'qualificationId': qualificationId,
       'categoryOfpremises': categoryOfpremises,
       'licenseStatus': licenseStatus,
       'categoryStatus': categoryStatus,
@@ -133,73 +148,105 @@ class GdpModel {
   // Helper methods to convert numeric values to text
   String _getFacilityStatusText(int status) {
     switch (status) {
-      case 1: return 'Open';
-      case 0: return 'Closed';
-      default: return 'Unknown';
+      case 1:
+        return 'Open';
+      case 0:
+        return 'Closed';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getPersonTypeText(int type) {
     switch (type) {
-      case 1: return 'In-charge';
-      case 2: return 'Attendant/Operator';
-      default: return 'Unknown';
+      case 1:
+        return 'In-charge';
+      case 2:
+        return 'Attendant/Operator';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getCategoryOfPremisesText(int category) {
     switch (category) {
-      case 1: return 'Retail Pharmacy';
-      case 2: return 'Drug Shop';
-      case 3: return 'Hospital';
-      case 4: return 'HCIV';
-      case 5: return 'HCIII';
-      case 6: return 'Clinic';
-      default: return 'Unknown';
+      case 1:
+        return 'Retail Pharmacy';
+      case 2:
+        return 'Drug Shop';
+      case 3:
+        return 'Hospital';
+      case 4:
+        return 'HCIV';
+      case 5:
+        return 'HCIII';
+      case 6:
+        return 'Clinic';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getLicenseStatusText(int status) {
     switch (status) {
-      case 1: return 'Licensed';
-      case 2: return 'Un-Licensed';
-      case 3: return 'Not-Applicable';
-      default: return 'Unknown';
+      case 1:
+        return 'Licensed';
+      case 2:
+        return 'Un-Licensed';
+      case 3:
+        return 'Not-Applicable';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getCategoryStatusText(int status) {
     switch (status) {
-      case 1: return 'Medical Device';
-      case 2: return 'Veterinary drugs';
-      case 3: return 'Human drugs';
-      case 4: return 'Public Healthcare products';
-      case 5: return 'Herbal drugs';
-      default: return 'Unknown';
+      case 1:
+        return 'Medical Device';
+      case 2:
+        return 'Veterinary drugs';
+      case 3:
+        return 'Human drugs';
+      case 4:
+        return 'Public Healthcare products';
+      case 5:
+        return 'Herbal drugs';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getFacilityTypeText(int type) {
     switch (type) {
-      case 1: return 'Public Facility';
-      case 2: return 'Private Facility';
-      default: return 'Unknown';
+      case 1:
+        return 'Public Facility';
+      case 2:
+        return 'Private Facility';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getCertStatusText(int status) {
     switch (status) {
-      case 1: return 'Certified';
-      case 2: return 'Not certified';
-      default: return 'Unknown';
+      case 1:
+        return 'Certified';
+      case 2:
+        return 'Not certified';
+      default:
+        return 'Unknown';
     }
   }
 
   String _getRecommendedForGdpText(int recommendation) {
     switch (recommendation) {
-      case 1: return 'GDP certification';
-      case 0: return 'Not recommended for GDP certification';
-      default: return 'Unknown';
+      case 1:
+        return 'GDP certification';
+      case 0:
+        return 'Not recommended for GDP certification';
+      default:
+        return 'Unknown';
     }
   }
 
@@ -242,6 +289,7 @@ class GdpModel {
       personName: personName ?? this.personName,
       contact: contact ?? this.contact,
       qualifications: qualifications ?? this.qualifications,
+      qualificationId: qualificationId,
       categoryOfpremises: categoryOfpremises ?? this.categoryOfpremises,
       licenseStatus: licenseStatus ?? this.licenseStatus,
       categoryStatus: categoryStatus ?? this.categoryStatus,

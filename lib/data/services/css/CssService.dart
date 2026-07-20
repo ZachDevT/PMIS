@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
 import 'package:pmis/utils/config.dart';
+import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
 
 class CssService {
   static const _baseUrl = 'http://pmis.nda.or.ug/api';
@@ -173,7 +174,9 @@ class CssService {
     apiData['facilityName'] = data['facilityName'];
     apiData['personName'] = data['personName'];
     apiData['contact'] = data['contact'];
-    apiData['qualifications'] = data['qualifications'];
+    apiData['qualificationId'] = data['qualificationId'] ??
+        QualificationController.instance
+            .idForName(data['qualifications']?.toString() ?? '');
     
     // Category & License
     apiData['categoryOfpremises'] = data['categoryOfpremises'];

@@ -9,6 +9,31 @@ class PmsaRepository {
   final box = GetStorage();
   final PmsService _pmsService = PmsService();
 
+  List<Map<String, dynamic>> _localActivities() =>
+      (box.read<List>('pmsa_activities') ?? [])
+          .map((item) => Map<String, dynamic>.from(item as Map))
+          .toList();
+
+  List<Map<String, dynamic>> _mergeWithLocal(
+      List<Map<String, dynamic>> remoteActivities) {
+    final merged = <String, Map<String, dynamic>>{};
+    for (final item in remoteActivities) {
+      merged['server:${item['id']}'] = item;
+    }
+    for (final item in _localActivities()) {
+      final localId = item['_localId'] ?? item['id'];
+      merged['local:$localId'] = item;
+    }
+    final activities = merged.values.toList();
+    activities.sort((a, b) => _inspectionDate(b).compareTo(_inspectionDate(a)));
+    return activities;
+  }
+
+  DateTime _inspectionDate(Map<String, dynamic> item) =>
+      DateTime.tryParse((item['inspectionDate'] ?? item['InspectionDate'] ?? '')
+          .toString()) ??
+      DateTime.fromMillisecondsSinceEpoch(0);
+
   /// Fetch PMS activities from API.
   Future<List<Map<String, dynamic>>> fetchActivities() async {
     try {
@@ -17,28 +42,28 @@ class PmsaRepository {
       final isOnline = await networkManager.isconnected();
 
       if (!isOnline) {
-        print('No internet connection, returning empty list');
-        return [];
+        print('No internet connection, returning local PMSA data');
+        return _mergeWithLocal(const []);
       }
 
-      return await _pmsService.getPmsData();
+      return _mergeWithLocal(await _pmsService.getPmsData());
     } on TimeoutException catch (e) {
       print('Timeout error fetching PMS activities: ${e.message}');
-      return [];
+      return _mergeWithLocal(const []);
     } on SocketException catch (e) {
       print('Network error fetching PMS activities: ${e.message}');
-      return [];
+      return _mergeWithLocal(const []);
     } on NetworkException catch (e) {
       print('Network exception: ${e.message}');
-      return [];
+      return _mergeWithLocal(const []);
     } catch (e) {
       if (e.toString().contains('TimeoutException') ||
           e.toString().contains('Future not completed')) {
         print('Timeout error detected: ${e.toString()}');
-        return [];
+        return _mergeWithLocal(const []);
       }
       print('Error fetching PMS activities: $e');
-      return [];
+      return _mergeWithLocal(const []);
     }
   }
 
@@ -50,10 +75,13 @@ class PmsaRepository {
   /// Save a PMSA activity locally when offline.
   Future<void> saveActivityLocally(Map<String, dynamic> activityData) async {
     try {
-      List storedActivities = box.read<List>('pmsa_activities') ?? [];
-      storedActivities.add(activityData);
+      final storedActivities = _localActivities();
+      final localActivity = Map<String, dynamic>.from(activityData);
+      localActivity['_localId'] ??=
+          'pmsa-${DateTime.now().microsecondsSinceEpoch}';
+      storedActivities.add(localActivity);
       await box.write('pmsa_activities', storedActivities);
-      print('PMS activity saved locally: ${activityData['id']}');
+      print('PMS activity saved locally: ${localActivity['_localId']}');
     } catch (e) {
       print('Error saving PMSA activity locally: $e');
     }
@@ -64,11 +92,13 @@ class PmsaRepository {
     try {
       List storedActivities = box.read<List>('pmsa_activities') ?? [];
       List<Map<String, dynamic>> failedSyncs = [];
+      List<Map<String, dynamic>> successfulSyncs = [];
 
       if (storedActivities.isNotEmpty) {
         for (var activityData in storedActivities) {
           try {
             await _pmsService.postPmsData(activityData);
+            successfulSyncs.add(Map<String, dynamic>.from(activityData));
             print('PMS activity synced successfully: ${activityData['id']}');
           } catch (e) {
             print('Failed to sync PMS activity ${activityData['id']}: $e');
@@ -80,7 +110,7 @@ class PmsaRepository {
         await box.write('pmsa_activities', failedSyncs);
       }
 
-      return storedActivities.map((e) => e as Map<String, dynamic>).toList();
+      return successfulSyncs;
     } catch (e) {
       print('Error syncing local PMS activities: $e');
       return [];
@@ -94,8 +124,7 @@ class PmsaRepository {
       print('PMS Activity submitted successfully');
     } catch (e) {
       print('Error submitting PMS activity: $e');
-      // Optionally save locally if network call fails.
-      await saveActivityLocally(pmsData);
+      rethrow;
     }
   }
 

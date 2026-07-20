@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 
 class RtsService {
   static const _baseUrl = 'http://pmis.nda.or.ug/api';
@@ -34,7 +35,8 @@ class RtsService {
     } catch (e) {
       if (e is ApiException) rethrow;
       // Check if it's a timeout error
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
         throw const TimeoutException('Request timeout. Please try again.');
       }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
@@ -111,14 +113,15 @@ class RtsService {
     String inspectionDate = DateTime.now().toIso8601String();
     try {
       if (data['inspectionDate'] != null) {
-        inspectionDate = data['inspectionDate'] is DateTime 
+        inspectionDate = data['inspectionDate'] is DateTime
             ? (data['inspectionDate'] as DateTime).toIso8601String()
-            : DateTime.parse(data['inspectionDate'].toString()).toIso8601String();
+            : DateTime.parse(data['inspectionDate'].toString())
+                .toIso8601String();
       }
     } catch (e) {
       // fallback to now
     }
-  
+
     // Based on the existing RTS data structure from the API
     return {
       'inspectionDate': inspectionDate,
@@ -126,52 +129,39 @@ class RtsService {
       'inspectorId': data['inspectorId'] ?? '',
       'latitude': data['latitude']?.toDouble() ?? 0.0,
       'longitude': data['longitude']?.toDouble() ?? 0.0,
-      'intRegion': data['region'] != null ? _getRegionGuid(data['region'].toString()) : null,
-      'districtId': data['district'] != null ? _getDistrictId(data['district'].toString()) : null,
-      'facilityName': data['venueLocation'] ?? data['facilityName'],
+      'intRegion': data['region'] != null
+          ? _getRegionGuid(data['region'].toString())
+          : null,
+      'districtId': data['district'] != null
+          ? _getDistrictId(data['district'].toString())
+          : null,
+      // The RTS API stores the radio company in facilityName. It does not
+      // expose a separate radioCompanyName property in GET responses.
+      'facilityName': data['radioCompanyName'] ?? data['facilityName'],
       'venue': data['venueLocation'] ?? data['facilityName'],
       'topic': data['topicOfDiscussion'] ?? data['topic'],
       'participants': data['numberOfParticipants'] ?? 0,
-      'radioCompanyName': data['radioCompanyName'],
     };
   }
 
   /// Get region GUID from region name
   String _getRegionGuid(String regionName) {
-    // Map region names to GUIDs (these should match the API)
-    switch (regionName.toUpperCase()) {
-      case 'HEAD OFFICE':
-        return 'deaf2c98-3dbb-489f-bdea-9e5fd49eec78';
-      case 'CENTRAL':
-        return '87ddeda4-cef9-4e7b-ad44-34bb56081916';
-      case 'EASTERN':
-        return 'e9b78052-b51b-417f-b3b6-72b8ff3c4b9a';
-      case 'SOUTHERN':
-        return '0b44f4f9-1423-4688-afd4-2369147e0f8f';
-      case 'WESTERN':
-        return 'de9b2845-56c4-4a19-8a0f-607bfd5c8689';
-      case 'NORTHERN':
-        return '87ddeda4-cef9-4e7b-ad44-34bb56081916';
-      default:
-        return 'deaf2c98-3dbb-489f-bdea-9e5fd49eec78'; // Default to Head Office
-    }
+    return RegionDistrictConstants.regionGuids.entries
+            .where(
+                (entry) => entry.key.toLowerCase() == regionName.toLowerCase())
+            .firstOrNull
+            ?.value ??
+        '';
   }
 
   /// Get district ID from district name
   int _getDistrictId(String districtName) {
-    // Map district names to IDs (these should match the API)
-    switch (districtName.toUpperCase()) {
-      case 'KAMPALA':
-        return 1;
-      case 'MASAKA':
-        return 2;
-      case 'KABALE':
-        return 3;
-      case 'FORTPORTAL':
-        return 4;
-      default:
-        return 1; // Default to Kampala
-    }
+    return RegionDistrictConstants.districtIds.entries
+            .where((entry) =>
+                entry.key.toLowerCase() == districtName.toLowerCase())
+            .firstOrNull
+            ?.value ??
+        0;
   }
 
   /// Post RTS data to the API
@@ -182,8 +172,7 @@ class RtsService {
       print('🌐 DEBUG: API URL: $uri');
 
       // Convert to API format
-      final Map<String, dynamic> apiData =
-          _mapToApiFormat(rtsData);
+      final Map<String, dynamic> apiData = _mapToApiFormat(rtsData);
       print('Converted RTS API data: $apiData');
       print('📤 DEBUG: Sending POST request to API...');
       final response = await http
@@ -214,7 +203,8 @@ class RtsService {
     } catch (e) {
       if (e is ApiException) rethrow;
       // Check if it's a timeout error
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
         throw const TimeoutException('Request timeout. Please try again.');
       }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
@@ -228,7 +218,10 @@ class RtsService {
       case 201:
         try {
           if (response.body.isEmpty) {
-            return {'success': true, 'message': 'RadioTalkShow data saved successfully'};
+            return {
+              'success': true,
+              'message': 'RadioTalkShow data saved successfully'
+            };
           }
 
           final Map<String, dynamic> data =

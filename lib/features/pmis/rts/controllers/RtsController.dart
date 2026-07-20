@@ -60,11 +60,12 @@ class RtsController extends GetxController {
 
   void _initializeForm() {
     // Set default values
-    inspectionDateController.text = DateTime.now().toLocal().toString().split(' ')[0];
+    inspectionDateController.text =
+        DateTime.now().toLocal().toString().split(' ')[0];
     final now = DateTime.now();
     inspectionTimeController.text =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00';
-    
+
     // Initialize with current location
     getCurrentLocation();
 
@@ -84,7 +85,9 @@ class RtsController extends GetxController {
       activities.assignAll(rtsActivities);
       filterActivities();
     } catch (e) {
-      Loaders.errorSnackbar(title: "Error", message: "Failed to load RTS activities: ${e.toString()}");
+      Loaders.errorSnackbar(
+          title: "Error",
+          message: "Failed to load RTS activities: ${e.toString()}");
     } finally {
       isLoading.value = false;
     }
@@ -106,18 +109,22 @@ class RtsController extends GetxController {
         );
         return;
       }
-      
+
       List<String> emptyFields = [];
       if (selectedRegion.value.isEmpty) emptyFields.add("Region");
       if (selectedDistrict.value.isEmpty) emptyFields.add("District");
-      if (inspectorNameController.text.isEmpty) emptyFields.add("Inspector Name");
-      if (venueLocationController.text.isEmpty) emptyFields.add("Venue Location");
-      if (topicOfDiscussionController.text.isEmpty) emptyFields.add("Topic of Discussion");
+      if (inspectorNameController.text.isEmpty)
+        emptyFields.add("Inspector Name");
+      if (venueLocationController.text.isEmpty)
+        emptyFields.add("Venue Location");
+      if (topicOfDiscussionController.text.isEmpty)
+        emptyFields.add("Topic of Discussion");
 
       if (emptyFields.isNotEmpty) {
         Loaders.errorSnackbar(
           title: "Error",
-          message: "Please fill in the following fields: ${emptyFields.join(', ')}.",
+          message:
+              "Please fill in the following fields: ${emptyFields.join(', ')}.",
         );
         return;
       }
@@ -132,13 +139,16 @@ class RtsController extends GetxController {
         district: selectedDistrict.value,
         venueLocation: venueLocationController.text,
         topicOfDiscussion: topicOfDiscussionController.text,
-        numberOfParticipants: int.tryParse(numberOfParticipantsController.text) ?? 0,
-        radioCompanyName: radioCompanyNameController.text.isNotEmpty ? radioCompanyNameController.text : null,
+        numberOfParticipants:
+            int.tryParse(numberOfParticipantsController.text) ?? 0,
+        radioCompanyName: radioCompanyNameController.text.isNotEmpty
+            ? radioCompanyNameController.text
+            : null,
       );
 
       bool online = await NetworkManager.instance.isconnected();
       var activityData = newActivity.toJson();
-      
+
       if (online) {
         try {
           print('Sending RTS data: $activityData'); // Debug log
@@ -151,7 +161,7 @@ class RtsController extends GetxController {
           await repository.saveActivityLocally(activityData);
           activities.add(newActivity);
           Loaders.errorSnackbar(
-              title: "Network Error", 
+              title: "Network Error",
               message: "Failed to send online. Saved locally for sync.");
         }
       } else {
@@ -162,7 +172,7 @@ class RtsController extends GetxController {
             title: "Offline",
             message: "RTS activity saved locally. Will sync when online.");
       }
-      
+
       // Clear the form fields after submission
       clearForm();
       if (context.mounted) {
@@ -184,16 +194,15 @@ class RtsController extends GetxController {
     radioCompanyNameController.clear();
     selectedRegion.value = '';
     selectedDistrict.value = '';
-  
+
     _initializeForm();
   }
 
   /// Filter activities based on search and filter criteria
   void filterActivities() {
     // Get current user info
-    final authController = Get.isRegistered<AuthController>() 
-        ? Get.find<AuthController>() 
-        : null;
+    final authController =
+        Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
     final isAdmin = authController?.isAdmin ?? false;
     final userDisplayName = authController?.userDisplayName ?? '';
 
@@ -201,18 +210,25 @@ class RtsController extends GetxController {
       // Role-based filter: If not admin, only show activities created by this user
       // Match by inspectorName since RtsModel doesn't have inspectorId
       if (!isAdmin && userDisplayName.isNotEmpty) {
-        if (activity.inspectorName.toLowerCase() != userDisplayName.toLowerCase()) {
+        if (activity.inspectorName.toLowerCase() !=
+            userDisplayName.toLowerCase()) {
           return false;
         }
       }
 
       bool matchesSearch = searchQuery.value.isEmpty ||
-          activity.topicOfDiscussion.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          activity.inspectorName.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          activity.venueLocation.toLowerCase().contains(searchQuery.value.toLowerCase());
+          activity.topicOfDiscussion
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          activity.inspectorName
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase()) ||
+          activity.venueLocation
+              .toLowerCase()
+              .contains(searchQuery.value.toLowerCase());
 
-      bool matchesRegion = filterRegion.value.isEmpty ||
-          activity.region == filterRegion.value;
+      bool matchesRegion =
+          filterRegion.value.isEmpty || activity.region == filterRegion.value;
 
       bool matchesDistrict = filterDistrict.value.isEmpty ||
           activity.district == filterDistrict.value;
@@ -220,33 +236,47 @@ class RtsController extends GetxController {
       return matchesSearch && matchesRegion && matchesDistrict;
     }).toList();
 
-    // Sort by creation date (latest first)
+    // API records do not include createdAt, so inspectionDate is the primary
+    // ordering field. Use createdAt and server ID to make ties deterministic.
     filtered.sort((a, b) {
-      if (a.createdAt == null && b.createdAt == null) return 0;
-      if (a.createdAt == null) return 1;
-      if (b.createdAt == null) return -1;
-      return b.createdAt!.compareTo(a.createdAt!);
+      final dateComparison = _sortDate(b).compareTo(_sortDate(a));
+      if (dateComparison != 0) return dateComparison;
+
+      final createdComparison =
+          (b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0))
+              .compareTo(a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0));
+      if (createdComparison != 0) return createdComparison;
+
+      return (int.tryParse(b.id ?? '') ?? -1)
+          .compareTo(int.tryParse(a.id ?? '') ?? -1);
     });
 
     filteredActivities.value = filtered;
   }
 
+  DateTime _sortDate(RtsModel activity) {
+    return DateTime.tryParse(activity.inspectionDate) ??
+        activity.createdAt ??
+        DateTime.fromMillisecondsSinceEpoch(0);
+  }
+
   /// Submit RTS activity
   Future<void> submitActivity() async {
     if (!formKey.currentState!.validate()) {
-        Loaders.errorSnackbar(
-          title: "Incomplete Form",
-          message: "Please fill in all the required fields.",
-        );
-        return;
-      }
+      Loaders.errorSnackbar(
+        title: "Incomplete Form",
+        message: "Please fill in all the required fields.",
+      );
+      return;
+    }
 
     try {
       isSubmitting.value = true;
 
       // Create RTS model
       final rtsActivity = RtsModel(
-        inspectionDate: "${inspectionDateController.text} ${inspectionTimeController.text}",
+        inspectionDate:
+            "${inspectionDateController.text} ${inspectionTimeController.text}",
         inspectorName: inspectorNameController.text,
         latitude: currentLatitude.value,
         longitude: currentLongitude.value,
@@ -254,41 +284,41 @@ class RtsController extends GetxController {
         district: selectedDistrict.value,
         venueLocation: venueLocationController.text,
         topicOfDiscussion: topicOfDiscussionController.text,
-        numberOfParticipants: int.tryParse(numberOfParticipantsController.text) ?? 0,
-        radioCompanyName: radioCompanyNameController.text.isNotEmpty ? radioCompanyNameController.text : null,
+        numberOfParticipants:
+            int.tryParse(numberOfParticipantsController.text) ?? 0,
+        radioCompanyName: radioCompanyNameController.text.isNotEmpty
+            ? radioCompanyNameController.text
+            : null,
         createdAt: DateTime.now(),
         isSynced: false,
       );
 
       bool online = await NetworkManager.instance.isconnected();
       var activityData = rtsActivity.toJson();
-      
+
       print('🔍 DEBUG: Network status: $online');
       print('🔍 DEBUG: Activity data to send: $activityData');
-      
+
       if (online) {
         try {
           print('🚀 DEBUG: Attempting to send RTS data to API...');
           var result = await repository.postRtsData(activityData);
           print('✅ DEBUG: API response received: $result');
-          
+
           // Extract ID if available
           String? serverId;
           if (result['rts'] != null && result['rts']['id'] != null) {
             serverId = result['rts']['id'].toString();
           }
-          
-          final syncedActivity = rtsActivity.copyWith(
-            id: serverId,
-            isSynced: true
-          );
-          
+
+          final syncedActivity =
+              rtsActivity.copyWith(id: serverId, isSynced: true);
+
           activities.add(syncedActivity);
-          // Save locally so we preserve numberOfParticipants which the server drops
-          await repository.saveActivityLocally(syncedActivity.toJson());
-          
+
           Loaders.successSnackbar(
-              title: "Success", message: "RTS activity sent to API successfully!");
+              title: "Success",
+              message: "RTS activity sent to API successfully!");
           Navigator.pop(Get.context!); // Close on success
         } catch (e) {
           print('❌ DEBUG: API call failed: $e');
@@ -296,7 +326,7 @@ class RtsController extends GetxController {
           await repository.saveActivityLocally(activityData);
           activities.add(rtsActivity);
           Loaders.errorSnackbar(
-              title: "Network Error", 
+              title: "Network Error",
               message: "Failed to send to API. Saved locally for sync.");
           Navigator.pop(Get.context!); // Close on fallback success
         }
@@ -314,12 +344,12 @@ class RtsController extends GetxController {
       filterActivities();
       clearForm();
     } catch (e) {
-      Loaders.errorSnackbar(title: "Error", message: "Failed to submit activity");
+      Loaders.errorSnackbar(
+          title: "Error", message: "Failed to submit activity");
     } finally {
       isSubmitting.value = false;
     }
   }
-
 
   /// Get current location
   Future<void> getCurrentLocation() async {
@@ -341,7 +371,8 @@ class RtsController extends GetxController {
         permission = await Geolocator.requestPermission();
       }
 
-      if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+      if (permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse) {
         // 3. Try to get current position with low accuracy and 4s timeout
         Position? position;
         try {

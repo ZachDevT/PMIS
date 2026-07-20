@@ -10,6 +10,14 @@ import 'package:pmis/data/repositories/RtsRepository/RtsRepository.dart';
 import 'package:pmis/data/repositories/ShiftMarketRepository/ShiftMarketRepository.dart';
 import 'package:pmis/data/repositories/EnforcementRepository/EnforcementRepository.dart';
 import 'package:pmis/data/repositories/SensitizationMeetingRepository/SensitizationMeetingRepository.dart';
+import 'package:pmis/features/pmis/css/controllers/CssController.dart';
+import 'package:pmis/features/pmis/enforcement/controllers/EnforcementController.dart';
+import 'package:pmis/features/pmis/gdp/controllers/GdpController.dart';
+import 'package:pmis/features/pmis/gpp/controllers/GppController.dart';
+import 'package:pmis/features/pmis/pmsa/controllers/PmsaController.dart';
+import 'package:pmis/features/pmis/rts/controllers/RtsController.dart';
+import 'package:pmis/features/pmis/sensitizationmeeting/controllers/SensitizationMeetingController.dart';
+import 'package:pmis/features/pmis/shiftmarket/controllers/ShiftMarketController.dart';
 import 'package:pmis/utils/popups/loaders.dart';
 
 class SyncManager extends GetxController {
@@ -77,16 +85,15 @@ class SyncManager extends GetxController {
       });
 
       // Calculate initial pending count (defer to avoid blocking main thread)
-      Future.microtask(() => _updatePendingCount());
+      Future.microtask(refreshPendingCount);
 
       _isInitialized = true;
       print('✅ SyncManager initialized - Automatic sync enabled');
     } catch (e) {
       print('Error initializing SyncManager: $e');
-      // Still allow the manager to function, just without connectivity listener
-      Future.microtask(() => _updatePendingCount());
-      _isInitialized =
-          true; // Mark as initialized even on error to prevent retries
+      Future.microtask(refreshPendingCount);
+      _isInitialized = false;
+      Future.delayed(const Duration(seconds: 2), initialize);
     }
   }
 
@@ -94,7 +101,7 @@ class SyncManager extends GetxController {
     _connectivityRetryAttempts = 0;
     while (_connectivityRetryAttempts < _maxRetryAttempts) {
       try {
-        await performSync(showProgress: true);
+        await performSync(showProgress: false, throwOnFailure: true);
         // Success - reset attempts and break
         _connectivityRetryAttempts = 0;
         break;
@@ -118,7 +125,7 @@ class SyncManager extends GetxController {
   }
 
   /// Update the total count of pending sync items
-  void _updatePendingCount() {
+  void refreshPendingCount() {
     try {
       final cssCount = _cssRepo.getOfflineActivitiesCount();
       final gppCount = _gppRepo.getOfflineActivitiesCount();
@@ -145,7 +152,10 @@ class SyncManager extends GetxController {
   }
 
   /// Perform synchronization for all modules
-  Future<Map<String, int>> performSync({bool showProgress = true}) async {
+  Future<Map<String, int>> performSync({
+    bool showProgress = true,
+    bool throwOnFailure = false,
+  }) async {
     if (_isSyncing.value) {
       if (showProgress) {
         Loaders.warningSnackbar(
@@ -171,10 +181,15 @@ class SyncManager extends GetxController {
       // Check connectivity
       final results = await Connectivity().checkConnectivity();
       if (_resolveConnectivityResult(results) == ConnectivityResult.none) {
-        Loaders.errorSnackbar(
-          title: "No Internet",
-          message: "Please check your internet connection",
-        );
+        if (showProgress) {
+          Loaders.errorSnackbar(
+            title: "No Internet",
+            message: "Please check your internet connection",
+          );
+        }
+        if (throwOnFailure) {
+          throw StateError('No network interface is available');
+        }
         return {};
       }
 
@@ -261,7 +276,13 @@ class SyncManager extends GetxController {
       }
 
       // Update pending count
-      _updatePendingCount();
+      refreshPendingCount();
+
+      if (_totalPendingItems.value > 0 && throwOnFailure) {
+        throw StateError(
+          '${_totalPendingItems.value} offline item(s) remain pending',
+        );
+      }
 
       // Reload controller data but don't block main thread — schedule non-blocking refresh
       Future.microtask(() async {
@@ -276,7 +297,13 @@ class SyncManager extends GetxController {
       if (showProgress) {
         final totalSynced =
             syncResults.values.fold(0, (sum, count) => sum + count);
-        if (totalSynced > 0) {
+        if (_totalPendingItems.value > 0) {
+          Loaders.warningSnackbar(
+            title: "Sync Incomplete",
+            message:
+                "$totalSynced synced; ${_totalPendingItems.value} still pending",
+          );
+        } else if (totalSynced > 0) {
           Loaders.successSnackbar(
             title: "Sync Complete",
             message: "Successfully synced $totalSynced offline activities",
@@ -304,6 +331,7 @@ class SyncManager extends GetxController {
           message: "Failed to synchronize data. Please try again.",
         );
       }
+      if (throwOnFailure) rethrow;
     } finally {
       _isSyncing.value = false;
     }
@@ -317,8 +345,8 @@ class SyncManager extends GetxController {
 
     // Reload CSS controller if registered
     try {
-      if (Get.isRegistered<dynamic>(tag: 'CssController')) {
-        final dynamic controller = Get.find(tag: 'CssController');
+      if (Get.isRegistered<CssController>()) {
+        final controller = Get.find<CssController>();
         if (nonBlocking) {
           Future.microtask(() async {
             try {
@@ -339,8 +367,8 @@ class SyncManager extends GetxController {
 
     // Reload GPP controller
     try {
-      if (Get.isRegistered<dynamic>(tag: 'GppController')) {
-        final dynamic controller = Get.find(tag: 'GppController');
+      if (Get.isRegistered<GppController>()) {
+        final controller = Get.find<GppController>();
         if (nonBlocking) {
           Future.microtask(() async {
             try {
@@ -361,8 +389,8 @@ class SyncManager extends GetxController {
 
     // Reload GDP controller
     try {
-      if (Get.isRegistered<dynamic>(tag: 'GdpController')) {
-        final dynamic controller = Get.find(tag: 'GdpController');
+      if (Get.isRegistered<GdpController>()) {
+        final controller = Get.find<GdpController>();
         if (nonBlocking) {
           Future.microtask(() async {
             try {
@@ -383,8 +411,8 @@ class SyncManager extends GetxController {
 
     // Reload PMSA controller
     try {
-      if (Get.isRegistered<dynamic>(tag: 'PmsaController')) {
-        final dynamic controller = Get.find(tag: 'PmsaController');
+      if (Get.isRegistered<PmsaController>()) {
+        final controller = Get.find<PmsaController>();
         if (nonBlocking) {
           Future.microtask(() async {
             try {
@@ -405,8 +433,8 @@ class SyncManager extends GetxController {
 
     // Reload RTS controller
     try {
-      if (Get.isRegistered<dynamic>(tag: 'RtsController')) {
-        final dynamic controller = Get.find(tag: 'RtsController');
+      if (Get.isRegistered<RtsController>()) {
+        final controller = Get.find<RtsController>();
         if (nonBlocking) {
           Future.microtask(() async {
             try {
@@ -427,8 +455,8 @@ class SyncManager extends GetxController {
 
     // Reload Shift Market controller
     try {
-      if (Get.isRegistered<dynamic>(tag: 'ShiftMarketController')) {
-        final dynamic controller = Get.find(tag: 'ShiftMarketController');
+      if (Get.isRegistered<ShiftMarketController>()) {
+        final controller = Get.find<ShiftMarketController>();
         if (nonBlocking) {
           Future.microtask(() async {
             try {
@@ -449,8 +477,8 @@ class SyncManager extends GetxController {
 
     // Reload Enforcement controller
     try {
-      if (Get.isRegistered<dynamic>(tag: 'EnforcementController')) {
-        final dynamic controller = Get.find(tag: 'EnforcementController');
+      if (Get.isRegistered<EnforcementController>()) {
+        final controller = Get.find<EnforcementController>();
         if (nonBlocking) {
           Future.microtask(() async {
             try {
@@ -471,9 +499,8 @@ class SyncManager extends GetxController {
 
     // Reload Sensitization Meeting controller
     try {
-      if (Get.isRegistered<dynamic>(tag: 'SensitizationMeetingController')) {
-        final dynamic controller =
-            Get.find(tag: 'SensitizationMeetingController');
+      if (Get.isRegistered<SensitizationMeetingController>()) {
+        final controller = Get.find<SensitizationMeetingController>();
         if (nonBlocking) {
           Future.microtask(() async {
             try {
@@ -540,7 +567,7 @@ class SyncManager extends GetxController {
           return 0;
       }
 
-      _updatePendingCount();
+      refreshPendingCount();
 
       Loaders.successSnackbar(
         title: "Module Sync Complete",

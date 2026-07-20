@@ -53,6 +53,8 @@ class EnforcementController extends GetxController {
   final personNameController = TextEditingController();
   final contactController = TextEditingController();
   final qualificationsController = TextEditingController();
+  final selectedQualification = ''.obs;
+  final selectedQualificationId = Rxn<int>();
 
   // Section: Category and Licensing
   var selectedCategoryOfPremises = ''.obs;
@@ -126,7 +128,8 @@ class EnforcementController extends GetxController {
 
   void _initializeForm() {
     // Set default values
-    inspectionDateController.text = DateTime.now().toLocal().toString().split(' ')[0];
+    inspectionDateController.text =
+        DateTime.now().toLocal().toString().split(' ')[0];
     final now = DateTime.now();
     inspectionTimeController.text =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00';
@@ -172,19 +175,20 @@ class EnforcementController extends GetxController {
   /// Submit Enforcement activity
   Future<void> submitActivity() async {
     if (!formKey.currentState!.validate()) {
-        Loaders.errorSnackbar(
-          title: "Incomplete Form",
-          message: "Please fill in all the required fields.",
-        );
-        return;
-      }
+      Loaders.errorSnackbar(
+        title: "Incomplete Form",
+        message: "Please fill in all the required fields.",
+      );
+      return;
+    }
 
     try {
       isSubmitting.value = true;
 
       // Create Enforcement model
-        final enforcementActivity = EnforcementModel(
-        inspectionDate: "${inspectionDateController.text} ${inspectionTimeController.text}",
+      final enforcementActivity = EnforcementModel(
+        inspectionDate:
+            "${inspectionDateController.text} ${inspectionTimeController.text}",
         gps: "${currentLatitude.value}, ${currentLongitude.value}",
         region: selectedRegion.value,
         district: selectedDistrict.value,
@@ -194,42 +198,47 @@ class EnforcementController extends GetxController {
         // When facility is Closed, clear person/contact/qualifications and
         // related category/license fields to mirror GPP/GDP behavior.
         personName: selectedFacilityStatus.value == "Closed"
-          ? ""
-          : personNameController.text,
+            ? ""
+            : personNameController.text,
         contact: selectedFacilityStatus.value == "Closed"
-          ? ""
-          : contactController.text,
+            ? ""
+            : contactController.text,
         qualifications: selectedFacilityStatus.value == "Closed"
-          ? ""
-          : qualificationsController.text,
+            ? ""
+            : selectedQualification.value,
+        qualificationId: selectedFacilityStatus.value == "Closed"
+            ? null
+            : selectedQualificationId.value,
         categoryOfPremises: selectedFacilityStatus.value == "Closed"
-          ? ""
-          : (selectedCategoryOfPremises.value == "Other" ? otherCategoryController.text : selectedCategoryOfPremises.value),
+            ? ""
+            : (selectedCategoryOfPremises.value == "Other"
+                ? otherCategoryController.text
+                : selectedCategoryOfPremises.value),
         licenseStatus: selectedFacilityStatus.value == "Closed"
-          ? ""
-          : selectedLicenseStatus.value,
+            ? ""
+            : selectedLicenseStatus.value,
         licenseNo: selectedFacilityStatus.value == "Closed"
-          ? ""
-          : licenseNoController.text,
+            ? ""
+            : licenseNoController.text,
         licenseExpiryDate: selectedFacilityStatus.value == "Closed"
-          ? ""
-          : licenseExpiryController.text,
+            ? ""
+            : licenseExpiryController.text,
         categoryStatus: selectedFacilityStatus.value == "Closed"
-          ? ""
-          : selectedCategoryStatus.value,
+            ? ""
+            : selectedCategoryStatus.value,
         categoryOfDrugs: selectedFacilityStatus.value == "Closed"
-          ? ""
-          : selectedCategoryOfDrugs.value,
+            ? ""
+            : selectedCategoryOfDrugs.value,
         previouslyLicensed: selectedFacilityStatus.value == "Closed"
-          ? ""
-          : selectedPreviouslyLicensed.value,
+            ? ""
+            : selectedPreviouslyLicensed.value,
         enforcementActionTaken: selectedEnforcementActions.join(", "),
         comments: commentsController.text,
         createdAt: DateTime.now(),
         inspectorName: inspectorNameController.text,
         inspectorId: inspectorIdController.text,
         isSynced: false,
-        );
+      );
 
       bool online = await NetworkManager.instance.isconnected();
       var activityData = enforcementActivity.toJson();
@@ -289,6 +298,8 @@ class EnforcementController extends GetxController {
     personNameController.clear();
     contactController.clear();
     qualificationsController.clear();
+    selectedQualification.value = '';
+    selectedQualificationId.value = null;
     licenseNoController.clear();
     licenseExpiryController.clear();
     otherCategoryController.clear();
@@ -352,8 +363,6 @@ class EnforcementController extends GetxController {
     filteredActivities.value = filtered;
   }
 
-
-
   /// Get current location
   Future<void> getCurrentLocation() async {
     try {
@@ -374,7 +383,8 @@ class EnforcementController extends GetxController {
         permission = await Geolocator.requestPermission();
       }
 
-      if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+      if (permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse) {
         // 3. Try to get current position with low accuracy and 4s timeout
         Position? position;
         try {

@@ -14,6 +14,7 @@ class EnforcementModel {
   final String personName;
   final String contact;
   final String qualifications;
+  final int? qualificationId;
   final String categoryOfPremises;
   final String licenseStatus;
   final String? licenseNo;
@@ -41,6 +42,7 @@ class EnforcementModel {
     required this.personName,
     required this.contact,
     required this.qualifications,
+    this.qualificationId,
     required this.categoryOfPremises,
     required this.licenseStatus,
     this.licenseNo,
@@ -71,6 +73,7 @@ class EnforcementModel {
       'personName': personName,
       'contact': contact,
       'qualifications': qualifications,
+      'qualificationId': qualificationId,
       'categoryOfPremises': categoryOfPremises,
       'licenseStatus': licenseStatus,
       'licenseNo': licenseNo,
@@ -108,15 +111,27 @@ class EnforcementModel {
       personName: json['personName'] ?? '',
       contact: json['contact'] ?? '',
       qualifications: json['qualifications'] ?? '',
+      qualificationId: json['qualificationId'] is int
+          ? json['qualificationId']
+          : int.tryParse(
+              (json['qualificationId'] ?? json['QualificationId'] ?? '')
+                  .toString()),
       categoryOfPremises: _getCategoryName(json['categoryOfpremises']),
       licenseStatus: _getLicenseStatusName(json['licenseStatus']),
       licenseNo: json['licenseNo'] ?? json['LicenseNo'] ?? '',
-      licenseExpiryDate:
-          json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? json['licenseExpDate'] ?? json['LicenseExpDate'] ?? '',
-      categoryStatus: _getCategoryStatusName(json['categoryStatus'] ?? json['CategoryStatus']),
+      licenseExpiryDate: json['licenseExpiryDate'] ??
+          json['LicenseExpiryDate'] ??
+          json['licenseExpDate'] ??
+          json['LicenseExpDate'] ??
+          '',
+      categoryStatus: _getCategoryStatusName(
+          json['categoryStatus'] ?? json['CategoryStatus']),
       categoryOfDrugs: json['categoryOfDrugs'] ?? json['CategoryOfDrugs'] ?? '',
-      previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
-      enforcementActionTaken: _getEnforcementActionName(json['enfAction'] ?? json['EnfAction'] ?? json['enforcementActionTaken']),
+      previouslyLicensed:
+          json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
+      enforcementActionTaken: _getEnforcementActionName(json['enfAction'] ??
+          json['EnfAction'] ??
+          json['enforcementActionTaken']),
       comments: json['comments'] ?? '',
       createdAt:
           json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
@@ -243,7 +258,8 @@ class EnforcementModel {
   /// Convert category status code to name
   static String _getCategoryStatusName(dynamic status) {
     if (status == null) return '';
-    final int? parsedStatus = status is int ? status : int.tryParse(status.toString());
+    final int? parsedStatus =
+        status is int ? status : int.tryParse(status.toString());
     switch (parsedStatus) {
       case 1:
         return 'Medical Device';
@@ -263,7 +279,8 @@ class EnforcementModel {
   /// Convert enforcement action code to name
   static String _getEnforcementActionName(dynamic action) {
     if (action == null) return '';
-    final int? parsedAction = action is int ? action : int.tryParse(action.toString());
+    final int? parsedAction =
+        action is int ? action : int.tryParse(action.toString());
     if (parsedAction == null) return 'No Action Taken';
     switch (parsedAction) {
       case 1:
@@ -328,6 +345,7 @@ class EnforcementModel {
       personName: personName ?? this.personName,
       contact: contact ?? this.contact,
       qualifications: qualifications ?? this.qualifications,
+      qualificationId: qualificationId,
       categoryOfPremises: categoryOfPremises ?? this.categoryOfPremises,
       licenseStatus: licenseStatus ?? this.licenseStatus,
       licenseNo: licenseNo ?? this.licenseNo,

@@ -34,6 +34,7 @@ import 'package:pmis/features/pmis/enforcement/controllers/EnforcementController
 import 'package:pmis/features/pmis/sensitizationmeeting/controllers/SensitizationMeetingController.dart';
 import 'package:pmis/features/personalisation/controllers/theme_controller.dart';
 import 'package:get/get.dart';
+import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
 
 class GeneralBindings extends Bindings {
   @override
@@ -43,6 +44,7 @@ class GeneralBindings extends Bindings {
     
     // Core Locations
     Get.put(pmis_location.LocationController(), permanent: true);
+    Get.put(QualificationController(), permanent: true);
 
     // Auth services
     Get.lazyPut<AuthService>(() => AuthService());

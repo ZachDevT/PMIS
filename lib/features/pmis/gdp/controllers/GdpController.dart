@@ -43,6 +43,8 @@ class GdpController extends GetxController {
   // Section: Personnel/Contact Details
   final contactQualificationsController = TextEditingController();
   final qualificationsController = TextEditingController();
+  final selectedQualification = ''.obs;
+  final selectedQualificationId = Rxn<int>();
   final nameController = TextEditingController();
 
   // Section: Facility Status & In-Charge
@@ -272,7 +274,8 @@ class GdpController extends GetxController {
       // Create a new GdpModel from the form inputs.
       var newActivity = GdpModel(
         id: DateTime.now().millisecondsSinceEpoch,
-        inspectionDate: DateTime.parse("${inspectionDateController.text} ${inspectionTimeController.text}"),
+        inspectionDate: DateTime.parse(
+            "${inspectionDateController.text} ${inspectionTimeController.text}"),
         inspectorName: inspectorNameController.text,
         gps: gpsLocationController.text,
         intRegion: _getRegionGuid(selectedRegion.value),
@@ -289,7 +292,10 @@ class GdpController extends GetxController {
             : contactController.text,
         qualifications: selectedFacilityStatus.value == "Closed"
             ? ""
-            : qualificationsController.text,
+            : selectedQualification.value,
+        qualificationId: selectedFacilityStatus.value == "Closed"
+            ? null
+            : selectedQualificationId.value,
         categoryOfpremises: selectedFacilityStatus.value == "Closed"
             ? 0
             : _getCategoryOfPremises(selectedCategoryOfFacility.value),
@@ -373,6 +379,8 @@ class GdpController extends GetxController {
     facilityNameController.clear();
     contactQualificationsController.clear();
     qualificationsController.clear();
+    selectedQualification.value = '';
+    selectedQualificationId.value = null;
     contactController.clear();
     selectedRegion.value = '';
     selectedDistrict.value = '';
@@ -388,7 +396,7 @@ class GdpController extends GetxController {
     licenseNoController.clear();
     licenseExpiryDateController.clear();
     nameController.clear();
-  
+
     _autoFillDefaults();
   }
 
@@ -598,7 +606,8 @@ class GdpController extends GetxController {
         permission = await Geolocator.requestPermission();
       }
 
-      if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+      if (permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse) {
         // 3. Try to get current position with low accuracy and 4s timeout
         Position? position;
         try {

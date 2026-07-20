@@ -5,9 +5,6 @@ class PseudoDataModel {
   final String feature;
   final int number;
 
-  const PseudoDataModel({
-      required this.icone, 
-      required this.feature,
-      required  this.number
-  });
+  const PseudoDataModel(
+      {required this.icone, required this.feature, required this.number});
 }

@@ -464,13 +464,12 @@ class _FilterDropdown extends StatelessWidget {
 class _UserProfileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final authController = Get.isRegistered<AuthController>() 
-        ? Get.find<AuthController>() 
-        : null;
-    
+    final authController =
+        Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
+
     return Obx(() {
       final displayName = authController?.userDisplayName ?? 'Guest';
-      
+
       return InkWell(
         onTap: () => Get.toNamed('/user-menu'),
         borderRadius: BorderRadius.circular(20),
@@ -481,7 +480,8 @@ class _UserProfileWidget extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text("Welcome ", style: Theme.of(context).textTheme.bodyMedium),
+                  Text("Welcome ",
+                      style: Theme.of(context).textTheme.bodyMedium),
                   Text(
                     displayName,
                     style: Theme.of(context).textTheme.titleLarge!.copyWith(

@@ -5,7 +5,8 @@ import 'package:pmis/features/pmis/sensitizationmeeting/models/SensitizationMeet
 import 'package:pmis/utils/helpers/networkmanager.dart';
 import 'package:pmis/utils/popups/loaders.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
-import 'package:pmis/features/pmis/location/controllers/LocationController.dart' as pmis_location;
+import 'package:pmis/features/pmis/location/controllers/LocationController.dart'
+    as pmis_location;
 import 'package:geolocator/geolocator.dart';
 import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
@@ -44,9 +45,7 @@ class SensitizationMeetingController extends GetxController {
     Future.microtask(() => loadActivities());
     getCurrentLocation();
     // Set current date
-    final now = DateTime.now();
-    inspectionDateController.text =
-        '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}, ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}.${now.millisecond.toString().padLeft(3, '0')}';
+    _setCurrentDateTime();
 
     // Auto-fill inspector name
     if (Get.isRegistered<AuthController>()) {
@@ -77,9 +76,8 @@ class SensitizationMeetingController extends GetxController {
 
   void filterActivities() {
     // Get current user info
-    final authController = Get.isRegistered<AuthController>() 
-        ? Get.find<AuthController>() 
-        : null;
+    final authController =
+        Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
     final isAdmin = authController?.isAdmin ?? false;
     final userDisplayName = authController?.userDisplayName ?? '';
 
@@ -87,7 +85,8 @@ class SensitizationMeetingController extends GetxController {
       // Role-based filter: If not admin, only show activities created by this user
       // Match by inspectorName since SensitizationMeetingModel doesn't have inspectorId
       if (!isAdmin && userDisplayName.isNotEmpty) {
-        if (activity.inspectorName.toLowerCase() != userDisplayName.toLowerCase()) {
+        if (activity.inspectorName.toLowerCase() !=
+            userDisplayName.toLowerCase()) {
           return false;
         }
       }
@@ -162,22 +161,31 @@ class SensitizationMeetingController extends GetxController {
 
   Future<void> createActivity(BuildContext context) async {
     if (!formKey.currentState!.validate()) {
-        Loaders.errorSnackbar(
-          title: "Incomplete Form",
-          message: "Please fill in all the required fields.",
-        );
-        return;
-      }
+      Loaders.errorSnackbar(
+        title: "Incomplete Form",
+        message: "Please fill in all the required fields.",
+      );
+      return;
+    }
 
     try {
       DateTime inspectionDate;
       try {
         final dateTimeParts = inspectionDateController.text.split(',');
         final dateParts = dateTimeParts[0].trim().split('/');
+        final timeParts = dateTimeParts.length > 1
+            ? dateTimeParts[1].trim().split(':')
+            : const <String>[];
+        final secondParts =
+            timeParts.length > 2 ? timeParts[2].split('.') : const <String>[];
         inspectionDate = DateTime(
           int.parse(dateParts[2]),
           int.parse(dateParts[1]),
           int.parse(dateParts[0]),
+          timeParts.isNotEmpty ? int.parse(timeParts[0]) : 0,
+          timeParts.length > 1 ? int.parse(timeParts[1]) : 0,
+          secondParts.isNotEmpty ? int.parse(secondParts[0]) : 0,
+          secondParts.length > 1 ? int.parse(secondParts[1]) : 0,
         );
       } catch (e) {
         // Fallback to current date if parsing fails
@@ -213,10 +221,12 @@ class SensitizationMeetingController extends GetxController {
           await repository.saveActivityLocally(localData);
           activities.add(newActivity);
           // Check if it's a 404 (endpoint not implemented)
-          if (e.toString().contains('404') || e.toString().contains('endpoint not found')) {
+          if (e.toString().contains('404') ||
+              e.toString().contains('endpoint not found')) {
             Loaders.successSnackbar(
                 title: "Saved Locally",
-                message: "API endpoint not available. Data saved locally for sync.");
+                message:
+                    "API endpoint not available. Data saved locally for sync.");
           } else {
             Loaders.warningSnackbar(
                 title: "Saved Locally",
@@ -244,8 +254,10 @@ class SensitizationMeetingController extends GetxController {
         errorMessage = "Authentication required. Please login again";
       } else if (e.toString().contains("ServerException")) {
         // Check if it's a 404 (endpoint not implemented)
-        if (e.toString().contains('404') || e.toString().contains('endpoint not found')) {
-          errorMessage = "API endpoint not available. Data will be saved locally.";
+        if (e.toString().contains('404') ||
+            e.toString().contains('endpoint not found')) {
+          errorMessage =
+              "API endpoint not available. Data will be saved locally.";
         } else {
           errorMessage = "Server error. Please try again later";
         }
@@ -255,7 +267,7 @@ class SensitizationMeetingController extends GetxController {
   }
 
   void clearForm() {
-    inspectionDateController.clear();
+    _setCurrentDateTime();
     inspectorNameController.clear();
     latitudeController.clear();
     longitudeController.clear();
@@ -268,6 +280,14 @@ class SensitizationMeetingController extends GetxController {
     currentLongitude.value = 0.0;
   }
 
+  void _setCurrentDateTime() {
+    final now = DateTime.now();
+    inspectionDateController.text =
+        '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}, '
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:'
+        '${now.second.toString().padLeft(2, '0')}.${now.millisecond.toString().padLeft(3, '0')}';
+  }
+
   String getRegionName(int regionIndex) {
     if (regionIndex >= 0 &&
         regionIndex < RegionDistrictConstants.regions.length) {
@@ -278,7 +298,8 @@ class SensitizationMeetingController extends GetxController {
 
   List<String> getDistrictsForRegion(String regionName) {
     if (Get.isRegistered<pmis_location.LocationController>()) {
-      return pmis_location.LocationController.instance.getDistrictsForRegion(regionName);
+      return pmis_location.LocationController.instance
+          .getDistrictsForRegion(regionName);
     }
     return RegionDistrictConstants.districts;
   }

@@ -46,6 +46,8 @@ class GppController extends GetxController {
   final facilityNameController = TextEditingController();
 
   final QualificationsController = TextEditingController();
+  final selectedQualification = ''.obs;
+  final selectedQualificationId = Rxn<int>();
   final nameController = TextEditingController();
 
   // Section: Facility Status & In-Charge
@@ -95,7 +97,7 @@ class GppController extends GetxController {
     final now = DateTime.now();
     inspectionTimeController.text =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00';
-    
+
     // Prepopulate inspector name and ID from logged-in user
     if (Get.isRegistered<AuthController>()) {
       final authController = Get.find<AuthController>();
@@ -121,9 +123,8 @@ class GppController extends GetxController {
   /// Filter activities based on search query and selected filters
   void filterActivities() {
     // Get current user info
-    final authController = Get.isRegistered<AuthController>() 
-        ? Get.find<AuthController>() 
-        : null;
+    final authController =
+        Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
     final isAdmin = authController?.isAdmin ?? false;
     final userId = authController?.userId ?? '';
 
@@ -208,23 +209,26 @@ class GppController extends GetxController {
       if (selectedFacilityStatus.value.isEmpty) {
         emptyFields.add("Facility Status");
       }
-      
+
       // Only require these fields if facility is not closed
       if (selectedFacilityStatus.value != "Closed") {
         if (selectedCategoryOfFacility.value.isEmpty) {
           emptyFields.add("Category of Facility");
         }
-        if (personFoundController.value.isEmpty) emptyFields.add("Person Found");
+        if (personFoundController.value.isEmpty)
+          emptyFields.add("Person Found");
         if (selectedLicensedStatus.value.isEmpty) {
           emptyFields.add("Licensed Status");
         }
-        if (selectedLicensedStatus.value == "Licensed" && licenseExpiryDateController.text.isEmpty) {
+        if (selectedLicensedStatus.value == "Licensed" &&
+            licenseExpiryDateController.text.isEmpty) {
           emptyFields.add("License Expiry Date");
         }
         if (selectedCategoryOfDrugs.value.isEmpty) {
           emptyFields.add("Category of Drugs");
         }
-        if (selectedFacilityType.value.isEmpty) emptyFields.add("Facility Type");
+        if (selectedFacilityType.value.isEmpty)
+          emptyFields.add("Facility Type");
         if (selectedCertificationStatus.value.isEmpty) {
           emptyFields.add("Certification Status");
         }
@@ -244,7 +248,8 @@ class GppController extends GetxController {
       // Create a new GppActivity from the form inputs.
       var newActivity = GppActivity(
         id: 0, // Will be set by API
-        inspectionDate: DateTime.parse("${inspectionDateController.text} ${inspectionTimeController.text}"),
+        inspectionDate: DateTime.parse(
+            "${inspectionDateController.text} ${inspectionTimeController.text}"),
         inspectorName: inspectorNameController.text,
         gps: gpsLocationController.text,
         intRegion: _getRegionGuid(selectedRegion.value),
@@ -254,7 +259,8 @@ class GppController extends GetxController {
         facilityPersonType: _getPersonType(personFoundController.value),
         personName: nameController.text,
         contact: contactController.text,
-        qualifications: QualificationsController.text,
+        qualifications: selectedQualification.value,
+        qualificationId: selectedQualificationId.value,
         categoryOfpremises:
             _getCategoryOfPremises(selectedCategoryOfFacility.value),
         licenseStatus: _getLicenseStatus(selectedLicensedStatus.value),
@@ -265,8 +271,12 @@ class GppController extends GetxController {
         inspectorId: inspectorIdController.text,
         latitude: currentLatitude.value,
         longitude: currentLongitude.value,
-        licenseNo: selectedLicensedStatus.value == "Licensed" ? licenseNoController.text : null,
-        licenseExpiryDate: selectedLicensedStatus.value == "Licensed" ? licenseExpiryDateController.text : null,
+        licenseNo: selectedLicensedStatus.value == "Licensed"
+            ? licenseNoController.text
+            : null,
+        licenseExpiryDate: selectedLicensedStatus.value == "Licensed"
+            ? licenseExpiryDateController.text
+            : null,
         previouslyLicensed: selectedFacilityStatus.value == "Closed"
             ? ""
             : selectedPreviouslyLicensed.value,
@@ -274,7 +284,7 @@ class GppController extends GetxController {
 
       // Here, check for connectivity (this is a dummy flag).
       bool online = await NetworkManager.instance.isconnected();
-      
+
       if (online) {
         // Convert GppActivity to Map for API
         var activityData = newActivity.toJson();
@@ -285,12 +295,11 @@ class GppController extends GetxController {
           Loaders.successSnackbar(
               title: "Success", message: "Activity added successfully...");
         } catch (e) {
-
           // If online submission fails, save locally as fallback
           await repository.saveActivityLocally(activityData);
           activities.add(newActivity);
           Loaders.errorSnackbar(
-              title: "Network Error", 
+              title: "Network Error",
               message: "Failed to send online. Saved locally for sync.");
         }
       } else {
@@ -331,6 +340,8 @@ class GppController extends GetxController {
     facilityNameController.clear();
     personFoundController.value = '';
     QualificationsController.clear();
+    selectedQualification.value = '';
+    selectedQualificationId.value = null;
     selectedRegion.value = '';
     selectedDistrict.value = '';
     selectedFacilityStatus.value = '';
@@ -342,7 +353,7 @@ class GppController extends GetxController {
     recommendedForGpp.value = '';
     contactController.clear();
     nameController.clear();
-  
+
     _autoFillDefaults();
   }
 
@@ -542,7 +553,8 @@ class GppController extends GetxController {
         permission = await Geolocator.requestPermission();
       }
 
-      if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+      if (permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse) {
         // 3. Try to get current position with low accuracy and 4s timeout
         Position? position;
         try {

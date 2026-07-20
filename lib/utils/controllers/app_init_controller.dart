@@ -37,7 +37,7 @@ class AppInitController extends GetxController with WidgetsBindingObserver {
 
       // Wait for bindings to be ready
       await Future.delayed(const Duration(milliseconds: 100));
-      
+
       // Initialize SyncManager AFTER first frame so Overlay/Navigator are available
       WidgetsBinding.instance.addPostFrameCallback((_) {
         try {
@@ -53,16 +53,16 @@ class AppInitController extends GetxController with WidgetsBindingObserver {
           });
         }
       });
-      
+
       // Initialize NetworkManager for connectivity monitoring
       if (!Get.isRegistered<NetworkManager>()) {
         Get.put(NetworkManager());
       }
       Get.find<NetworkManager>();
-      
+
       // Start automatic sync checking
       _startAutomaticSync();
-      
+
       _isInitialized.value = true;
       print('✅ App initialization completed - Auto sync enabled');
     } catch (e) {
@@ -77,7 +77,7 @@ class AppInitController extends GetxController with WidgetsBindingObserver {
   void _startAutomaticSync() {
     // Check if there are any pending items and sync if online
     _performBackgroundSync();
-    
+
     // Set up periodic sync check every 30 seconds when app is active
     Future.delayed(const Duration(seconds: 30), () {
       if (_isInitialized.value) {
@@ -91,11 +91,14 @@ class AppInitController extends GetxController with WidgetsBindingObserver {
     try {
       final syncManager = Get.find<SyncManager>();
       final networkManager = Get.find<NetworkManager>();
-      
+
+      // Queue contents can change after SyncManager initialization.
+      syncManager.refreshPendingCount();
+
       // Check if online and has pending items
       bool isOnline = await networkManager.isconnected();
       final pendingCount = syncManager.totalPendingItems;
-      
+
       if (isOnline && pendingCount > 0 && !syncManager.isSyncing) {
         print('🔄 Auto-syncing $pendingCount offline items...');
         await syncManager.performSync(showProgress: false); // Silent sync
@@ -108,7 +111,7 @@ class AppInitController extends GetxController with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    
+
     if (state == AppLifecycleState.resumed) {
       // When app comes back to foreground, try to sync any pending data
       if (_isInitialized.value) {

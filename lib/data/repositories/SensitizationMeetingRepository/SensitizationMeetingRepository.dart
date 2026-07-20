@@ -9,6 +9,31 @@ class SensitizationMeetingRepository {
   final box = GetStorage();
   final SensitizationMeetingService _service = SensitizationMeetingService();
 
+  List<Map<String, dynamic>> _localActivities() =>
+      (box.read<List>('sensitization_meeting_activities') ?? [])
+          .map((item) => Map<String, dynamic>.from(item as Map))
+          .toList();
+
+  List<Map<String, dynamic>> _mergeWithLocal(
+      List<Map<String, dynamic>> remoteActivities) {
+    final merged = <String, Map<String, dynamic>>{};
+    for (final item in remoteActivities) {
+      merged['server:${item['id']}'] = item;
+    }
+    for (final item in _localActivities()) {
+      final localId = item['_localId'] ?? item['id'];
+      merged['local:$localId'] = item;
+    }
+    final activities = merged.values.toList();
+    activities.sort((a, b) => _inspectionDate(b).compareTo(_inspectionDate(a)));
+    return activities;
+  }
+
+  DateTime _inspectionDate(Map<String, dynamic> item) =>
+      DateTime.tryParse((item['inspectionDate'] ?? item['InspectionDate'] ?? '')
+          .toString()) ??
+      DateTime.fromMillisecondsSinceEpoch(0);
+
   /// Fetch Sensitization Meeting activities from API.
   Future<List<Map<String, dynamic>>> fetchActivities() async {
     try {
@@ -18,45 +43,44 @@ class SensitizationMeetingRepository {
 
       if (!isOnline) {
         print('No internet connection, returning local data');
-        List storedActivities = box.read<List>('sensitization_meeting_activities') ?? [];
-        return storedActivities.map((e) => Map<String, dynamic>.from(e)).toList();
+        return _mergeWithLocal(const []);
       }
 
-      List<Map<String, dynamic>> remoteData = await _service.getSensitizationMeetingData();
-      List<Map<String, dynamic>> localData = (box.read<List>('sensitization_meeting_activities') ?? []).map((e) => e as Map<String, dynamic>).toList();
-      return [...remoteData, ...localData];
+      List<Map<String, dynamic>> remoteData =
+          await _service.getSensitizationMeetingData();
+      return _mergeWithLocal(remoteData);
     } on TimeoutException catch (e) {
       print(
           'Timeout error fetching Sensitization Meeting activities: ${e.message}');
-      return [];
+      return _mergeWithLocal(const []);
     } on SocketException catch (e) {
       print(
           'Network error fetching Sensitization Meeting activities: ${e.message}');
-      return [];
+      return _mergeWithLocal(const []);
     } on NetworkException catch (e) {
       print('Network exception: ${e.message}');
-      return [];
+      return _mergeWithLocal(const []);
     } on ServerException catch (e) {
       // API endpoint may not be fully implemented - return empty list gracefully
       print(
           'Server exception (API may not be fully implemented): ${e.message}');
-      return [];
+      return _mergeWithLocal(const []);
     } catch (e) {
       // Handle any other errors, including TimeoutException or ServerException that might not be caught above
       if (e.toString().contains('TimeoutException') ||
           e.toString().contains('Future not completed')) {
         print('Timeout error detected: ${e.toString()}');
-        return [];
+        return _mergeWithLocal(const []);
       }
       if (e.toString().contains('ServerException') ||
           e.toString().contains('Server returned error') ||
           e.toString().contains('statusCode')) {
         print(
             'Server error detected (API may not be fully implemented): ${e.toString()}');
-        return [];
+        return _mergeWithLocal(const []);
       }
       print('Error fetching Sensitization Meeting activities: $e');
-      return [];
+      return _mergeWithLocal(const []);
     }
   }
 
@@ -72,33 +96,21 @@ class SensitizationMeetingRepository {
     } catch (e) {
       print('Error fetching Sensitization Meeting activities: $e');
     }
-    
-    List storedActivities = box.read<List>('sensitization_meeting_activities') ?? [];
-    
-    final Map<String, Map<String, dynamic>> mergedMap = {};
-    for (var item in onlineData) {
-      if (item['id'] != null) {
-        mergedMap[item['id'].toString()] = item;
-      }
-    }
-    for (var item in storedActivities) {
-      if (item['id'] != null) {
-        mergedMap[item['id'].toString()] = Map<String, dynamic>.from(item);
-      }
-    }
-    
-    return mergedMap.values.toList();
+
+    return _mergeWithLocal(onlineData);
   }
 
   /// Save a Sensitization Meeting activity locally when offline.
   Future<void> saveActivityLocally(Map<String, dynamic> activityData) async {
     try {
-      List storedActivities =
-          box.read<List>('sensitization_meeting_activities') ?? [];
-      storedActivities.add(activityData);
+      final storedActivities = _localActivities();
+      final localActivity = Map<String, dynamic>.from(activityData);
+      localActivity['_localId'] ??=
+          'sensitization-${DateTime.now().microsecondsSinceEpoch}';
+      storedActivities.add(localActivity);
       await box.write('sensitization_meeting_activities', storedActivities);
       print(
-          'Sensitization Meeting activity saved locally: ${activityData['id']}');
+          'Sensitization Meeting activity saved locally: ${localActivity['_localId']}');
     } catch (e) {
       print('Error saving Sensitization Meeting activity locally: $e');
     }
@@ -110,11 +122,13 @@ class SensitizationMeetingRepository {
       List storedActivities =
           box.read<List>('sensitization_meeting_activities') ?? [];
       List<Map<String, dynamic>> failedSyncs = [];
+      List<Map<String, dynamic>> successfulSyncs = [];
 
       if (storedActivities.isNotEmpty) {
         for (var activityData in storedActivities) {
           try {
             await _service.postSensitizationMeetingData(activityData);
+            successfulSyncs.add(Map<String, dynamic>.from(activityData));
             print(
                 'Sensitization Meeting activity synced successfully: ${activityData['id']}');
           } catch (e) {
@@ -128,7 +142,7 @@ class SensitizationMeetingRepository {
         await box.write('sensitization_meeting_activities', failedSyncs);
       }
 
-      return storedActivities.map((e) => e as Map<String, dynamic>).toList();
+      return successfulSyncs;
     } catch (e) {
       print('Error syncing local Sensitization Meeting activities: $e');
       return [];

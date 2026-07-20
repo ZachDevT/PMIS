@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
 
 class EnforcementService {
   static const _baseUrl = 'http://pmis.nda.or.ug/api';
@@ -167,7 +168,9 @@ class EnforcementService {
     apiData['facilityPersonType'] = personStr.isNotEmpty ? 1 : 0;
     apiData['personName'] = data['personName'];
     apiData['contact'] = data['contact'];
-    apiData['qualifications'] = data['qualifications'];
+    apiData['qualificationId'] = data['qualificationId'] ??
+        QualificationController.instance
+            .idForName(data['qualifications']?.toString() ?? '');
     apiData['categoryOfpremises'] =
         _getCategoryOfPremises(data['categoryOfPremises']);
         

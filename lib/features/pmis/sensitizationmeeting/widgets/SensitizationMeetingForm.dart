@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:pmis/commons/widgets/icons/circular_icon.dart';
 import 'package:pmis/features/pmis/sensitizationmeeting/controllers/SensitizationMeetingController.dart';
+import 'package:pmis/features/pmis/location/controllers/LocationController.dart'
+    as pmis_location;
 import 'package:pmis/utils/constants/colors.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 import 'package:iconsax/iconsax.dart';
@@ -51,196 +53,199 @@ class SensitizationMeetingForm extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Inspection Date
+                    _buildDateField(context),
 
-            // Inspection Date
-            _buildDateField(context),
+                    // Inspector Name
+                    _buildTextField(
+                      controller: controller.inspectorNameController,
+                      readOnly: true,
+                      label: "Inspector Name",
+                      prefixIcon: Iconsax.user,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter inspector name";
+                        }
+                        return null;
+                      },
+                    ),
 
-            // Inspector Name
-            _buildTextField(
-              controller: controller.inspectorNameController,
-                    readOnly: true,
-              label: "Inspector Name",
-              prefixIcon: Iconsax.user,
-              
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Please enter inspector name";
-                }
-                return null;
-              },
-            ),
+                    // Location fields
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTextField(
+                            controller: controller.latitudeController,
+                            label: "Latitude",
+                            prefixIcon: Iconsax.location,
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Required";
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildTextField(
+                            controller: controller.longitudeController,
+                            label: "Longitude",
+                            prefixIcon: Iconsax.location,
+                            keyboardType:
+                                TextInputType.numberWithOptions(decimal: true),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Required";
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Obx(() => ElevatedButton.icon(
+                              onPressed: controller.isGettingLocation.value
+                                  ? null
+                                  : () => controller.getCurrentLocation(),
+                              icon: controller.isGettingLocation.value
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    )
+                                  : const Icon(Iconsax.location, size: 18),
+                              label: const Text("Location"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Tcolors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 16),
+                              ),
+                            )),
+                      ],
+                    ),
 
-            // Location fields
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    controller: controller.latitudeController,
-                    label: "Latitude",
-                    prefixIcon: Iconsax.location,
-                    keyboardType:
-                        TextInputType.numberWithOptions(decimal: true),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Required";
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildTextField(
-                    controller: controller.longitudeController,
-                    label: "Longitude",
-                    prefixIcon: Iconsax.location,
-                    keyboardType:
-                        TextInputType.numberWithOptions(decimal: true),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Required";
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Obx(() => ElevatedButton.icon(
-                      onPressed: controller.isGettingLocation.value
-                          ? null
-                          : () => controller.getCurrentLocation(),
-                      icon: controller.isGettingLocation.value
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Iconsax.location, size: 18),
-                      label: const Text("Location"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Tcolors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 16),
+                    // District
+                    Obx(() => _buildDropdown(
+                          label: "District",
+                          items: pmis_location
+                              .LocationController.instance.districts
+                              .map((district) => district.name)
+                              .toList(),
+                          selectedItem: controller.selectedDistrict,
+                          prefixIcon: Iconsax.map_1,
+                          onChanged: (district) {
+                            controller.selectedDistrict.value = district ?? '';
+                            controller.selectedRegion.value = pmis_location
+                                .LocationController.instance
+                                .getRegionForDistrict(district ?? '');
+                          },
+                          validator: (value) {
+                            if (controller.selectedDistrict.value.isEmpty) {
+                              return "Please select a district";
+                            }
+                            return null;
+                          },
+                        )),
+
+                    // Region is derived from the selected district.
+                    _buildDropdown(
+                      label: "Region",
+                      items: RegionDistrictConstants.regions,
+                      selectedItem: controller.selectedRegion,
+                      prefixIcon: Iconsax.map,
+                      enabled: false,
+                      validator: (value) {
+                        if (controller.selectedRegion.value.isEmpty) {
+                          return "Please select a district with a region";
+                        }
+                        return null;
+                      },
+                    ),
+
+                    // Venue/Location
+                    _buildTextField(
+                      controller: controller.venueLocationController,
+                      label: "Venue/Location",
+                      prefixIcon: Iconsax.location,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter venue location";
+                        }
+                        return null;
+                      },
+                    ),
+
+                    // Topic of Discussion
+                    _buildTextField(
+                      controller: controller.topicOfDiscussionController,
+                      label: "Topic of Discussion",
+                      prefixIcon: Iconsax.document_text,
+                      maxLines: 3,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter topic of discussion";
+                        }
+                        return null;
+                      },
+                    ),
+
+                    // Number of Participants
+                    _buildTextField(
+                      controller: controller.numberOfParticipantsController,
+                      label: "Number of Participants",
+                      prefixIcon: Iconsax.people,
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter number of participants";
+                        }
+                        final num = int.tryParse(value);
+                        if (num == null || num < 0) {
+                          return "Please enter a valid number";
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Submit Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => controller.createActivity(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Tcolors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          "Submit",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
                       ),
-                    )),
-              ],
-            ),
+                    ),
 
-            // Region
-            _buildDropdown(
-              label: "Region",
-              items: RegionDistrictConstants.regions,
-              selectedItem: controller.selectedRegion,
-              prefixIcon: Iconsax.map,
-              onChanged: (value) {
-                controller.selectedRegion.value = value ?? '';
-                controller.selectedDistrict.value = '';
-              },
-              validator: (value) {
-                if (controller.selectedRegion.value.isEmpty) {
-                  return "Please select a region";
-                }
-                return null;
-              },
-            ),
+                    const SizedBox(height: 16),
 
-            // District
-            Obx(() => _buildDropdown(
-                  label: "District",
-                  items: controller.selectedRegion.value.isEmpty
-                      ? []
-                      : controller.getDistrictsForRegion(
-                          controller.selectedRegion.value),
-                  selectedItem: controller.selectedDistrict,
-                  prefixIcon: Iconsax.map_1,
-                  validator: (value) {
-                    if (controller.selectedDistrict.value.isEmpty) {
-                      return "Please select a district";
-                    }
-                    return null;
-                  },
-                )),
+                    // Back to List
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                        onPressed: () => Get.back(),
+                        child: const Text("Back to List"),
+                      ),
+                    ),
 
-            // Venue/Location
-            _buildTextField(
-              controller: controller.venueLocationController,
-              label: "Venue/Location",
-              prefixIcon: Iconsax.location,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Please enter venue location";
-                }
-                return null;
-              },
-            ),
-
-            // Topic of Discussion
-            _buildTextField(
-              controller: controller.topicOfDiscussionController,
-              label: "Topic of Discussion",
-              prefixIcon: Iconsax.document_text,
-              maxLines: 3,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Please enter topic of discussion";
-                }
-                return null;
-              },
-            ),
-
-            // Number of Participants
-            _buildTextField(
-              controller: controller.numberOfParticipantsController,
-              label: "Number of Participants",
-              prefixIcon: Iconsax.people,
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Please enter number of participants";
-                }
-                final num = int.tryParse(value);
-                if (num == null || num < 0) {
-                  return "Please enter a valid number";
-                }
-                return null;
-              },
-            ),
-
-            const SizedBox(height: 24),
-
-            // Submit Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => controller.createActivity(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Tcolors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  "Submit",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Back to List
-            SizedBox(
-              width: double.infinity,
-              child: TextButton(
-                onPressed: () => Get.back(),
-                child: const Text("Back to List"),
-              ),
-            ),
-
-            const SizedBox(height: 16),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -286,6 +291,7 @@ class SensitizationMeetingForm extends StatelessWidget {
     required IconData prefixIcon,
     Function(String?)? onChanged,
     String? Function(String?)? validator,
+    bool enabled = true,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -305,10 +311,12 @@ class SensitizationMeetingForm extends StatelessWidget {
                 child: Text(item),
               );
             }).toList(),
-            onChanged: onChanged ??
-                ((value) {
-                  selectedItem.value = value ?? '';
-                }),
+            onChanged: enabled
+                ? onChanged ??
+                    ((value) {
+                      selectedItem.value = value ?? '';
+                    })
+                : null,
             validator: validator,
           )),
     );
