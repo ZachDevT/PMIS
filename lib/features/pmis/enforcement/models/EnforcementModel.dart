@@ -264,23 +264,24 @@ class EnforcementModel {
   static String _getEnforcementActionName(dynamic action) {
     if (action == null) return '';
     final int? parsedAction = action is int ? action : int.tryParse(action.toString());
-    if (parsedAction == null) return 'NONE';
+    if (parsedAction == null) return 'No Action Taken';
     switch (parsedAction) {
       case 1:
-        return 'WARNING';
+        return 'Impound';
       case 2:
-        return 'FINE';
+        return 'Arrest';
       case 3:
-        return 'CLOSURE';
+        return 'Close';
       case 4:
-        return 'IMPOUND';
+        return 'Initiated Court Case';
       case 5:
-        return 'SEIZURE';
+        return 'No Action Taken';
       case 6:
-        return 'ARREST';
-      case 0:
+        return 'Caution';
+      case 7:
+        return 'Warning Letter';
       default:
-        return 'NONE';
+        return 'No Action Taken';
     }
   }
 

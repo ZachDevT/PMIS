@@ -93,12 +93,12 @@ class EnforcementController extends GetxController {
   // Enforcement Action options
   final List<String> enforcementActionOptions = [
     "Impound",
-    "Warning",
-    "Fine",
-    "Closure",
-    "Seizure",
     "Arrest",
-    "Other"
+    "Close",
+    "Initiated Court Case",
+    "No Action Taken",
+    "Caution",
+    "Warning Letter"
   ];
 
   @override

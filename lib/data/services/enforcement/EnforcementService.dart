@@ -214,15 +214,16 @@ class EnforcementService {
     if (action is int) return action;
     if (action is String) {
       final lower = action.toLowerCase();
-      // Handle multi-select comma-separated values — pick the most severe action
-      if (lower.contains('arrest')) return 6;
-      if (lower.contains('seizure')) return 5;
-      if (lower.contains('impound')) return 4;
-      if (lower.contains('closure') || lower.contains('close')) return 3;
-      if (lower.contains('fine')) return 2;
-      if (lower.contains('warning')) return 1;
+      // Handle multi-select comma-separated values — pick the most severe action or map first match
+      if (lower.contains('warning')) return 7;
+      if (lower.contains('caution')) return 6;
+      if (lower.contains('no action')) return 5;
+      if (lower.contains('court')) return 4;
+      if (lower.contains('close')) return 3;
+      if (lower.contains('arrest')) return 2;
+      if (lower.contains('impound')) return 1;
     }
-    return 0;
+    return 5; // Default to No Action Taken
   }
 
   int _mapCategoryStatus(dynamic status) {
