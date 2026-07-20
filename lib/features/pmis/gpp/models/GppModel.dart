@@ -196,8 +196,8 @@ class GppActivity {
 
   String _getRecommendedForGppText(int recommendation) {
     switch (recommendation) {
-      case 1: return 'GPP certification';
-      case 0: return 'Not recommended for GPP certification';
+      case 1: return 'Not Recommended for GPP';
+      case 2: return 'Recommended for GPP';
       default: return 'Unknown';
     }
   }

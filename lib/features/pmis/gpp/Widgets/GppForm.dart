@@ -333,7 +333,7 @@ class GppForm extends StatelessWidget {
                           label: "Recommended for GPP",
                           items: [
                             "Recommended for GPP",
-                            "Not recommended for GPP"
+                            "Not Recommended for GPP"
                           ],
                           selectedItem: controller.recommendedForGpp,
                           prefixIcon: Icons.recommend,

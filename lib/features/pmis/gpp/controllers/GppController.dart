@@ -471,10 +471,10 @@ class GppController extends GetxController {
 
   int _getRecommendedForGpp(String recommendation) {
     switch (recommendation) {
-      case "Recommended for GPP":
+      case "Not Recommended for GPP":
         return 1;
-      case "Not recommended for GPP":
-        return 0;
+      case "Recommended for GPP":
+        return 2;
       default:
         return 1;
     }
