@@ -119,17 +119,6 @@ class CssForm extends StatelessWidget {
                     label: "Inspection Date",
                     prefixIcon: Icons.date_range,
                     readOnly: true,
-                    onTap: () async {
-                      DateTime? picked = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100));
-                      if (picked != null) {
-                        controller.inspectionDateController.text =
-                            picked.toLocal().toString().split(' ')[0];
-                      }
-                    },
                     validator: (value) => value!.isEmpty ? "Required" : null,
                   ),
                   buildTextField(

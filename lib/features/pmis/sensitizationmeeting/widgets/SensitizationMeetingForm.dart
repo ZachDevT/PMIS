@@ -328,31 +328,6 @@ class SensitizationMeetingForm extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        onTap: () async {
-          final DateTime? picked = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime(2000),
-            lastDate: DateTime(2100),
-          );
-          if (picked != null) {
-            final TimeOfDay? time = await showTimePicker(
-              context: context,
-              initialTime: TimeOfDay.now(),
-            );
-            if (time != null) {
-              final DateTime selected = DateTime(
-                picked.year,
-                picked.month,
-                picked.day,
-                time.hour,
-                time.minute,
-              );
-              controller.inspectionDateController.text =
-                  '${selected.day.toString().padLeft(2, '0')}/${selected.month.toString().padLeft(2, '0')}/${selected.year}, ${selected.hour.toString().padLeft(2, '0')}:${selected.minute.toString().padLeft(2, '0')}:${selected.second.toString().padLeft(2, '0')}.${selected.millisecond.toString().padLeft(3, '0')}';
-            }
-          }
-        },
         validator: (value) {
           if (value == null || value.isEmpty) {
             return "Please select inspection date";
