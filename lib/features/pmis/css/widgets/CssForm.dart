@@ -132,15 +132,7 @@ class CssForm extends StatelessWidget {
                     controller: controller.inspectionTimeController,
                     label: "Inspection Time",
                     prefixIcon: Icons.access_time,
-                    
-                    onTap: () async {
-                      TimeOfDay? picked = await showTimePicker(
-                          context: context, initialTime: TimeOfDay.now());
-                      if (picked != null) {
-                        controller.inspectionTimeController.text =
-                            picked.format(context);
-                      }
-                    },
+                    readOnly: true,
                     validator: (value) => value!.isEmpty ? "Required" : null,
                   ),
                   buildTextField(

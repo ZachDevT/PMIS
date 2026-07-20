@@ -33,29 +33,18 @@ class CommonDateTimeInput extends StatelessWidget {
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: GestureDetector(
-            onTap: () async {
-              TimeOfDay? picked = await showTimePicker(
-                context: context,
-                initialTime: TimeOfDay.now(),
-              );
-              if (picked != null && context.mounted) {
-                timeController.text = picked.format(context);
-              }
-            },
-            child: AbsorbPointer(
-              child: TextFormField(
-                controller: timeController,
-                decoration: InputDecoration(
-                  labelText: "Time",
-                  prefixIcon: Icon(Iconsax.clock),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+          child: AbsorbPointer(
+            child: TextFormField(
+              controller: timeController,
+              decoration: InputDecoration(
+                labelText: "Time",
+                prefixIcon: Icon(Iconsax.clock),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                validator: (value) =>
-                    value == null || value.isEmpty ? "Required" : null,
               ),
+              validator: (value) =>
+                  value == null || value.isEmpty ? "Required" : null,
             ),
           ),
         ),

@@ -129,14 +129,6 @@ class GppForm extends StatelessWidget {
                     label: "Inspection Time",
                     prefixIcon: Icons.access_time,
                     readOnly: true,
-                    onTap: () async {
-                      TimeOfDay? picked = await showTimePicker(
-                          context: context, initialTime: TimeOfDay.now());
-                      if (picked != null) {
-                        controller.inspectionTimeController.text =
-                            picked.format(context);
-                      }
-                    },
                     validator: (value) => value!.isEmpty ? "Required" : null,
                   ),
                   buildTextField(
