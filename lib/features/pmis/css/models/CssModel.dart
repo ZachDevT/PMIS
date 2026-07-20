@@ -289,7 +289,23 @@ class CssModel {
   }
 
   String _getActionText(String? action) {
-    return action == null || action.isEmpty ? 'Not specified' : action;
+    if (action == null || action.isEmpty) return 'Not specified';
+    // If it's a number from the API, map it back to text
+    if (int.tryParse(action) != null) {
+      switch (int.parse(action)) {
+        case 1:
+          return 'Closed';
+        case 2:
+          return 'Outlet abandoned by Owner';
+        case 3:
+          return 'Impounded';
+        case 4:
+          return 'Suspect Aarrested';
+        case 5:
+          return 'No action Taken';
+      }
+    }
+    return action;
   }
 
   CssModel copyWith({

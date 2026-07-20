@@ -343,13 +343,13 @@ class CssForm extends StatelessWidget {
                   // Action Taken - only show if facility is Open
                   if (controller.selectedFacilityStatus.value == "Open")
                     TMultiSelectDropdown(
-                      label: "Action Taken",
+                      label: "Compliance Action",
                       items: const [
-                        "Warning Letter",
-                        "NDA Form 43",
+                        "Closed",
+                        "Outlet abandoned by Owner",
                         "Impounded",
-                        "Suspect arrested",
-                        "No action taken"
+                        "Suspect Aarrested",
+                        "No action Taken"
                       ],
                       selectedItems: controller.selectedActionTaken,
                       prefixIcon: Icons.assignment_turned_in,

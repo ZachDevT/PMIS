@@ -208,11 +208,11 @@ class CssService {
     if (actionStr == null || actionStr.isEmpty) return null;
     
     final lower = actionStr.toLowerCase();
-    // Since it's multi-select locally but single int in API, grab the most severe action
-    if (lower.contains('closed facility')) return 3;
-    if (lower.contains('suspect arrested')) return 2;
-    if (lower.contains('impounded')) return 1;
-    if (lower.contains('no action taken')) return 4;
+    if (lower.contains('closed')) return 1;
+    if (lower.contains('abandoned')) return 2;
+    if (lower.contains('impounded')) return 3;
+    if (lower.contains('suspect')) return 4; // covers 'suspect arrested' and typo 'aarrested'
+    if (lower.contains('no action')) return 5;
     
     return null;
   }
