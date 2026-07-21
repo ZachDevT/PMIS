@@ -382,48 +382,60 @@ class EnforcementForm extends StatelessWidget {
                           )
                         : const SizedBox.shrink()),
 
-                    // Enforcement Actions Section
-                    _buildSectionHeader("Enforcement Actions", dark),
-                    const SizedBox(height: Tsizes.spaceBtwSections / 2),
-
-                    // Actions Taken (Multi-select)
-                    const Text("Actions Taken",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 14)),
-                    const SizedBox(height: 8),
-                    Obx(() => Wrap(
-                          spacing: 8.0,
-                          runSpacing: 4.0,
-                          children:
-                              controller.enforcementActionOptions.map((action) {
-                            final isSelected = controller
-                                .selectedEnforcementActions
-                                .contains(action);
-                            return FilterChip(
-                              label: Text(action),
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                if (selected) {
-                                  controller.selectedEnforcementActions
-                                      .add(action);
-                                } else {
-                                  controller.selectedEnforcementActions
-                                      .remove(action);
-                                }
-                              },
-                            );
-                          }).toList(),
-                        )),
-                    const SizedBox(height: Tsizes.spaceBtwInputFields),
-
-                    // Comments
-                    _buildTextField(
-                      controller: controller.commentsController,
-                      label: "Comments",
-                      prefixIcon: Iconsax.message,
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: Tsizes.spaceBtwSections * 2),
+                    // Closed is terminal: do not show or submit any fields
+                    // below Facility Status.
+                    Obx(() => controller.selectedFacilityStatus.value ==
+                            "Closed"
+                        ? const SizedBox(height: Tsizes.spaceBtwSections)
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildSectionHeader("Enforcement Actions", dark),
+                              const SizedBox(
+                                  height: Tsizes.spaceBtwSections / 2),
+                              const Text("Actions Taken",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14)),
+                              const SizedBox(height: 8),
+                              Obx(() => Wrap(
+                                    spacing: 8.0,
+                                    runSpacing: 4.0,
+                                    children: controller
+                                        .enforcementActionOptions
+                                        .map((action) {
+                                      final isSelected = controller
+                                          .selectedEnforcementActions
+                                          .contains(action);
+                                      return FilterChip(
+                                        label: Text(action),
+                                        selected: isSelected,
+                                        onSelected: (selected) {
+                                          if (selected) {
+                                            controller
+                                                .selectedEnforcementActions
+                                                .add(action);
+                                          } else {
+                                            controller
+                                                .selectedEnforcementActions
+                                                .remove(action);
+                                          }
+                                        },
+                                      );
+                                    }).toList(),
+                                  )),
+                              const SizedBox(
+                                  height: Tsizes.spaceBtwInputFields),
+                              _buildTextField(
+                                controller: controller.commentsController,
+                                label: "Comments",
+                                prefixIcon: Iconsax.message,
+                                maxLines: 3,
+                              ),
+                              const SizedBox(
+                                  height: Tsizes.spaceBtwSections * 2),
+                            ],
+                          )),
 
                     // Submit Button
                     const SizedBox(height: 15),
