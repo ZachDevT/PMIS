@@ -91,7 +91,11 @@ class CssModel {
       intRegion: json['intRegion'] ?? json['IntRegion'] ?? '',
       districtId: json['districtId'] ?? json['DistrictId'] ?? 0,
       facilityName: json['facilityName'] ?? json['FacilityName'] ?? '',
-      facilityStatus: json['facilityStatus'] ?? 0,
+      // The API has historical CSS rows with null or unsupported status
+      // values. Only an explicit open value is open; everything else is
+      // treated as closed.
+      facilityStatus: _normalizeFacilityStatus(
+          json['facilityStatus'] ?? json['FacilityStatus']),
       facilityPersonType: json['facilityPersonType'] ?? 0,
       personName: json['personName'] ?? '',
       contact: json['contact'] ?? '',
@@ -166,8 +170,14 @@ class CssModel {
       case 0:
         return 'Closed';
       default:
-        return 'Unknown';
+        return 'Closed';
     }
+  }
+
+  static int _normalizeFacilityStatus(dynamic status) {
+    if (status is num) return status.toInt() == 1 ? 1 : 0;
+    final value = status?.toString().trim().toLowerCase();
+    return value == '1' || value == 'open' ? 1 : 0;
   }
 
   String _getPersonTypeText(int type) {

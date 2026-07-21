@@ -403,7 +403,7 @@ class CssController extends GetxController {
       case "Closed":
         return 0;
       default:
-        return 1;
+        return 0;
     }
   }
 
@@ -563,7 +563,7 @@ class CssController extends GetxController {
       case 0:
         return "Closed";
       default:
-        return "Open";
+        return "Closed";
     }
   }
 

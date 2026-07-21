@@ -53,7 +53,7 @@ class CssActivityCard extends StatelessWidget {
       case 0:
         return 'Closed';
       default:
-        return 'Unknown';
+        return 'Closed';
     }
   }
 
@@ -751,7 +751,7 @@ class CssActivityCard extends StatelessWidget {
       case 0:
         return Colors.red; // Closed
       default:
-        return Colors.grey;
+        return Colors.red;
     }
   }
 

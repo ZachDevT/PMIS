@@ -142,14 +142,17 @@ class CssService {
   /// Map local JSON keys to exactly what the API expects for CSS
   Map<String, dynamic> _mapToApiFormat(Map<String, dynamic> data) {
     final Map<String, dynamic> apiData = {};
-    
+
     // Ensure inspectionDate is ISO8601
     if (data['inspectionDate'] != null) {
       if (data['inspectionDate'] is DateTime) {
-        apiData['inspectionDate'] = (data['inspectionDate'] as DateTime).toIso8601String();
+        apiData['inspectionDate'] =
+            (data['inspectionDate'] as DateTime).toIso8601String();
       } else {
         try {
-          apiData['inspectionDate'] = DateTime.parse(data['inspectionDate'].toString()).toIso8601String();
+          apiData['inspectionDate'] =
+              DateTime.parse(data['inspectionDate'].toString())
+                  .toIso8601String();
         } catch (e) {
           apiData['inspectionDate'] = DateTime.now().toIso8601String();
         }
@@ -159,17 +162,20 @@ class CssService {
     // Direct string maps
     apiData['inspectorName'] = data['inspectorName'];
     apiData['inspectorId'] = data['inspectorId'] ?? '';
-    
+
     // Float coordinates
     apiData['latitude'] = data['latitude']?.toDouble() ?? 0.0;
     apiData['longitude'] = data['longitude']?.toDouble() ?? 0.0;
-    
+
     // IDs and Integers
     apiData['intRegion'] = data['intRegion'];
     apiData['districtId'] = data['districtId'];
-    apiData['facilityStatus'] = data['facilityStatus'];
+    // Always send the numeric API contract. This also repairs legacy offline
+    // rows that stored "Closed", null, or an unsupported/unknown value.
+    apiData['facilityStatus'] =
+        _normalizeFacilityStatus(data['facilityStatus']);
     apiData['facilityPersonType'] = data['facilityPersonType'];
-    
+
     // Text fields
     apiData['facilityName'] = data['facilityName'];
     apiData['personName'] = data['personName'];
@@ -177,21 +183,23 @@ class CssService {
     apiData['qualificationId'] = data['qualificationId'] ??
         QualificationController.instance
             .idForName(data['qualifications']?.toString() ?? '');
-    
+
     // Category & License
     apiData['categoryOfpremises'] = data['categoryOfpremises'];
     apiData['other_CategoryPremise'] = data['other_CategoryPremise'];
     apiData['licenseStatus'] = data['licenseStatus'];
     apiData['licenseNo'] = data['licenseNo'];
-    
+
     // IMPORTANT: API expects 'licenseExpDate' in DateOnly format YYYY-MM-DD
-    final expiryDate = data['licenseExpiryDate'] ?? data['licenseExpDate'] ?? '';
+    final expiryDate =
+        data['licenseExpiryDate'] ?? data['licenseExpDate'] ?? '';
     if (expiryDate.toString().isNotEmpty) {
-      apiData['licenseExpDate'] = expiryDate.toString().split('T')[0].split(' ')[0];
+      apiData['licenseExpDate'] =
+          expiryDate.toString().split('T')[0].split(' ')[0];
     }
-    
+
     apiData['unlicensed'] = data['unlicensed'];
-    
+
     // CSS specifics
     apiData['categoryStatus'] = data['categoryStatus'];
     apiData['premisesCondition'] = data['premisesCondition'];
@@ -202,21 +210,28 @@ class CssService {
     apiData['action'] = _mapAction(data['action']?.toString());
 
     // Notice we DO NOT include `previouslyLicensed`, `licenseExpiryDate`, or `id`.
-    
+
     return apiData;
+  }
+
+  int _normalizeFacilityStatus(dynamic status) {
+    if (status is num) return status.toInt() == 1 ? 1 : 0;
+    final value = status?.toString().trim().toLowerCase();
+    return value == '1' || value == 'open' ? 1 : 0;
   }
 
   /// Map CSS Action from string to integer for the backend API
   int? _mapAction(String? actionStr) {
     if (actionStr == null || actionStr.isEmpty) return null;
-    
+
     final lower = actionStr.toLowerCase();
     if (lower.contains('closed')) return 1;
     if (lower.contains('abandoned')) return 2;
     if (lower.contains('impounded')) return 3;
-    if (lower.contains('suspect')) return 4; // covers 'suspect arrested' and typo 'aarrested'
+    if (lower.contains('suspect'))
+      return 4; // covers 'suspect arrested' and typo 'aarrested'
     if (lower.contains('no action')) return 5;
-    
+
     return null;
   }
 
