@@ -40,8 +40,6 @@ class PmsaActivityCard extends StatelessWidget {
     }
   }
 
-  
-
   String _getFacilityStatusText(int status) {
     switch (status) {
       case 1:
@@ -395,11 +393,15 @@ class PmsaActivityCard extends StatelessWidget {
                             Iconsax.calendar),
                         _buildModernDetailRow('Inspector Name',
                             activity.inspectorName, Iconsax.user),
-                        _buildModernDetailRow('Region',
-                            RegionDistrictConstants.getRegionName(activity.intRegion), Iconsax.map),
+                        _buildModernDetailRow(
+                            'Region',
+                            RegionDistrictConstants.getRegionName(
+                                activity.intRegion),
+                            Iconsax.map),
                         _buildModernDetailRow(
                             'District',
-                            RegionDistrictConstants.getDistrictName(activity.districtId),
+                            RegionDistrictConstants.getDistrictName(
+                                activity.districtId),
                             Iconsax.building),
                       ],
                     ),
@@ -425,16 +427,16 @@ class PmsaActivityCard extends StatelessWidget {
                               'License Status',
                               _getLicenseStatusText(activity.licenseStatus),
                               Iconsax.shield_tick),
-                          if (activity.licenseStatus == 1) ...[  
+                          if (activity.licenseStatus == 1) ...[
                             _buildModernDetailRow(
                                 'License Number',
-                                activity.licenseNo.isNotEmpty ? activity.licenseNo : 'Not provided',
+                                activity.licenseNo.isNotEmpty
+                                    ? activity.licenseNo
+                                    : 'Not provided',
                                 Iconsax.document),
                             if (activity.licenseExpiryDate.isNotEmpty)
-                              _buildModernDetailRow(
-                                  'License Expiry Date',
-                                  activity.licenseExpiryDate,
-                                  Iconsax.calendar),
+                              _buildModernDetailRow('License Expiry Date',
+                                  activity.licenseExpiryDate, Iconsax.calendar),
                           ],
                           if (activity.previouslyLicensed.isNotEmpty)
                             _buildModernDetailRow(
@@ -477,40 +479,47 @@ class PmsaActivityCard extends StatelessWidget {
                               'PMS Activity',
                               _getPmsActivityText(activity.pmsActivity),
                               Iconsax.activity),
-                          _buildModernDetailRow(
-                              'Sample Product Name',
-                              activity.sampleProductName.isNotEmpty
-                                  ? activity.sampleProductName
-                                  : 'Not provided',
-                              Iconsax.box),
-                          _buildModernDetailRow(
-                              'Sample Number',
-                              activity.sampleNo.toString(),
-                              Iconsax.document_text),
-                          _buildModernDetailRow(
-                              'Sample Batch',
-                              activity.sampleBatch.isNotEmpty
-                                  ? activity.sampleBatch
-                                  : 'Not provided',
-                              Iconsax.tag),
-                          _buildModernDetailRow(
-                              'Follow-up Comment',
-                              activity.followupComment.isNotEmpty
-                                  ? activity.followupComment
-                                  : 'Not provided',
-                              Iconsax.message_text),
-                          _buildModernDetailRow(
-                              'Complaint Product',
-                              activity.complaintProduct.isNotEmpty
-                                  ? activity.complaintProduct
-                                  : 'Not provided',
-                              Iconsax.warning_2),
-                          _buildModernDetailRow(
-                              'Other Activity',
-                              activity.otherActivity.isNotEmpty
-                                  ? activity.otherActivity
-                                  : 'Not provided',
-                              Iconsax.more),
+                          if (activity.pmsActivity == 1 ||
+                              activity.pmsActivity == 2 ||
+                              activity.pmsActivity == 3) ...[
+                            _buildModernDetailRow(
+                                'Sample Product Name',
+                                activity.sampleProductName.isNotEmpty
+                                    ? activity.sampleProductName
+                                    : 'Not provided',
+                                Iconsax.box),
+                            _buildModernDetailRow(
+                                'Sample Number',
+                                activity.sampleNo.toString(),
+                                Iconsax.document_text),
+                            _buildModernDetailRow(
+                                'Sample Batch',
+                                activity.sampleBatch.isNotEmpty
+                                    ? activity.sampleBatch
+                                    : 'Not provided',
+                                Iconsax.tag),
+                          ],
+                          if (activity.pmsActivity == 2)
+                            _buildModernDetailRow(
+                                'Follow-up Comment',
+                                activity.followupComment.isNotEmpty
+                                    ? activity.followupComment
+                                    : 'Not provided',
+                                Iconsax.message_text),
+                          if (activity.pmsActivity == 3)
+                            _buildModernDetailRow(
+                                'Complaint Product',
+                                activity.complaintProduct.isNotEmpty
+                                    ? activity.complaintProduct
+                                    : 'Not provided',
+                                Iconsax.warning_2),
+                          if (activity.pmsActivity == 4)
+                            _buildModernDetailRow(
+                                'Other Activity',
+                                activity.otherActivity.isNotEmpty
+                                    ? activity.otherActivity
+                                    : 'Not provided',
+                                Iconsax.more),
                         ],
                       ),
                     ],
