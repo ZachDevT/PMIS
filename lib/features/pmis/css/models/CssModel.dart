@@ -1,3 +1,5 @@
+import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
+
 class CssModel {
   final int id;
   final DateTime inspectionDate;
@@ -93,7 +95,9 @@ class CssModel {
       facilityPersonType: json['facilityPersonType'] ?? 0,
       personName: json['personName'] ?? '',
       contact: json['contact'] ?? '',
-      qualifications: json['qualifications'] ?? '',
+      qualifications: QualificationController.instance.displayName(
+          json['qualifications'] ?? json['Qualifications'],
+          json['qualificationId'] ?? json['QualificationId']),
       qualificationId: json['qualificationId'] is int
           ? json['qualificationId']
           : int.tryParse(
@@ -311,13 +315,15 @@ class CssModel {
         case 3:
           return 'Impounded';
         case 4:
-          return 'Suspect Aarrested';
+          return 'Suspect Arrested';
         case 5:
-          return 'No action Taken';
+          return 'No Action Taken';
       }
     }
     return action;
   }
+
+  String get actionText => _getActionText(action);
 
   CssModel copyWith({
     int? id,

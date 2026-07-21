@@ -317,13 +317,15 @@ class GppActivityCard extends StatelessWidget {
                                 'License Number',
                                 activity.licenseNo ?? 'Not provided',
                                 Iconsax.document),
-                            if (activity.licenseExpiryDate != null && activity.licenseExpiryDate!.isNotEmpty)
+                            if (activity.licenseExpiryDate != null &&
+                                activity.licenseExpiryDate!.isNotEmpty)
                               _buildModernDetailRow(
                                   'License Expiry Date',
                                   activity.licenseExpiryDate!,
                                   Iconsax.calendar),
                           ],
-                          if (activity.previouslyLicensed != null && activity.previouslyLicensed!.isNotEmpty)
+                          if (activity.previouslyLicensed != null &&
+                              activity.previouslyLicensed!.isNotEmpty)
                             _buildModernDetailRow(
                                 'Previously Licensed / Illegal Outlet',
                                 activity.previouslyLicensed!,
@@ -367,7 +369,7 @@ class GppActivityCard extends StatelessWidget {
                               _getCategoryStatusText(activity.categoryStatus),
                               Iconsax.category_2),
                           _buildModernDetailRow(
-                              'Recommended for GPP',
+                              'GPP Certification',
                               _getRecommendedText(activity.recommendedforGPP),
                               Iconsax.like),
                         ],
@@ -655,9 +657,9 @@ class GppActivityCard extends StatelessWidget {
   String _getRecommendedText(int recommended) {
     switch (recommended) {
       case 1:
-        return 'GPP certification';
-      case 0:
-        return 'Not recommended for GPP certification';
+        return 'Not Recommended';
+      case 2:
+        return 'Recommended';
       default:
         return 'Unknown';
     }

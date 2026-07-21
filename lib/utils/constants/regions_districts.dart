@@ -92,7 +92,8 @@ class RegionDistrictConstants {
         return entry.key;
       }
     }
-    return "Head Office";
+    // Never silently relabel an unknown/new API region as Head Office.
+    return guid;
   }
 
   static String getDistrictName(int id) {
@@ -101,7 +102,8 @@ class RegionDistrictConstants {
         return entry.key;
       }
     }
-    return "Kampala";
+    // Preserve an unknown/new API district instead of showing Kampala.
+    return id.toString();
   }
 
   /// Get districts filtered by selected region
@@ -109,7 +111,7 @@ class RegionDistrictConstants {
     if (region.isEmpty || region == "Head Office") {
       return allDistricts; // Return all districts for Head Office
     }
-    
+
     return allDistricts.where((district) {
       return districtToRegion[district] == region;
     }).toList();

@@ -2,6 +2,9 @@
 /// Represents enforcement activities and data structure
 library;
 
+import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
+
 class EnforcementModel {
   final String? id;
   final String inspectionDate;
@@ -110,7 +113,9 @@ class EnforcementModel {
       personFoundAtFacility: _getPersonFoundStatus(json['facilityPersonType']),
       personName: json['personName'] ?? '',
       contact: json['contact'] ?? '',
-      qualifications: json['qualifications'] ?? '',
+      qualifications: QualificationController.instance.displayName(
+          json['qualifications'] ?? json['Qualifications'],
+          json['qualificationId'] ?? json['QualificationId']),
       qualificationId: json['qualificationId'] is int
           ? json['qualificationId']
           : int.tryParse(
@@ -146,37 +151,13 @@ class EnforcementModel {
   /// Convert region GUID to region name
   static String _getRegionName(String? regionGuid) {
     if (regionGuid == null) return '';
-    switch (regionGuid) {
-      case 'deaf2c98-3dbb-489f-bdea-9e5fd49eec78':
-        return 'HEAD OFFICE';
-      case '87ddeda4-cef9-4e7b-ad44-34bb56081916':
-        return 'CENTRAL';
-      case 'e9b78052-b51b-417f-b3b6-72b8ff3c4b9a':
-        return 'EASTERN';
-      case '0b44f4f9-1423-4688-afd4-2369147e0f8f':
-        return 'SOUTHERN';
-      case 'de9b2845-56c4-4a19-8a0f-607bfd5c8689':
-        return 'WESTERN';
-      default:
-        return 'HEAD OFFICE';
-    }
+    return RegionDistrictConstants.getRegionName(regionGuid);
   }
 
   /// Convert district ID to district name
   static String _getDistrictName(int? districtId) {
     if (districtId == null) return '';
-    switch (districtId) {
-      case 1:
-        return 'KAMPALA';
-      case 2:
-        return 'MASAKA';
-      case 3:
-        return 'KABALE';
-      case 4:
-        return 'FORTPORTAL';
-      default:
-        return 'KAMPALA';
-    }
+    return RegionDistrictConstants.getDistrictName(districtId);
   }
 
   /// Convert facility status code to name
@@ -197,11 +178,13 @@ class EnforcementModel {
     if (status == null) return '';
     switch (status) {
       case 1:
-        return 'YES';
+        return 'In-charge';
+      case 2:
+        return 'Attendant/Operator';
       case 0:
-        return 'NO';
+        return '';
       default:
-        return 'YES';
+        return '';
     }
   }
 

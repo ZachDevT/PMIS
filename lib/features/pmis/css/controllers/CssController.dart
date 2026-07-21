@@ -359,7 +359,7 @@ class CssController extends GetxController {
     inspectionTimeController.clear();
     inspectorNameController.clear();
     inspectorIdController.clear();
-    gpsLocationController.clear();
+    // Keep the last acquired GPS value for the next inspection.
     facilityNameController.clear();
     nameController.clear();
     contactController.clear();

@@ -498,54 +498,36 @@ class EnforcementActivityCard extends StatelessWidget {
                               Iconsax.message),
                         ],
                       ),
-                    ] else ...[
+                    ],
+                    if (!activity.facilityStatus
+                        .toLowerCase()
+                        .contains('closed')) ...[
+                      const SizedBox(height: 24),
                       _buildModernDetailSection(
                         context,
-                        'Enforcement Actions',
-                        Iconsax.shield_security,
+                        'Additional Information',
+                        Iconsax.info_circle,
                         [
                           _buildModernDetailRow(
                               context,
-                              'Enforcement Action Taken',
-                              activity.enforcementActionTaken.isNotEmpty
-                                  ? activity.enforcementActionTaken
-                                  : 'None',
-                              Iconsax.warning_2),
-                          _buildModernDetailRow(
-                              context,
-                              'Comments',
-                              activity.comments.isNotEmpty
-                                  ? activity.comments
-                                  : 'No comments',
-                              Iconsax.message),
+                              'Sync Status',
+                              activity.isSynced ? 'Synced' : 'Pending',
+                              Iconsax.cloud),
+                          if (activity.createdAt != null)
+                            _buildModernDetailRow(
+                                context,
+                                'Created At',
+                                _formatDateTime(activity.createdAt!),
+                                Iconsax.calendar),
+                          if (activity.updatedAt != null)
+                            _buildModernDetailRow(
+                                context,
+                                'Updated At',
+                                _formatDateTime(activity.updatedAt!),
+                                Iconsax.calendar),
                         ],
                       ),
                     ],
-                    const SizedBox(height: 24),
-                    _buildModernDetailSection(
-                      context,
-                      'Additional Information',
-                      Iconsax.info_circle,
-                      [
-                        _buildModernDetailRow(
-                            context,
-                            'Sync Status',
-                            activity.isSynced ? 'Synced' : 'Pending',
-                            Iconsax.cloud),
-                        if (activity.createdAt != null)
-                          _buildModernDetailRow(
-                              context,
-                              'Created At',
-                              _formatDateTime(activity.createdAt!),
-                              Iconsax.calendar),
-                        if (activity.updatedAt != null)
-                          _buildModernDetailRow(
-                              context,
-                              'Updated At',
-                              _formatDateTime(activity.updatedAt!),
-                              Iconsax.calendar),
-                      ],
-                    ),
                     const SizedBox(height: 40),
                   ],
                 ),

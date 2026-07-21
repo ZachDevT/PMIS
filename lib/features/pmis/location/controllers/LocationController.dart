@@ -3,6 +3,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:pmis/data/models/LocationModel.dart';
 import 'package:pmis/data/services/location/LocationService.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
+import 'package:pmis/utils/helpers/master_data_refresh.dart';
 
 class LocationController extends GetxController {
   static LocationController get instance => Get.find();
@@ -75,6 +76,7 @@ class LocationController extends GetxController {
 
     if (regions.isNotEmpty || districts.isNotEmpty) {
       _updateConstants();
+      reloadControllersAfterMasterDataChange();
     }
   }
 
@@ -104,6 +106,7 @@ class LocationController extends GetxController {
       }
 
       _updateConstants();
+      await reloadControllersAfterMasterDataChange();
     } catch (e) {
       print('Error fetching locations: $e');
     } finally {

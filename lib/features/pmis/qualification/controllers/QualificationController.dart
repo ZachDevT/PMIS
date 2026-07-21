@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:pmis/data/models/QualificationModel.dart';
 import 'package:pmis/data/services/qualification/QualificationService.dart';
+import 'package:pmis/utils/helpers/master_data_refresh.dart';
 
 class QualificationController extends GetxController {
   static QualificationController get instance => Get.find();
@@ -28,6 +29,11 @@ class QualificationController extends GetxController {
         '';
   }
 
+  String displayName(dynamic apiName, dynamic id) {
+    final name = apiName?.toString().trim() ?? '';
+    return name.isNotEmpty ? name : nameForId(id);
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -50,6 +56,7 @@ class QualificationController extends GetxController {
                 (item) => {'id': item.id, 'code': item.code, 'name': item.name})
             .toList(),
       );
+      await reloadControllersAfterMasterDataChange();
     } catch (error) {
       print('Error fetching qualifications: $error');
     } finally {

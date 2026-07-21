@@ -2,6 +2,8 @@
 /// Represents shift market inspection activities and data structure
 library;
 
+import 'package:pmis/utils/constants/regions_districts.dart';
+
 class ShiftMarketModel {
   final String? id;
   final String inspectionDate;
@@ -12,7 +14,8 @@ class ShiftMarketModel {
   final String region;
   final String district;
   final String facilityName;
-  final String personFoundAtFacility; // Replaces facilityStatus, personName, contact, qualifications
+  final String
+      personFoundAtFacility; // Replaces facilityStatus, personName, contact, qualifications
   final String categoryOfPremises;
   final String licenseStatus;
   final String? licenseNo;
@@ -93,9 +96,13 @@ class ShiftMarketModel {
           json['LicenseStatus']?.toString() ??
           '1',
       licenseNo: json['licenseNo'] ?? json['LicenseNo'] ?? '',
-      licenseExpiryDate:
-          json['licenseExpiryDate'] ?? json['LicenseExpiryDate'] ?? json['licenseExpDate'] ?? json['LicenseExpDate'] ?? '',
-      previouslyLicensed: json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
+      licenseExpiryDate: json['licenseExpiryDate'] ??
+          json['LicenseExpiryDate'] ??
+          json['licenseExpDate'] ??
+          json['LicenseExpDate'] ??
+          '',
+      previouslyLicensed:
+          json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
       regulatoryActionTaken: json['regulatoryAction'] ?? '',
       consignmentsImpounded: json['consignmentsImpounded'] ?? '',
       createdAt:
@@ -109,37 +116,13 @@ class ShiftMarketModel {
   /// Convert region GUID to region name
   static String _getRegionName(String? regionGuid) {
     if (regionGuid == null) return '';
-    switch (regionGuid) {
-      case 'deaf2c98-3dbb-489f-bdea-9e5fd49eec78':
-        return 'HEAD OFFICE';
-      case '87ddeda4-cef9-4e7b-ad44-34bb56081916':
-        return 'CENTRAL';
-      case 'e9b78052-b51b-417f-b3b6-72b8ff3c4b9a':
-        return 'EASTERN';
-      case '0b44f4f9-1423-4688-afd4-2369147e0f8f':
-        return 'SOUTHERN';
-      case 'de9b2845-56c4-4a19-8a0f-607bfd5c8689':
-        return 'WESTERN';
-      default:
-        return 'HEAD OFFICE';
-    }
+    return RegionDistrictConstants.getRegionName(regionGuid);
   }
 
   /// Convert district ID to district name
   static String _getDistrictName(int? districtId) {
     if (districtId == null) return '';
-    switch (districtId) {
-      case 1:
-        return 'KAMPALA';
-      case 2:
-        return 'MASAKA';
-      case 3:
-        return 'KABALE';
-      case 4:
-        return 'FORTPORTAL';
-      default:
-        return 'KAMPALA';
-    }
+    return RegionDistrictConstants.getDistrictName(districtId);
   }
 
   /// Convert facility status code to name
@@ -232,9 +215,9 @@ class ShiftMarketModel {
       region: region ?? this.region,
       district: district ?? this.district,
       facilityName: facilityName ?? this.facilityName,
-        personFoundAtFacility:
+      personFoundAtFacility:
           personFoundAtFacility ?? this.personFoundAtFacility,
-        facilityStatus: facilityStatus ?? this.facilityStatus,
+      facilityStatus: facilityStatus ?? this.facilityStatus,
       categoryOfPremises: categoryOfPremises ?? this.categoryOfPremises,
       licenseStatus: licenseStatus ?? this.licenseStatus,
       licenseNo: licenseNo ?? this.licenseNo,

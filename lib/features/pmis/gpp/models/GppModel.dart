@@ -1,3 +1,5 @@
+import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
+
 class GppActivity {
   final int id;
   final DateTime inspectionDate;
@@ -72,12 +74,9 @@ class GppActivity {
         facilityPersonType: json['facilityPersonType'] ?? 1,
         personName: json['personName'] ?? '',
         contact: json['contact'] ?? '',
-        qualifications: json['qualifications'] ??
-            (json['qualificationId'] != null
-                ? _getQualificationName(json['qualificationId'])
-                : (json['QualificationId'] != null
-                    ? _getQualificationName(json['QualificationId'])
-                    : '')),
+        qualifications: QualificationController.instance.displayName(
+            json['qualifications'] ?? json['Qualifications'],
+            json['qualificationId'] ?? json['QualificationId']),
         qualificationId:
             _asInt(json['qualificationId'] ?? json['QualificationId']),
         categoryOfpremises: json['categoryOfpremises'] ?? 1,
@@ -101,24 +100,6 @@ class GppActivity {
 
   static int? _asInt(dynamic value) =>
       value is int ? value : int.tryParse(value?.toString() ?? '');
-
-  static String _getQualificationName(dynamic id) {
-    if (id == null) return '';
-    final intId = id is int ? id : int.tryParse(id.toString());
-    if (intId == null) return '';
-    switch (intId) {
-      case 1:
-        return 'Pharmacist';
-      case 2:
-        return 'Nurse';
-      case 3:
-        return 'Dispenser';
-      case 4:
-        return 'Attendant';
-      default:
-        return 'Other ($intId)';
-    }
-  }
 
   Map<String, dynamic> toJson() => {
         'id': id,

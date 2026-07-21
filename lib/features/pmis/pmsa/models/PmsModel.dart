@@ -1,3 +1,5 @@
+import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
+
 class PmsModel {
   final int id;
   final DateTime inspectionDate;
@@ -93,7 +95,9 @@ class PmsModel {
       facilityPersonType: json['facilityPersonType'] ?? 0,
       personName: json['personName'] ?? '',
       contact: json['contact'] ?? '',
-      qualifications: json['qualifications'] ?? '',
+      qualifications: QualificationController.instance.displayName(
+          json['qualifications'] ?? json['Qualifications'],
+          json['qualificationId'] ?? json['QualificationId']),
       qualificationId: json['qualificationId'] is int
           ? json['qualificationId']
           : int.tryParse(

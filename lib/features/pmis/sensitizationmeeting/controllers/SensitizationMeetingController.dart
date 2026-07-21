@@ -268,16 +268,12 @@ class SensitizationMeetingController extends GetxController {
 
   void clearForm() {
     _setCurrentDateTime();
-    inspectorNameController.clear();
-    latitudeController.clear();
-    longitudeController.clear();
+    // Inspector and GPS defaults remain available for the next meeting.
     venueLocationController.clear();
     topicOfDiscussionController.clear();
     numberOfParticipantsController.clear();
     selectedRegion.value = '';
     selectedDistrict.value = '';
-    currentLatitude.value = 0.0;
-    currentLongitude.value = 0.0;
   }
 
   void _setCurrentDateTime() {

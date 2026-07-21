@@ -153,8 +153,6 @@ class CssActivityCard extends StatelessWidget {
     }
   }
 
-  
-
   String _getPersonTypeText(int type) {
     switch (type) {
       case 1:
@@ -436,7 +434,8 @@ class CssActivityCard extends StatelessWidget {
                             _getRegionName(activity.intRegion), Iconsax.map),
                         _buildModernDetailRow(
                             'District',
-                            RegionDistrictConstants.getDistrictName(activity.districtId ?? 1),
+                            RegionDistrictConstants.getDistrictName(
+                                activity.districtId ?? 1),
                             Iconsax.building),
                       ],
                     ),
@@ -462,19 +461,19 @@ class CssActivityCard extends StatelessWidget {
                               'License Status',
                               _getLicenseStatusText(activity.licenseStatus),
                               Iconsax.shield_tick),
-                          if (activity.licenseStatus == 1) ...[  
-                          _buildModernDetailRow(
-                              'License Number',
-                              activity.licenseNo.isNotEmpty
-                                  ? activity.licenseNo
-                                  : 'Not provided',
-                              Iconsax.document),
-                          _buildModernDetailRow(
-                              'License Expiry Date',
-                              activity.licenseExpiryDate.isNotEmpty
-                                  ? activity.licenseExpiryDate
-                                  : 'Not provided',
-                              Iconsax.calendar),
+                          if (activity.licenseStatus == 1) ...[
+                            _buildModernDetailRow(
+                                'License Number',
+                                activity.licenseNo.isNotEmpty
+                                    ? activity.licenseNo
+                                    : 'Not provided',
+                                Iconsax.document),
+                            _buildModernDetailRow(
+                                'License Expiry Date',
+                                activity.licenseExpiryDate.isNotEmpty
+                                    ? activity.licenseExpiryDate
+                                    : 'Not provided',
+                                Iconsax.calendar),
                           ],
                           if (activity.previouslyLicensed.isNotEmpty)
                             _buildModernDetailRow(
@@ -524,11 +523,8 @@ class CssActivityCard extends StatelessWidget {
                               'Record Keeping',
                               _getRecordKeepingText(activity.recordKeeping),
                               Iconsax.document_text),
-                          _buildModernDetailRow(
-                              'Action Taken',
-                              activity.action.isEmpty ? 'Not specified' : activity.action,
-                              Iconsax.warning_2),
-                          
+                          _buildModernDetailRow('Action Taken',
+                              activity.actionText, Iconsax.warning_2),
                         ],
                       ),
                     ],

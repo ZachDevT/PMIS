@@ -120,7 +120,8 @@ class EnforcementService {
       } else {
         try {
           apiData['inspectionDate'] =
-              DateTime.parse(data['inspectionDate'].toString()).toIso8601String();
+              DateTime.parse(data['inspectionDate'].toString())
+                  .toIso8601String();
         } catch (e) {
           apiData['inspectionDate'] = DateTime.now().toIso8601String();
         }
@@ -155,17 +156,24 @@ class EnforcementService {
     apiData['longitude'] = lon;
 
     // Region / District
-    apiData['intRegion'] =
-        data['region'] != null ? _getRegionGuid(data['region'].toString()) : null;
-    apiData['districtId'] =
-        data['district'] != null ? _getDistrictId(data['district'].toString()) : null;
+    apiData['intRegion'] = data['region'] != null
+        ? _getRegionGuid(data['region'].toString())
+        : null;
+    apiData['districtId'] = data['district'] != null
+        ? _getDistrictId(data['district'].toString())
+        : null;
 
     // Facility details
     apiData['facilityName'] = data['facilityName'];
     apiData['facilityStatus'] = _getFacilityStatus(data['facilityStatus']);
     // Map person found at facility
-    final personStr = data['personFoundAtFacility']?.toString().toUpperCase() ?? '';
-    apiData['facilityPersonType'] = personStr.isNotEmpty ? 1 : 0;
+    final personStr =
+        data['personFoundAtFacility']?.toString().toLowerCase() ?? '';
+    apiData['facilityPersonType'] = personStr.contains('attendant')
+        ? 2
+        : personStr.contains('in-charge')
+            ? 1
+            : 0;
     apiData['personName'] = data['personName'];
     apiData['contact'] = data['contact'];
     apiData['qualificationId'] = data['qualificationId'] ??
@@ -173,7 +181,7 @@ class EnforcementService {
             .idForName(data['qualifications']?.toString() ?? '');
     apiData['categoryOfpremises'] =
         _getCategoryOfPremises(data['categoryOfPremises']);
-        
+
     // In enforcement, "Category of Drugs" maps to "categoryOfpremisesOther" maybe?
     // According to API, it has categoryOfpremisesOther, but no categoryOfDrugs.
     // Or we just ignore it.
@@ -183,19 +191,22 @@ class EnforcementService {
     if (data.containsKey('licenseNo') && data['licenseNo'] != null) {
       apiData['licenseNo'] = data['licenseNo'];
     }
-    
+
     // VERY IMPORTANT: The API expects licenseExpDate NOT licenseExpiryDate
-    if (data.containsKey('licenseExpiryDate') && data['licenseExpiryDate'] != null && data['licenseExpiryDate'].toString().isNotEmpty) {
+    if (data.containsKey('licenseExpiryDate') &&
+        data['licenseExpiryDate'] != null &&
+        data['licenseExpiryDate'].toString().isNotEmpty) {
       // Extract only the date part YYYY-MM-DD to satisfy DateOnly API requirement
-      apiData['licenseExpDate'] = data['licenseExpiryDate'].toString().split('T')[0].split(' ')[0];
+      apiData['licenseExpDate'] =
+          data['licenseExpiryDate'].toString().split('T')[0].split(' ')[0];
     }
 
     // Category and enforcement action
     apiData['categoryStatus'] = _mapCategoryStatus(data['categoryStatus']);
-    
+
     final actionCode = _mapEnforcementAction(data['enforcementActionTaken']);
     apiData['enfAction'] = actionCode.toString();
-    
+
     apiData['comments'] = data['comments'];
 
     return apiData;
@@ -343,9 +354,9 @@ class EnforcementService {
       print('🌐 DEBUG: Enforcement API URL: $uri');
 
       // Convert to API format
-      final Map<String, dynamic> apiData =
-          _mapToApiFormat(enforcementData);
-      print('Converted Enforcement API data: $apiData'); // Debug log    print('📤 DEBUG: Sending POST request to Enforcement API...');
+      final Map<String, dynamic> apiData = _mapToApiFormat(enforcementData);
+      print(
+          'Converted Enforcement API data: $apiData'); // Debug log    print('📤 DEBUG: Sending POST request to Enforcement API...');
       final response = await http
           .post(
             uri,

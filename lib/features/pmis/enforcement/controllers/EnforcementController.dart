@@ -232,8 +232,12 @@ class EnforcementController extends GetxController {
         previouslyLicensed: selectedFacilityStatus.value == "Closed"
             ? ""
             : selectedPreviouslyLicensed.value,
-        enforcementActionTaken: selectedEnforcementActions.join(", "),
-        comments: commentsController.text,
+        enforcementActionTaken: selectedFacilityStatus.value == "Closed"
+            ? ""
+            : selectedEnforcementActions.join(", "),
+        comments: selectedFacilityStatus.value == "Closed"
+            ? ""
+            : commentsController.text,
         createdAt: DateTime.now(),
         inspectorName: inspectorNameController.text,
         inspectorId: inspectorIdController.text,
