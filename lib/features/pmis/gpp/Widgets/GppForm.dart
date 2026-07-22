@@ -100,7 +100,7 @@ class GppForm extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("GPP Details",
+              const Text("GPP",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
               TcircularIcon(
                 width: 40,
@@ -255,7 +255,7 @@ class GppForm extends StatelessWidget {
                                         fontSize: 14,
                                         fontWeight: FontWeight.w500)),
                                 buildDropdown(
-                                  label: "Category of Facility",
+                                  label: "Category of Premises",
                                   items: [
                                     "Wholesale Pharmacy - Human",
                                     "Wholesale Pharmacy - Vet",
@@ -289,7 +289,7 @@ class GppForm extends StatelessWidget {
                                   ),
                                 ],
                                 buildDropdown(
-                                  label: "Licensed/Unlicensed",
+                                  label: "License Status",
                                   items: [
                                     "Licensed",
                                     "Un-Licensed",

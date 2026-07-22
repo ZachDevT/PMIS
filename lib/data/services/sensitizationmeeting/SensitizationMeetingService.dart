@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 
 class SensitizationMeetingService {
   static const _baseUrl = 'http://pmis.nda.or.ug/api';
@@ -33,7 +34,8 @@ class SensitizationMeetingService {
     } catch (e) {
       if (e is ApiException) rethrow;
       // Check if it's a timeout error
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
         throw const TimeoutException('Request timeout. Please try again.');
       }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
@@ -79,27 +81,30 @@ class SensitizationMeetingService {
     if (apiData.containsKey('region') && !apiData.containsKey('intRegion')) {
       apiData['intRegion'] = _getRegionGuid(apiData['region'].toString());
     }
-    
+
     // Map 'district' to 'districtId'
     if (apiData.containsKey('district') && !apiData.containsKey('districtId')) {
       apiData['districtId'] = _getDistrictId(apiData['district'].toString());
     }
-    
+
     // Map 'venueLocation' to 'facilityName'
-    if (apiData.containsKey('venueLocation') && !apiData.containsKey('facilityName')) {
+    if (apiData.containsKey('venueLocation') &&
+        !apiData.containsKey('facilityName')) {
       apiData['facilityName'] = apiData['venueLocation'];
     }
-    
+
     // Map 'topicOfDiscussion' to 'topic'
-    if (apiData.containsKey('topicOfDiscussion') && !apiData.containsKey('topic')) {
+    if (apiData.containsKey('topicOfDiscussion') &&
+        !apiData.containsKey('topic')) {
       apiData['topic'] = apiData['topicOfDiscussion'];
     }
-    
+
     // Map 'numberOfParticipants' to 'participants'
-    if (apiData.containsKey('numberOfParticipants') && !apiData.containsKey('participants')) {
+    if (apiData.containsKey('numberOfParticipants') &&
+        !apiData.containsKey('participants')) {
       apiData['participants'] = apiData['numberOfParticipants'];
     }
-    
+
     // Remove local-only keys to keep payload clean
     apiData.remove('id');
     apiData.remove('region');
@@ -112,30 +117,11 @@ class SensitizationMeetingService {
   }
 
   static String _getRegionGuid(String regionName) {
-    switch (regionName.toUpperCase()) {
-      case 'HEAD OFFICE':
-        return 'deaf2c98-3dbb-489f-bdea-9e5fd49eec78';
-      case 'CENTRAL':
-        return '87ddeda4-cef9-4e7b-ad44-34bb56081916';
-      case 'EASTERN':
-        return 'e9b78052-b51b-417f-b3b6-72b8ff3c4b9a';
-      case 'SOUTHERN':
-        return '0b44f4f9-1423-4688-afd4-2369147e0f8f';
-      case 'WESTERN':
-        return 'de9b2845-56c4-4a19-8a0f-607bfd5c8689';
-      default:
-        return 'deaf2c98-3dbb-489f-bdea-9e5fd49eec78';
-    }
+    return RegionDistrictConstants.getRegionGuid(regionName.toUpperCase());
   }
 
   static int _getDistrictId(String districtName) {
-    switch (districtName.toUpperCase()) {
-      case 'KAMPALA': return 1;
-      case 'MASAKA': return 2;
-      case 'KABALE': return 3;
-      case 'FORTPORTAL': return 4;
-      default: return 1;
-    }
+    return RegionDistrictConstants.getDistrictId(districtName);
   }
 
   /// Post Sensitization Meeting data to the API
@@ -143,7 +129,7 @@ class SensitizationMeetingService {
       Map<String, dynamic> meetingData) async {
     try {
       final uri = Uri.parse('$_baseUrl/SM');
-      
+
       final Map<String, dynamic> apiData = _mapToApiFormat(meetingData);
       print('Converted Sensitization API data: $apiData'); // Debug log
 
@@ -169,7 +155,8 @@ class SensitizationMeetingService {
     } catch (e) {
       if (e is ApiException) rethrow;
       // Check if it's a timeout error
-      if (e.toString().contains('TimeoutException') || e.toString().contains('Future not completed')) {
+      if (e.toString().contains('TimeoutException') ||
+          e.toString().contains('Future not completed')) {
         throw const TimeoutException('Request timeout. Please try again.');
       }
       throw NetworkException('An unexpected error occurred: ${e.toString()}');
@@ -190,7 +177,8 @@ class SensitizationMeetingService {
         throw const AuthException('Access forbidden.');
       case 404:
         // API endpoint not found/not implemented - throw exception so data can be saved locally
-        throw const ServerException('API endpoint not found. Data will be saved locally for sync.');
+        throw const ServerException(
+            'API endpoint not found. Data will be saved locally for sync.');
       case 500:
         throw const ServerException('Server error. Please try again later.');
       default:

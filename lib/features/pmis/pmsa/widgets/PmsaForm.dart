@@ -102,7 +102,7 @@ class PmsaForm extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("PMSA Details",
+              const Text("Post Market Surveillance Activity",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
               TcircularIcon(
                 width: 40,
@@ -249,7 +249,7 @@ class PmsaForm extends StatelessWidget {
                                 style: TextStyle(
                                     fontSize: 14, fontWeight: FontWeight.w500)),
                             buildDropdown(
-                              label: "Category of Facility",
+                              label: "Category of Premises",
                               items: [
                                 "Wholesale Pharmacy - Human",
                                 "Wholesale Pharmacy - Vet",
@@ -271,7 +271,7 @@ class PmsaForm extends StatelessWidget {
                               prefixIcon: Icons.category,
                             ),
                             buildDropdown(
-                              label: "Licensed/Unlicensed",
+                              label: "License Status",
                               items: [
                                 "Licensed",
                                 "Un-Licensed",

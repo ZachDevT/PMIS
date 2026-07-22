@@ -267,7 +267,7 @@ class CssForm extends StatelessWidget {
                           ),
                         ],
                         buildDropdown(
-                          label: "Licensed Status",
+                          label: "License Status",
                           items: ["Licensed", "Un-Licensed", "Not-Applicable"],
                           selectedItem: controller.selectedLicensedStatus,
                           prefixIcon: Icons.verified_user,

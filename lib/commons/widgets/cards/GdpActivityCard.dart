@@ -28,18 +28,7 @@ class GdpActivityCard extends StatelessWidget {
   }
 
   String _getRegionName(String guid) {
-    switch (guid) {
-      case "deaf2c98-3dbb-489f-bdea-9e5fd49eec78":
-        return "Central Region";
-      case "57a2afce-98b8-48b2-984e-cc04e3d84264":
-        return "Eastern Region";
-      case "12345678-1234-1234-1234-123456789012":
-        return "Northern Region";
-      case "87654321-4321-4321-4321-210987654321":
-        return "Western Region";
-      default:
-        return "Central Region";
-    }
+    return RegionDistrictConstants.getRegionName(guid);
   }
 
   String _getFacilityStatusText(int status) {
@@ -95,9 +84,9 @@ class GdpActivityCard extends StatelessWidget {
   String _getRecommendationText(int recommendation) {
     switch (recommendation) {
       case 1:
-        return 'GDP certification';
+        return 'Not Recommended for GDP';
       case 0:
-        return 'Not recommended for GDP certification';
+        return 'Recommended for GDP';
       default:
         return 'Unknown';
     }
@@ -417,15 +406,20 @@ class GdpActivityCard extends StatelessWidget {
                           if (activity.licenseStatus == 1) ...[
                             _buildModernDetailRow(
                                 'License Number',
-                                activity.licenseNo != null && activity.licenseNo!.isNotEmpty ? activity.licenseNo! : 'N/A',
+                                activity.licenseNo != null &&
+                                        activity.licenseNo!.isNotEmpty
+                                    ? activity.licenseNo!
+                                    : 'N/A',
                                 Iconsax.document),
-                            if (activity.licenseExpiryDate != null && activity.licenseExpiryDate!.isNotEmpty)
+                            if (activity.licenseExpiryDate != null &&
+                                activity.licenseExpiryDate!.isNotEmpty)
                               _buildModernDetailRow(
                                   'License Expiry Date',
                                   activity.licenseExpiryDate!,
                                   Iconsax.calendar),
                           ],
-                          if (activity.previouslyLicensed != null && activity.previouslyLicensed!.isNotEmpty)
+                          if (activity.previouslyLicensed != null &&
+                              activity.previouslyLicensed!.isNotEmpty)
                             _buildModernDetailRow(
                                 'Previously Licensed / Illegal Outlet',
                                 activity.previouslyLicensed!,

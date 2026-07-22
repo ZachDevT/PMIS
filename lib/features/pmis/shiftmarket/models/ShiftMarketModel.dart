@@ -84,7 +84,9 @@ class ShiftMarketModel {
       inspectorName: json['inspectorName'] ?? '',
       latitude: (json['latitude'] ?? 0.0).toDouble(),
       longitude: (json['longitude'] ?? 0.0).toDouble(),
-      region: _getRegionName(json['intRegion']),
+      region: RegionDistrictConstants.getRegionNameForDistrictId(
+          json['districtId'],
+          fallbackGuid: json['intRegion'] ?? ''),
       district: _getDistrictName(json['districtId']),
       facilityName: json['facilityName'] ?? '',
       personFoundAtFacility: json['personFoundAtFacility'] ?? '',
@@ -104,7 +106,8 @@ class ShiftMarketModel {
       previouslyLicensed:
           json['previouslyLicensed'] ?? json['PreviouslyLicensed'] ?? '',
       regulatoryActionTaken: json['regulatoryAction'] ?? '',
-      consignmentsImpounded: json['consignmentsImpounded'] ?? '',
+      consignmentsImpounded:
+          json['consignment'] ?? json['consignmentsImpounded'] ?? '',
       createdAt:
           json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
       updatedAt:

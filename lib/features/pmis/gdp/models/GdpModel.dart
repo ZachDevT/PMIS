@@ -1,4 +1,5 @@
 import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 
 class GdpModel {
   final int id;
@@ -84,7 +85,9 @@ class GdpModel {
               : ((json['latitude'] != null || json['Latitude'] != null)
                   ? 'Lat: ${json['latitude'] ?? json['Latitude']}, Lon: ${json['longitude'] ?? json['Longitude']}'
                   : ''),
-      intRegion: json['intRegion'] ?? json['IntRegion'] ?? '',
+      intRegion: RegionDistrictConstants.getRegionGuidForDistrictId(
+          json['districtId'] ?? json['DistrictId'],
+          fallbackGuid: json['intRegion'] ?? json['IntRegion'] ?? ''),
       districtId: json['districtId'] ?? json['DistrictId'] ?? 0,
       facilityName: json['facilityName'] ?? json['FacilityName'] ?? '',
       facilityStatus: json['facilityStatus'] ?? 0,
@@ -246,9 +249,9 @@ class GdpModel {
   String _getRecommendedForGdpText(int recommendation) {
     switch (recommendation) {
       case 1:
-        return 'GDP certification';
+        return 'Not Recommended for GDP';
       case 0:
-        return 'Not recommended for GDP certification';
+        return 'Recommended for GDP';
       default:
         return 'Unknown';
     }

@@ -1,4 +1,5 @@
 import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 
 class PmsModel {
   final int id;
@@ -88,7 +89,9 @@ class PmsModel {
       inspectorId: inspectorId,
       latitude: (json['latitude'] ?? json['Latitude'] ?? 0).toDouble(),
       longitude: (json['longitude'] ?? json['Longitude'] ?? 0).toDouble(),
-      intRegion: json['intRegion'] ?? json['IntRegion'] ?? '',
+      intRegion: RegionDistrictConstants.getRegionGuidForDistrictId(
+          json['districtId'] ?? json['DistrictId'],
+          fallbackGuid: json['intRegion'] ?? json['IntRegion'] ?? ''),
       districtId: json['districtId'] ?? json['DistrictId'] ?? 0,
       facilityName: json['facilityName'] ?? json['FacilityName'] ?? '',
       facilityStatus: json['facilityStatus'] ?? 0,

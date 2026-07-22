@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 
 class ShiftMarketService {
   static const _baseUrl = 'http://pmis.nda.or.ug/api';
@@ -118,7 +119,8 @@ class ShiftMarketService {
       } else {
         try {
           apiData['inspectionDate'] =
-              DateTime.parse(data['inspectionDate'].toString()).toIso8601String();
+              DateTime.parse(data['inspectionDate'].toString())
+                  .toIso8601String();
         } catch (e) {
           apiData['inspectionDate'] = DateTime.now().toIso8601String();
         }
@@ -135,17 +137,21 @@ class ShiftMarketService {
     apiData['latitude'] = lat;
     apiData['longitude'] = lon;
 
-    apiData['intRegion'] =
-        data['region'] != null ? _getRegionGuid(data['region'].toString()) : null;
-    apiData['districtId'] =
-        data['district'] != null ? _getDistrictId(data['district'].toString()) : null;
+    apiData['intRegion'] = data['region'] != null
+        ? _getRegionGuid(data['region'].toString())
+        : null;
+    apiData['districtId'] = data['district'] != null
+        ? _getDistrictId(data['district'].toString())
+        : null;
 
     apiData['facilityName'] = data['facilityName'];
     // Map facility status from string (OPEN/CLOSED) to int
-    final statusStr = data['facilityStatus']?.toString().toUpperCase() ?? 'OPEN';
+    final statusStr =
+        data['facilityStatus']?.toString().toUpperCase() ?? 'OPEN';
     apiData['facilityStatus'] = statusStr.contains('CLOSE') ? 0 : 1;
     // Map person found at facility
-    final personStr = data['personFoundAtFacility']?.toString().toUpperCase() ?? '';
+    final personStr =
+        data['personFoundAtFacility']?.toString().toUpperCase() ?? '';
     apiData['facilityPersonType'] = personStr.contains('YES') ? 1 : 0;
     apiData['personName'] = data['personName'];
     apiData['contact'] = data['contact'];
@@ -159,7 +165,7 @@ class ShiftMarketService {
       apiData['licenseNo'] = data['licenseNo'];
     }
     if (data.containsKey('licenseExpiryDate') &&
-        data['licenseExpiryDate'] != null && 
+        data['licenseExpiryDate'] != null &&
         data['licenseExpiryDate'].toString().isNotEmpty) {
       apiData['licenseExpDate'] = data['licenseExpiryDate'];
     }
@@ -167,7 +173,8 @@ class ShiftMarketService {
     // Actions
     // Shift Market Specific fields might map to other API fields:
     apiData['regulatoryAction'] = data['regulatoryActionTaken'];
-    apiData['consignmentsImpounded'] = data['consignmentsImpounded'];
+    apiData['consignment'] =
+        data['consignmentsImpounded'] ?? data['consignment'] ?? '';
     apiData['unlicensed'] = data['previouslyLicensed'] ?? '';
 
     return apiData;
@@ -177,47 +184,21 @@ class ShiftMarketService {
     if (status is int) return status;
     if (status is String) {
       final s = status.toLowerCase();
-      if (s.contains('licensed')) return 1;
       if (s.contains('un')) return 2;
       if (s.contains('not')) return 3;
+      if (s.contains('licensed')) return 1;
     }
     return 1;
   }
 
   /// Get region GUID from region name
   String _getRegionGuid(String regionName) {
-    switch (regionName.toUpperCase()) {
-      case 'HEAD OFFICE':
-        return 'deaf2c98-3dbb-489f-bdea-9e5fd49eec78';
-      case 'CENTRAL':
-        return '87ddeda4-cef9-4e7b-ad44-34bb56081916';
-      case 'EASTERN':
-        return 'e9b78052-b51b-417f-b3b6-72b8ff3c4b9a';
-      case 'SOUTHERN':
-        return '0b44f4f9-1423-4688-afd4-2369147e0f8f';
-      case 'WESTERN':
-        return 'de9b2845-56c4-4a19-8a0f-607bfd5c8689';
-      case 'NORTHERN':
-        return '87ddeda4-cef9-4e7b-ad44-34bb56081916';
-      default:
-        return 'deaf2c98-3dbb-489f-bdea-9e5fd49eec78';
-    }
+    return RegionDistrictConstants.getRegionGuid(regionName.toUpperCase());
   }
 
   /// Get district ID from district name
   int _getDistrictId(String districtName) {
-    switch (districtName.toUpperCase()) {
-      case 'KAMPALA':
-        return 1;
-      case 'MASAKA':
-        return 2;
-      case 'KABALE':
-        return 3;
-      case 'FORTPORTAL':
-        return 4;
-      default:
-        return 1;
-    }
+    return RegionDistrictConstants.getDistrictId(districtName);
   }
 
   /// Get facility status code
@@ -267,9 +248,9 @@ class ShiftMarketService {
       print('🌐 DEBUG: ShiftMarket API URL: $uri');
 
       // Convert to API format
-      final Map<String, dynamic> apiData =
-          _mapToApiFormat(shiftMarketData);
-      print('Converted ShiftMarket API data: $apiData'); // Debug log    print('📤 DEBUG: Sending POST request to ShiftMarket API...');
+      final Map<String, dynamic> apiData = _mapToApiFormat(shiftMarketData);
+      print(
+          'Converted ShiftMarket API data: $apiData'); // Debug log    print('📤 DEBUG: Sending POST request to ShiftMarket API...');
       final response = await http
           .post(
             uri,

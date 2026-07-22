@@ -1,4 +1,5 @@
 import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 
 class CssModel {
   final int id;
@@ -88,7 +89,9 @@ class CssModel {
       inspectorId: inspectorId,
       latitude: (json['latitude'] ?? json['Latitude'] ?? 0).toDouble(),
       longitude: (json['longitude'] ?? json['Longitude'] ?? 0).toDouble(),
-      intRegion: json['intRegion'] ?? json['IntRegion'] ?? '',
+      intRegion: RegionDistrictConstants.getRegionGuidForDistrictId(
+          json['districtId'] ?? json['DistrictId'],
+          fallbackGuid: json['intRegion'] ?? json['IntRegion'] ?? ''),
       districtId: json['districtId'] ?? json['DistrictId'] ?? 0,
       facilityName: json['facilityName'] ?? json['FacilityName'] ?? '',
       // The API has historical CSS rows with null or unsupported status
@@ -334,6 +337,9 @@ class CssModel {
   }
 
   String get actionText => _getActionText(action);
+  String get classOfDrugsText => _getClassOfDrugsText(classofDrugs);
+  String get unregisteredDrugsText =>
+      _getUnregisteredDrugsText(unRegisteredDrug);
 
   CssModel copyWith({
     int? id,

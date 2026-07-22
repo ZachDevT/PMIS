@@ -106,7 +106,9 @@ class EnforcementModel {
               : ((json['latitude'] != null || json['Latitude'] != null)
                   ? 'Lat: ${json['latitude'] ?? json['Latitude']}, Lon: ${json['longitude'] ?? json['Longitude']}'
                   : ''),
-      region: _getRegionName(json['intRegion']),
+      region: RegionDistrictConstants.getRegionNameForDistrictId(
+          json['districtId'],
+          fallbackGuid: json['intRegion'] ?? ''),
       district: _getDistrictName(json['districtId']),
       facilityName: json['facilityName'] ?? '',
       facilityStatus: _getFacilityStatusName(json['facilityStatus']),
@@ -262,9 +264,17 @@ class EnforcementModel {
   /// Convert enforcement action code to name
   static String _getEnforcementActionName(dynamic action) {
     if (action == null) return '';
-    final int? parsedAction =
-        action is int ? action : int.tryParse(action.toString());
-    if (parsedAction == null) return 'No Action Taken';
+    final raw = action.toString().trim();
+    if (raw.contains(',')) {
+      return raw
+          .split(',')
+          .map((value) => _getEnforcementActionName(value.trim()))
+          .where((value) => value.isNotEmpty)
+          .toSet()
+          .join(', ');
+    }
+    final int? parsedAction = action is int ? action : int.tryParse(raw);
+    if (parsedAction == null) return raw;
     switch (parsedAction) {
       case 1:
         return 'Impound';

@@ -190,7 +190,8 @@ class EnforcementController extends GetxController {
         inspectionDate:
             "${inspectionDateController.text} ${inspectionTimeController.text}",
         gps: "${currentLatitude.value}, ${currentLongitude.value}",
-        region: selectedRegion.value,
+        region: RegionDistrictConstants.getRegionForDistrict(
+            selectedDistrict.value),
         district: selectedDistrict.value,
         facilityName: facilityNameController.text,
         facilityStatus: selectedFacilityStatus.value,
@@ -358,10 +359,13 @@ class EnforcementController extends GetxController {
 
     // Sort by creation date (latest first)
     filtered.sort((a, b) {
-      if (a.createdAt == null && b.createdAt == null) return 0;
-      if (a.createdAt == null) return 1;
-      if (b.createdAt == null) return -1;
-      return b.createdAt!.compareTo(a.createdAt!);
+      final aDate = a.createdAt ??
+          DateTime.tryParse(a.inspectionDate) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      final bDate = b.createdAt ??
+          DateTime.tryParse(b.inspectionDate) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      return bDate.compareTo(aDate);
     });
 
     filteredActivities.value = filtered;

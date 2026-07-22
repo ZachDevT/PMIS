@@ -30,7 +30,7 @@ class RtsForm extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Radio Talk Show Details",
+              const Text("Radio Talk Shows",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
               TcircularIcon(
                 width: 40,

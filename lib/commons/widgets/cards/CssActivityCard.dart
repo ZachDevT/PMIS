@@ -27,18 +27,7 @@ class CssActivityCard extends StatelessWidget {
   }
 
   String _getRegionName(String guid) {
-    switch (guid) {
-      case "deaf2c98-3dbb-489f-bdea-9e5fd49eec78":
-        return "Central Region";
-      case "57a2afce-98b8-48b2-984e-cc04e3d84264":
-        return "Eastern Region";
-      case "12345678-1234-1234-1234-123456789012":
-        return "Northern Region";
-      case "87654321-4321-4321-4321-210987654321":
-        return "Western Region";
-      default:
-        return "Central Region";
-    }
+    return RegionDistrictConstants.getRegionName(guid);
   }
 
   String _getDistrictName(int? districtId) {
@@ -523,6 +512,17 @@ class CssActivityCard extends StatelessWidget {
                               'Record Keeping',
                               _getRecordKeepingText(activity.recordKeeping),
                               Iconsax.document_text),
+                          _buildModernDetailRow('Class of Drugs',
+                              activity.classOfDrugsText, Iconsax.book),
+                          _buildModernDetailRow(
+                              'Unregistered Drugs',
+                              activity.unregisteredDrugsText,
+                              Iconsax.warning_2),
+                          if (activity.unRegDrugQty.isNotEmpty)
+                            _buildModernDetailRow(
+                                'Unregistered Drug Name and Quantity',
+                                activity.unRegDrugQty,
+                                Iconsax.document_text),
                           _buildModernDetailRow('Action Taken',
                               activity.actionText, Iconsax.warning_2),
                         ],

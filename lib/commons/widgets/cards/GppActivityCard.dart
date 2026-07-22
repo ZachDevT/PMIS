@@ -723,19 +723,7 @@ class GppActivityCard extends StatelessWidget {
   }
 
   String _getRegionName(String guid) {
-    // Map GUIDs back to region names for display
-    switch (guid) {
-      case "deaf2c98-3dbb-489f-bdea-9e5fd49eec78":
-        return "Central Region";
-      case "57a2afce-98b8-48b2-984e-cc04e3d84264":
-        return "Eastern Region";
-      case "12345678-1234-1234-1234-123456789012":
-        return "Northern Region";
-      case "87654321-4321-4321-4321-210987654321":
-        return "Western Region";
-      default:
-        return "Central Region";
-    }
+    return RegionDistrictConstants.getRegionName(guid);
   }
 
   String _getDistrictName(int? districtId) {

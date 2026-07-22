@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:pmis/utils/exceptions/api_exceptions.dart';
 import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 
 class PmsService {
   static const _baseUrl = 'http://pmis.nda.or.ug/api';
@@ -268,35 +269,11 @@ class PmsService {
   }
 
   String _getRegionGuid(String regionName) {
-    switch (regionName.toUpperCase()) {
-      case 'HEAD OFFICE':
-        return 'deaf2c98-3dbb-489f-bdea-9e5fd49eec78';
-      case 'CENTRAL':
-        return '87ddeda4-cef9-4e7b-ad44-34bb56081916';
-      case 'EASTERN':
-        return 'e9b78052-b51b-417f-b3b6-72b8ff3c4b9a';
-      case 'SOUTHERN':
-        return '0b44f4f9-1423-4688-afd4-2369147e0f8f';
-      case 'WESTERN':
-        return 'de9b2845-56c4-4a19-8a0f-607bfd5c8689';
-      default:
-        return 'deaf2c98-3dbb-489f-bdea-9e5fd49eec78';
-    }
+    return RegionDistrictConstants.getRegionGuid(regionName.toUpperCase());
   }
 
   int _getDistrictId(String districtName) {
-    switch (districtName.toUpperCase()) {
-      case 'KAMPALA':
-        return 1;
-      case 'MASAKA':
-        return 2;
-      case 'KABALE':
-        return 3;
-      case 'FORTPORTAL':
-        return 4;
-      default:
-        return 1;
-    }
+    return RegionDistrictConstants.getDistrictId(districtName);
   }
 
   /// Post PMS data to the API

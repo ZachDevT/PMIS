@@ -1,4 +1,5 @@
 import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
+import 'package:pmis/utils/constants/regions_districts.dart';
 
 class GppActivity {
   final int id;
@@ -67,7 +68,9 @@ class GppActivity {
                 : ((json['latitude'] != null || json['Latitude'] != null)
                     ? 'Lat: ${json['latitude'] ?? json['Latitude']}, Lon: ${json['longitude'] ?? json['Longitude']}'
                     : ''),
-        intRegion: json['intRegion'] ?? '',
+        intRegion: RegionDistrictConstants.getRegionGuidForDistrictId(
+            _asInt(json['districtId']),
+            fallbackGuid: json['intRegion'] ?? ''),
         districtId: json['districtId'] ?? 0,
         facilityName: json['facilityName'] ?? '',
         facilityStatus: json['facilityStatus'] ?? 1,

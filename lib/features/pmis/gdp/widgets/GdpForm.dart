@@ -98,7 +98,7 @@ class GdpForm extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("GDP Details",
+              const Text("GDP",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
               TcircularIcon(
                 width: 40,
@@ -248,7 +248,7 @@ class GdpForm extends StatelessWidget {
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500)),
                               buildDropdown(
-                                label: "Category of Facility",
+                                label: "Category of Premises",
                                 items: [
                                   "Wholesale Pharmacy - Human",
                                   "Wholesale Pharmacy - Vet",
@@ -380,8 +380,8 @@ class GdpForm extends StatelessWidget {
                               buildDropdown(
                                 label: "Recommended for GDP",
                                 items: [
-                                  "GDP certification",
-                                  "Not recommended for GDP certification"
+                                  "Not Recommended for GDP",
+                                  "Recommended for GDP"
                                 ],
                                 selectedItem: controller.recommendedForGpp,
                                 prefixIcon: Icons.recommend,

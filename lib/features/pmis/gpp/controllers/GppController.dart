@@ -252,7 +252,9 @@ class GppController extends GetxController {
             "${inspectionDateController.text} ${inspectionTimeController.text}"),
         inspectorName: inspectorNameController.text,
         gps: gpsLocationController.text,
-        intRegion: _getRegionGuid(selectedRegion.value),
+        intRegion: RegionDistrictConstants.getRegionGuid(
+            RegionDistrictConstants.getRegionForDistrict(
+                selectedDistrict.value)),
         districtId: _getDistrictId(selectedDistrict.value),
         facilityName: facilityNameController.text,
         facilityStatus: _getFacilityStatus(selectedFacilityStatus.value),

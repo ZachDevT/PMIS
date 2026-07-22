@@ -45,8 +45,8 @@ class ShiftMarketController extends GetxController {
   final facilityNameController = TextEditingController();
 
   // Section: Facility Details
-    var selectedFacilityStatus = ''.obs;
-    var selectedPersonFoundAtFacility =
+  var selectedFacilityStatus = ''.obs;
+  var selectedPersonFoundAtFacility =
       ''.obs; // New field replacing removed person fields
 
   // Section: Category and Actions
@@ -103,7 +103,8 @@ class ShiftMarketController extends GetxController {
 
   void _initializeForm() {
     // Set default values
-    inspectionDateController.text = DateTime.now().toLocal().toString().split(' ')[0];
+    inspectionDateController.text =
+        DateTime.now().toLocal().toString().split(' ')[0];
     final now = DateTime.now();
     inspectionTimeController.text =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00';
@@ -151,49 +152,51 @@ class ShiftMarketController extends GetxController {
   /// Submit ShiftMarket activity
   Future<void> submitActivity() async {
     if (!formKey.currentState!.validate()) {
-        Loaders.errorSnackbar(
-          title: "Incomplete Form",
-          message: "Please fill in all the required fields.",
-        );
-        return;
-      }
+      Loaders.errorSnackbar(
+        title: "Incomplete Form",
+        message: "Please fill in all the required fields.",
+      );
+      return;
+    }
 
     try {
       isSubmitting.value = true;
 
       // Create ShiftMarket model
-        final shiftMarketActivity = ShiftMarketModel(
-        inspectionDate: "${inspectionDateController.text} ${inspectionTimeController.text}",
+      final shiftMarketActivity = ShiftMarketModel(
+        inspectionDate:
+            "${inspectionDateController.text} ${inspectionTimeController.text}",
         inspectorName: inspectorNameController.text,
         latitude: currentLatitude.value,
         longitude: currentLongitude.value,
-        region: selectedRegion.value,
+        region: RegionDistrictConstants.getRegionForDistrict(
+            selectedDistrict.value),
         district: selectedDistrict.value,
         facilityName: facilityNameController.text,
         facilityStatus: selectedFacilityStatus.value,
         personFoundAtFacility: selectedFacilityStatus.value == 'Closed'
-          ? ''
-          : selectedPersonFoundAtFacility.value,
+            ? ''
+            : selectedPersonFoundAtFacility.value,
         categoryOfPremises: selectedFacilityStatus.value == 'Closed'
-          ? ''
-          : selectedCategoryOfPremises.value,
+            ? ''
+            : selectedCategoryOfPremises.value,
         licenseStatus: selectedFacilityStatus.value == 'Closed'
-          ? ''
-          : selectedLicenseStatus.value,
+            ? ''
+            : selectedLicenseStatus.value,
         licenseNo: selectedFacilityStatus.value == 'Closed'
-          ? ''
-          : licenseNoController.text,
+            ? ''
+            : licenseNoController.text,
         licenseExpiryDate: selectedFacilityStatus.value == 'Closed'
-          ? ''
-          : licenseExpiryController.text,
+            ? ''
+            : licenseExpiryController.text,
         regulatoryActionTaken: regulatoryActionTakenController.text,
         consignmentsImpounded: consignmentsImpoundedController.text,
         previouslyLicensed: selectedFacilityStatus.value == 'Closed'
-          ? ''
-          : selectedPreviouslyLicensed.value,
+            ? ''
+            : selectedPreviouslyLicensed.value,
         createdAt: DateTime.now(),
         isSynced: false,
-        );
+      );
 
       bool online = await NetworkManager.instance.isconnected();
       var activityData = shiftMarketActivity.toJson();
@@ -294,10 +297,13 @@ class ShiftMarketController extends GetxController {
 
     // Sort by creation date (latest first)
     filtered.sort((a, b) {
-      if (a.createdAt == null && b.createdAt == null) return 0;
-      if (a.createdAt == null) return 1;
-      if (b.createdAt == null) return -1;
-      return b.createdAt!.compareTo(a.createdAt!);
+      final aDate = a.createdAt ??
+          DateTime.tryParse(a.inspectionDate) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      final bDate = b.createdAt ??
+          DateTime.tryParse(b.inspectionDate) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      return bDate.compareTo(aDate);
     });
 
     filteredActivities.value = filtered;
@@ -344,7 +350,8 @@ class ShiftMarketController extends GetxController {
         permission = await Geolocator.requestPermission();
       }
 
-      if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+      if (permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse) {
         // 3. Try to get current position with low accuracy and 4s timeout
         Position? position;
         try {
