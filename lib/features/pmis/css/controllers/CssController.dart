@@ -66,7 +66,7 @@ class CssController extends GetxController {
     // Defer activity loading to avoid blocking main thread during initialization
     Future.microtask(() => loadActivities());
     getCurrentLocation(); // Get current location on init
-    _autoFillDefaults();
+    refreshFormDateTime();
 
     // Initialize filtered activities
     ever(activities, (_) => filterActivities());
@@ -77,7 +77,7 @@ class CssController extends GetxController {
     ever(filterCategoryOfDrugs, (_) => filterActivities());
   }
 
-  void _autoFillDefaults() {
+  void refreshFormDateTime() {
     inspectionDateController.text =
         DateTime.now().toLocal().toString().split(' ')[0];
     final now = DateTime.now();
@@ -386,7 +386,7 @@ class CssController extends GetxController {
     selectedActionTaken.clear();
     selectedPreviouslyLicensed.value = '';
 
-    _autoFillDefaults();
+    refreshFormDateTime();
   }
 
   // Helper methods to map form values to API values

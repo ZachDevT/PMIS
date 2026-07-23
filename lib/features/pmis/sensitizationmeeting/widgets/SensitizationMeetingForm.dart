@@ -328,6 +328,32 @@ class SensitizationMeetingForm extends StatelessWidget {
       child: TextFormField(
         controller: controller.inspectionDateController,
         readOnly: true,
+        onTap: () async {
+          final now = DateTime.now();
+          final selectedDate = await showDatePicker(
+            context: context,
+            initialDate: now,
+            firstDate: DateTime(2000),
+            lastDate: DateTime(now.year + 5),
+          );
+          if (selectedDate == null || !context.mounted) return;
+          final selectedTime = await showTimePicker(
+            context: context,
+            initialTime: TimeOfDay.now(),
+            builder: (context, child) => MediaQuery(
+              data:
+                  MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+              child: child!,
+            ),
+          );
+          if (selectedTime == null) return;
+          controller.inspectionDateController.text =
+              '${selectedDate.day.toString().padLeft(2, '0')}/'
+              '${selectedDate.month.toString().padLeft(2, '0')}/'
+              '${selectedDate.year}, '
+              '${selectedTime.hour.toString().padLeft(2, '0')}:'
+              '${selectedTime.minute.toString().padLeft(2, '0')}:00.000';
+        },
         decoration: InputDecoration(
           labelText: "Inspection Date",
           prefixIcon: const Icon(Iconsax.calendar),

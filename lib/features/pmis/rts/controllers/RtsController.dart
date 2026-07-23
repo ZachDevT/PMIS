@@ -53,12 +53,12 @@ class RtsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _initializeForm();
+    refreshFormDateTime();
     // Defer activity loading to avoid blocking main thread during initialization
     Future.microtask(() => loadActivities());
   }
 
-  void _initializeForm() {
+  void refreshFormDateTime() {
     // Set default values
     inspectionDateController.text =
         DateTime.now().toLocal().toString().split(' ')[0];
@@ -195,7 +195,7 @@ class RtsController extends GetxController {
     selectedRegion.value = '';
     selectedDistrict.value = '';
 
-    _initializeForm();
+    refreshFormDateTime();
   }
 
   /// Filter activities based on search and filter criteria

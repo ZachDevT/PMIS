@@ -83,7 +83,7 @@ class ShiftMarketController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _initializeForm();
+    refreshFormDateTime();
     // Defer activity loading to avoid blocking main thread during initialization
     Future.microtask(() => loadActivities());
     // Clear dependent fields when facility status changes to Closed
@@ -101,7 +101,7 @@ class ShiftMarketController extends GetxController {
     });
   }
 
-  void _initializeForm() {
+  void refreshFormDateTime() {
     // Set default values
     inspectionDateController.text =
         DateTime.now().toLocal().toString().split(' ')[0];
@@ -327,7 +327,7 @@ class ShiftMarketController extends GetxController {
     selectedCategoryOfPremises.value = '';
 
     // Re-initialize with current values
-    _initializeForm();
+    refreshFormDateTime();
   }
 
   /// Get current location

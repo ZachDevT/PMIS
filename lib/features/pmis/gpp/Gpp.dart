@@ -83,6 +83,7 @@ class GppScreen extends StatelessWidget {
   }
 
   void _showCreateNewModal(BuildContext context) {
+    controller.refreshFormDateTime();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

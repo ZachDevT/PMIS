@@ -91,7 +91,7 @@ class GdpController extends GetxController {
     // Defer activity loading to avoid blocking main thread during initialization
     Future.microtask(() => loadActivities());
     getCurrentLocation(); // Get current location on init
-    _autoFillDefaults(); // Prepopulate inspector info
+    refreshFormDateTime(); // Prepopulate inspector info
 
     // Initialize filtered activities if repo is empty
     if (activities.isEmpty) {
@@ -99,7 +99,7 @@ class GdpController extends GetxController {
     }
   }
 
-  void _autoFillDefaults() {
+  void refreshFormDateTime() {
     // Set current date/time
     inspectionDateController.text =
         DateTime.now().toLocal().toString().split(' ')[0];
@@ -399,7 +399,7 @@ class GdpController extends GetxController {
     licenseExpiryDateController.clear();
     nameController.clear();
 
-    _autoFillDefaults();
+    refreshFormDateTime();
   }
 
   // Helper methods to map form values to API values

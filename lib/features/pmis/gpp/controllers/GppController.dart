@@ -79,7 +79,7 @@ class GppController extends GetxController {
     // Defer activity loading to avoid blocking main thread during initialization
     Future.microtask(() => loadActivities());
     getCurrentLocation(); // Get current location on init
-    _autoFillDefaults(); // Prepopulate inspector info
+    refreshFormDateTime(); // Prepopulate inspector info
 
     // Initialize filtered activities
     ever(activities, (_) => filterActivities());
@@ -90,7 +90,7 @@ class GppController extends GetxController {
     ever(filterCategoryOfDrugs, (_) => filterActivities());
   }
 
-  void _autoFillDefaults() {
+  void refreshFormDateTime() {
     // Set current date/time
     inspectionDateController.text =
         DateTime.now().toLocal().toString().split(' ')[0];
@@ -356,7 +356,7 @@ class GppController extends GetxController {
     contactController.clear();
     nameController.clear();
 
-    _autoFillDefaults();
+    refreshFormDateTime();
   }
 
   // Helper methods to map form values to API values

@@ -10,7 +10,8 @@ import 'package:pmis/utils/constants/images_strings.dart';
 import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
 class SensitizationMeetingScreen extends StatelessWidget {
-  final SensitizationMeetingController controller = Get.find<SensitizationMeetingController>();
+  final SensitizationMeetingController controller =
+      Get.find<SensitizationMeetingController>();
 
   SensitizationMeetingScreen({super.key});
 
@@ -80,6 +81,7 @@ class SensitizationMeetingScreen extends StatelessWidget {
   }
 
   void _showCreateNewModal(BuildContext context) {
+    controller.refreshFormDateTime();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -120,7 +122,8 @@ class _QuickActionsSection extends StatelessWidget {
             child: _ActionButton(
               icon: Iconsax.add,
               label: "Create Meeting",
-              onTap: () => SensitizationMeetingScreen()._showCreateNewModal(context),
+              onTap: () =>
+                  SensitizationMeetingScreen()._showCreateNewModal(context),
             ),
           ),
           const SizedBox(width: 10),
@@ -188,7 +191,8 @@ class _ActionButton extends StatelessWidget {
 }
 
 class _SearchBarWidget extends StatelessWidget {
-  final SensitizationMeetingController controller = Get.find<SensitizationMeetingController>();
+  final SensitizationMeetingController controller =
+      Get.find<SensitizationMeetingController>();
 
   @override
   Widget build(BuildContext context) {
@@ -252,7 +256,8 @@ class _SearchBarWidget extends StatelessWidget {
 }
 
 class _FilterDialog extends StatelessWidget {
-  final SensitizationMeetingController controller = Get.find<SensitizationMeetingController>();
+  final SensitizationMeetingController controller =
+      Get.find<SensitizationMeetingController>();
 
   @override
   Widget build(BuildContext context) {
@@ -380,13 +385,12 @@ class _FilterDropdown extends StatelessWidget {
 class _UserProfileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final authController = Get.isRegistered<AuthController>() 
-        ? Get.find<AuthController>() 
-        : null;
-    
+    final authController =
+        Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
+
     return Obx(() {
       final displayName = authController?.userDisplayName ?? 'Guest';
-      
+
       return InkWell(
         onTap: () => Get.toNamed('/user-menu'),
         borderRadius: BorderRadius.circular(20),
@@ -397,7 +401,8 @@ class _UserProfileWidget extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text("Welcome ", style: Theme.of(context).textTheme.bodyMedium),
+                  Text("Welcome ",
+                      style: Theme.of(context).textTheme.bodyMedium),
                   Text(
                     displayName,
                     style: Theme.of(context).textTheme.titleLarge!.copyWith(
@@ -484,4 +489,3 @@ class _ActivityListSection extends StatelessWidget {
     });
   }
 }
-

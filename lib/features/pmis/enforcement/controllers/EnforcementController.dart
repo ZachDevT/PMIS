@@ -106,7 +106,7 @@ class EnforcementController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _initializeForm();
+    refreshFormDateTime();
     // Defer activity loading to avoid blocking main thread during initialization
     Future.microtask(() => loadActivities());
     // Clear dependent fields when facility status changes to Closed
@@ -126,7 +126,7 @@ class EnforcementController extends GetxController {
     });
   }
 
-  void _initializeForm() {
+  void refreshFormDateTime() {
     // Set default values
     inspectionDateController.text =
         DateTime.now().toLocal().toString().split(' ')[0];
@@ -320,7 +320,7 @@ class EnforcementController extends GetxController {
     selectedEnforcementActionTaken.value = '';
     selectedEnforcementActions.clear();
 
-    _initializeForm();
+    refreshFormDateTime();
   }
 
   /// Filter activities based on search and filter criteria

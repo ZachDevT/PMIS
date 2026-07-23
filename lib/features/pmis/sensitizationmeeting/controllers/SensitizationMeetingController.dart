@@ -45,7 +45,7 @@ class SensitizationMeetingController extends GetxController {
     Future.microtask(() => loadActivities());
     getCurrentLocation();
     // Set current date
-    _setCurrentDateTime();
+    refreshFormDateTime();
 
     // Auto-fill inspector name
     if (Get.isRegistered<AuthController>()) {
@@ -267,7 +267,7 @@ class SensitizationMeetingController extends GetxController {
   }
 
   void clearForm() {
-    _setCurrentDateTime();
+    refreshFormDateTime();
     // Inspector and GPS defaults remain available for the next meeting.
     venueLocationController.clear();
     topicOfDiscussionController.clear();
@@ -276,7 +276,7 @@ class SensitizationMeetingController extends GetxController {
     selectedDistrict.value = '';
   }
 
-  void _setCurrentDateTime() {
+  void refreshFormDateTime() {
     final now = DateTime.now();
     inspectionDateController.text =
         '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}, '
