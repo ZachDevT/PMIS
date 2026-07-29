@@ -9,6 +9,24 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pmis/features/authentification/controllers/login/authcontroller.dart';
 
+class PmsaSampleFormEntry {
+  final productNameController = TextEditingController();
+  final quantityController = TextEditingController(text: '1');
+  final batchNumberController = TextEditingController();
+
+  PmsSample toSample() => PmsSample(
+        productName: productNameController.text.trim(),
+        quantity: int.tryParse(quantityController.text.trim()) ?? 0,
+        batchNumber: batchNumberController.text.trim(),
+      );
+
+  void dispose() {
+    productNameController.dispose();
+    quantityController.dispose();
+    batchNumberController.dispose();
+  }
+}
+
 class PmsaController extends GetxController {
   // List of PMS activities.
   var activities = <PmsModel>[].obs;
@@ -62,9 +80,7 @@ class PmsaController extends GetxController {
   // Section: Drugs & Product Sampling
   var selectedCategoryOfDrugs = ''.obs;
   var selectedCategoryOfProductSamples = ''.obs;
-  final productSampledNameController = TextEditingController();
-  final numberOfSamplesCollectedController = TextEditingController();
-  final batchNumberOfSampleController = TextEditingController();
+  final sampleEntries = <PmsaSampleFormEntry>[].obs;
 
   // Section: Follow-up & Complaint Details
   final productBeingFollowedUpController = TextEditingController();
@@ -102,7 +118,7 @@ class PmsaController extends GetxController {
     final now = DateTime.now();
     inspectionTimeController.text =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:00';
-    numberOfSamplesCollectedController.text = "0";
+    if (sampleEntries.isEmpty) addSample();
 
     // Prepopulate inspector name and ID from logged-in user
     if (Get.isRegistered<AuthController>()) {
@@ -110,6 +126,14 @@ class PmsaController extends GetxController {
       inspectorNameController.text = authController.userDisplayName;
       inspectorIdController.text = authController.userId;
     }
+  }
+
+  void addSample() => sampleEntries.add(PmsaSampleFormEntry());
+
+  void removeSample(int index) {
+    if (sampleEntries.length == 1) return;
+    final removed = sampleEntries.removeAt(index);
+    removed.dispose();
   }
 
   Future<void> loadActivities() async {
@@ -263,15 +287,23 @@ class PmsaController extends GetxController {
         if (activity == "Sampling" ||
             activity == "Complaint investigation" ||
             activity == "Follow-up on Recall") {
-          if (productSampledNameController.text.isEmpty) {
-            emptyFields.add("Name of Product");
+          if (sampleEntries.isEmpty) {
+            emptyFields.add("At least one product sample");
           }
-          if (numberOfSamplesCollectedController.text.isEmpty ||
-              numberOfSamplesCollectedController.text == "0") {
-            emptyFields.add("Quantity");
-          }
-          if (batchNumberOfSampleController.text.isEmpty) {
-            emptyFields.add("Batch Number");
+          for (var index = 0; index < sampleEntries.length; index++) {
+            final sample = sampleEntries[index];
+            final number = index + 1;
+            if (sample.productNameController.text.trim().isEmpty) {
+              emptyFields.add("Product $number name");
+            }
+            final quantity =
+                int.tryParse(sample.quantityController.text.trim()) ?? 0;
+            if (quantity <= 0) {
+              emptyFields.add("Product $number quantity");
+            }
+            if (sample.batchNumberController.text.trim().isEmpty) {
+              emptyFields.add("Product $number batch number");
+            }
           }
         }
 
@@ -338,9 +370,12 @@ class PmsaController extends GetxController {
             : "",
         unlicensed: licensedStatus.value == "Un-Licensed" ? 1 : 0,
         pmsActivity: _getPmsActivity(pmsaActivityCarriesOut.value),
-        sampleProductName: productSampledNameController.text,
-        sampleNo: int.tryParse(numberOfSamplesCollectedController.text) ?? 0,
-        sampleBatch: batchNumberOfSampleController.text,
+        samples: (selectedFacilityStatus.value != "Closed" &&
+                (pmsaActivityCarriesOut.value == "Sampling" ||
+                    pmsaActivityCarriesOut.value == "Complaint investigation" ||
+                    pmsaActivityCarriesOut.value == "Follow-up on Recall"))
+            ? sampleEntries.map((entry) => entry.toSample()).toList()
+            : const <PmsSample>[],
         followupComment: commentOnOverallFollowUpController.text,
         complaintProduct: postMarketComplaintNotedController.text.isNotEmpty
             ? postMarketComplaintNotedController.text
@@ -411,9 +446,12 @@ class PmsaController extends GetxController {
     pmsaActivityCarriesOut.value = '';
     selectedCategoryOfDrugs.value = '';
     selectedCategoryOfProductSamples.value = '';
-    productSampledNameController.clear();
-    numberOfSamplesCollectedController.text = "0";
-    batchNumberOfSampleController.clear();
+    for (final sample in sampleEntries) {
+      sample.dispose();
+    }
+    sampleEntries
+      ..clear()
+      ..add(PmsaSampleFormEntry());
     productBeingFollowedUpController.clear();
     commentOnOverallFollowUpController.clear();
     productComplaintInvestigatedController.clear();
@@ -421,6 +459,14 @@ class PmsaController extends GetxController {
     specifyActivityController.clear();
 
     refreshFormDateTime();
+  }
+
+  @override
+  void onClose() {
+    for (final sample in sampleEntries) {
+      sample.dispose();
+    }
+    super.onClose();
   }
 
   // Helper methods to map form values to API values

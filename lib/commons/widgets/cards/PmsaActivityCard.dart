@@ -471,22 +471,29 @@ class PmsaActivityCard extends StatelessWidget {
                           if (activity.pmsActivity == 1 ||
                               activity.pmsActivity == 2 ||
                               activity.pmsActivity == 3) ...[
-                            _buildModernDetailRow(
-                                'Sample Product Name',
-                                activity.sampleProductName.isNotEmpty
-                                    ? activity.sampleProductName
-                                    : 'Not provided',
-                                Iconsax.box),
-                            _buildModernDetailRow(
-                                'Sample Number',
-                                activity.sampleNo.toString(),
-                                Iconsax.document_text),
-                            _buildModernDetailRow(
-                                'Sample Batch',
-                                activity.sampleBatch.isNotEmpty
-                                    ? activity.sampleBatch
-                                    : 'Not provided',
-                                Iconsax.tag),
+                            if (activity.samples.isEmpty)
+                              _buildModernDetailRow(
+                                  'Products', 'Not provided', Iconsax.box),
+                            ...activity.samples.asMap().entries.expand(
+                                  (entry) => [
+                                    _buildModernDetailRow(
+                                        'Product ${entry.key + 1}',
+                                        entry.value.productName.isNotEmpty
+                                            ? entry.value.productName
+                                            : 'Not provided',
+                                        Iconsax.box),
+                                    _buildModernDetailRow(
+                                        'Quantity',
+                                        entry.value.quantity.toString(),
+                                        Iconsax.document_text),
+                                    _buildModernDetailRow(
+                                        'Batch Number',
+                                        entry.value.batchNumber.isNotEmpty
+                                            ? entry.value.batchNumber
+                                            : 'Not provided',
+                                        Iconsax.tag),
+                                  ],
+                                ),
                           ],
                           if (activity.pmsActivity == 2)
                             _buildModernDetailRow(

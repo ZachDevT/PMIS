@@ -203,13 +203,42 @@ class PmsService {
     apiData['pmsActivity'] = _asInt(data['pmsActivity']) ??
         _getPmsActivityCode(data['pmsaActivityCarriesOut']?.toString() ?? '');
 
-    apiData['sample_ProductName'] =
-        data['sample_ProductName'] ?? data['productSampledName'] ?? '';
-    apiData['sample_No'] = _asInt(data['sample_No']) ??
-        int.tryParse(data['numberOfSamplesCollected']?.toString() ?? '0') ??
-        0;
-    apiData['sample_Batch'] =
-        data['sample_Batch'] ?? data['batchNumberOfSample'] ?? '';
+    final rawSamples = data['samples'];
+    if (rawSamples is List) {
+      apiData['samples'] = rawSamples.map((rawSample) {
+        final sample = Map<String, dynamic>.from(rawSample as Map);
+        return {
+          'id': _asInt(sample['id']) ?? 0,
+          'productName': sample['productName']?.toString() ?? '',
+          'quantity': _asInt(sample['quantity']) ?? 0,
+          'batchNumber': sample['batchNumber']?.toString() ?? '',
+          'postMarketSurveillanceId':
+              _asInt(sample['postMarketSurveillanceId']) ?? 0,
+        };
+      }).toList();
+    } else {
+      // Migrate older queued offline records to the new samples collection.
+      final productName =
+          data['sample_ProductName'] ?? data['productSampledName'] ?? '';
+      final quantity = _asInt(data['sample_No']) ??
+          int.tryParse(data['numberOfSamplesCollected']?.toString() ?? '0') ??
+          0;
+      final batchNumber =
+          data['sample_Batch'] ?? data['batchNumberOfSample'] ?? '';
+      apiData['samples'] = productName.toString().isNotEmpty ||
+              quantity > 0 ||
+              batchNumber.toString().isNotEmpty
+          ? [
+              {
+                'id': 0,
+                'productName': productName.toString(),
+                'quantity': quantity,
+                'batchNumber': batchNumber.toString(),
+                'postMarketSurveillanceId': 0,
+              }
+            ]
+          : <Map<String, dynamic>>[];
+    }
 
     apiData['followup_Comment'] =
         data['followup_Comment'] ?? data['commentOnOverallFollowUp'] ?? '';

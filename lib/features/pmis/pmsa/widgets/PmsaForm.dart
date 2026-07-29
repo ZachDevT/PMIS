@@ -354,33 +354,87 @@ class PmsaForm extends StatelessWidget {
                                     "Complaint investigation" ||
                                 controller.pmsaActivityCarriesOut.value ==
                                     "Follow-up on Recall") ...[
-                              buildTextField(
-                                controller:
-                                    controller.productSampledNameController,
-                                label: "Name of Product",
-                                prefixIcon: Icons.production_quantity_limits,
-                                validator: (value) =>
-                                    value!.isEmpty ? "Required" : null,
+                              ...controller.sampleEntries.asMap().entries.map(
+                                (entry) {
+                                  final index = entry.key;
+                                  final sample = entry.value;
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 16),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Colors.grey.shade300),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "Product ${index + 1}",
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.w600),
+                                            ),
+                                            const Spacer(),
+                                            if (controller
+                                                    .sampleEntries.length >
+                                                1)
+                                              IconButton(
+                                                tooltip: "Remove product",
+                                                onPressed: () => controller
+                                                    .removeSample(index),
+                                                icon: const Icon(
+                                                    Icons.delete_outline),
+                                              ),
+                                          ],
+                                        ),
+                                        buildTextField(
+                                          controller:
+                                              sample.productNameController,
+                                          label: "Name of Product",
+                                          prefixIcon:
+                                              Icons.production_quantity_limits,
+                                          validator: (value) => value!.isEmpty
+                                              ? "Required"
+                                              : null,
+                                        ),
+                                        buildTextField(
+                                          controller: sample.quantityController,
+                                          label: "Quantity",
+                                          prefixIcon: Icons.numbers,
+                                          keyboardType: TextInputType.number,
+                                          validator: (value) => (value!
+                                                      .isEmpty ||
+                                                  (int.tryParse(value) ?? 0) <=
+                                                      0)
+                                              ? "Required"
+                                              : null,
+                                        ),
+                                        buildTextField(
+                                          controller:
+                                              sample.batchNumberController,
+                                          label: "Batch Number",
+                                          prefixIcon: Icons.confirmation_number,
+                                          validator: (value) => value!.isEmpty
+                                              ? "Required"
+                                              : null,
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
-                              buildTextField(
-                                controller: controller
-                                    .numberOfSamplesCollectedController,
-                                label: "Quantity",
-                                prefixIcon: Icons.numbers,
-                                keyboardType: TextInputType.number,
-                                validator: (value) =>
-                                    (value!.isEmpty || value == "0")
-                                        ? "Required"
-                                        : null,
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: OutlinedButton.icon(
+                                  onPressed: controller.addSample,
+                                  icon: const Icon(Icons.add),
+                                  label: const Text("Add another product"),
+                                ),
                               ),
-                              buildTextField(
-                                controller:
-                                    controller.batchNumberOfSampleController,
-                                label: "Batch Number",
-                                prefixIcon: Icons.confirmation_number,
-                                validator: (value) =>
-                                    value!.isEmpty ? "Required" : null,
-                              ),
+                              const SizedBox(height: 12),
                             ],
                             // Specific field for Complaint investigation
                             if (controller.pmsaActivityCarriesOut.value ==

@@ -1,6 +1,46 @@
 import 'package:pmis/features/pmis/qualification/controllers/QualificationController.dart';
 import 'package:pmis/utils/constants/regions_districts.dart';
 
+class PmsSample {
+  final int id;
+  final String productName;
+  final int quantity;
+  final String batchNumber;
+  final int postMarketSurveillanceId;
+
+  const PmsSample({
+    this.id = 0,
+    required this.productName,
+    required this.quantity,
+    required this.batchNumber,
+    this.postMarketSurveillanceId = 0,
+  });
+
+  factory PmsSample.fromJson(Map<String, dynamic> json) => PmsSample(
+        id: _sampleInt(json['id']),
+        productName: (json['productName'] ?? json['sample_ProductName'] ?? '')
+            .toString(),
+        quantity: _sampleInt(json['quantity'] ?? json['sample_No']),
+        batchNumber:
+            (json['batchNumber'] ?? json['sample_Batch'] ?? '').toString(),
+        postMarketSurveillanceId: _sampleInt(json['postMarketSurveillanceId']),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'productName': productName,
+        'quantity': quantity,
+        'batchNumber': batchNumber,
+        'postMarketSurveillanceId': postMarketSurveillanceId,
+      };
+
+  static int _sampleInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+}
+
 class PmsModel {
   final int id;
   final DateTime inspectionDate;
@@ -24,9 +64,7 @@ class PmsModel {
   final String licenseExpiryDate;
   final int unlicensed;
   final int pmsActivity;
-  final String sampleProductName;
-  final int sampleNo;
-  final String sampleBatch;
+  final List<PmsSample> samples;
   final String followupComment;
   final String complaintProduct;
   final String otherActivity;
@@ -55,9 +93,7 @@ class PmsModel {
     required this.licenseExpiryDate,
     required this.unlicensed,
     required this.pmsActivity,
-    required this.sampleProductName,
-    required this.sampleNo,
-    required this.sampleBatch,
+    required this.samples,
     required this.followupComment,
     required this.complaintProduct,
     required this.otherActivity,
@@ -79,6 +115,23 @@ class PmsModel {
     print('Final inspectorName: $inspectorName');
     print('Final inspectorId: $inspectorId');
     print('=== End PMS Model Debug ===');
+
+    final rawSamples = json['samples'];
+    final samples = rawSamples is List
+        ? rawSamples
+            .whereType<Map>()
+            .map((sample) =>
+                PmsSample.fromJson(Map<String, dynamic>.from(sample)))
+            .toList()
+        : <PmsSample>[];
+    if (samples.isEmpty) {
+      final legacySample = PmsSample.fromJson(json);
+      if (legacySample.productName.isNotEmpty ||
+          legacySample.quantity > 0 ||
+          legacySample.batchNumber.isNotEmpty) {
+        samples.add(legacySample);
+      }
+    }
 
     return PmsModel(
       id: json['id'] ?? 0,
@@ -117,9 +170,7 @@ class PmsModel {
           '',
       unlicensed: json['unlicensed'] ?? 0,
       pmsActivity: json['pmsActivity'] ?? 0,
-      sampleProductName: json['sample_ProductName'] ?? '',
-      sampleNo: json['sample_No'] ?? 0,
-      sampleBatch: json['sample_Batch'] ?? '',
+      samples: samples,
       followupComment: json['followup_Comment'] ?? '',
       complaintProduct: json['complaint_Product'] ?? '',
       otherActivity: json['other_Activity'] ?? '',
@@ -152,9 +203,7 @@ class PmsModel {
       'licenseExpiryDate': licenseExpiryDate,
       'unlicensed': unlicensed,
       'pmsActivity': pmsActivity,
-      'sample_ProductName': sampleProductName,
-      'sample_No': sampleNo,
-      'sample_Batch': sampleBatch,
+      'samples': samples.map((sample) => sample.toJson()).toList(),
       'followup_Comment': followupComment,
       'complaint_Product': complaintProduct,
       'other_Activity': otherActivity,
@@ -256,9 +305,7 @@ class PmsModel {
     String? licenseExpiryDate,
     int? unlicensed,
     int? pmsActivity,
-    String? sampleProductName,
-    int? sampleNo,
-    String? sampleBatch,
+    List<PmsSample>? samples,
     String? followupComment,
     String? complaintProduct,
     String? otherActivity,
@@ -287,9 +334,7 @@ class PmsModel {
       licenseExpiryDate: licenseExpiryDate ?? this.licenseExpiryDate,
       unlicensed: unlicensed ?? this.unlicensed,
       pmsActivity: pmsActivity ?? this.pmsActivity,
-      sampleProductName: sampleProductName ?? this.sampleProductName,
-      sampleNo: sampleNo ?? this.sampleNo,
-      sampleBatch: sampleBatch ?? this.sampleBatch,
+      samples: samples ?? this.samples,
       followupComment: followupComment ?? this.followupComment,
       complaintProduct: complaintProduct ?? this.complaintProduct,
       otherActivity: otherActivity ?? this.otherActivity,
