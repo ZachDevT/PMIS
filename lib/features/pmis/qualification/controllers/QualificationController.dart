@@ -12,7 +12,13 @@ class QualificationController extends GetxController {
   final qualifications = <QualificationModel>[].obs;
   final isLoading = false.obs;
 
-  List<String> get names => qualifications.map((item) => item.name).toList();
+  List<String> get names {
+    final names = qualifications.map((item) => item.name).toList();
+    if (!names.any((name) => name.toLowerCase() == 'other')) {
+      names.add('Other');
+    }
+    return names;
+  }
 
   int? idForName(String name) => qualifications
       .firstWhereOrNull((item) => item.name.toLowerCase() == name.toLowerCase())

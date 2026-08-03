@@ -180,6 +180,10 @@ class EnforcementService {
     apiData['qualificationId'] = data['qualificationId'] ??
         QualificationController.instance
             .idForName(data['qualifications']?.toString() ?? '');
+    apiData['qualificationOther'] = data['qualificationOther'] ??
+        (data['qualifications']?.toString().trim().toLowerCase() == 'other'
+            ? data['qualifications']?.toString().trim() ?? ''
+            : '');
     apiData['categoryOfpremises'] =
         _getCategoryOfPremises(data['categoryOfPremises']);
 
@@ -307,6 +311,8 @@ class EnforcementService {
       case 'RETAIL PHARMACY - VET':
         return 4;
       case 'DRUG SHOP':
+      case 'DRUG SHOP – HUMAN':
+      case 'DRUG SHOP – VET':
         return 5;
       case 'EXTERNAL STORES':
         return 6;

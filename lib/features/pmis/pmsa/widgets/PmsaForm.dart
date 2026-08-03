@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pmis/commons/widgets/inputs/TSearchableDistrictField.dart';
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:pmis/commons/widgets/icons/circular_icon.dart';
@@ -22,6 +23,13 @@ class PmsaForm extends StatelessWidget {
     void Function(String?)? onChanged,
     bool enabled = true,
   }) {
+    if (label == 'District') {
+      return TSearchableDistrictField(
+        items: items,
+        selectedItem: selectedItem,
+        prefixIcon: prefixIcon,
+      );
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: InputDecorator(
@@ -244,6 +252,15 @@ class PmsaForm extends StatelessWidget {
                                               .idForName(name ?? ''),
                                   prefixIcon: Icons.school,
                                 )),
+                            if (controller.selectedQualification.value ==
+                                'Other')
+                              buildTextField(
+                                controller: controller.qualificationsController,
+                                label: 'Specify qualification',
+                                prefixIcon: Icons.school_outlined,
+                                validator: (value) =>
+                                    value!.trim().isEmpty ? 'Required' : null,
+                              ),
                             // SECTION: Facility Category & Licensing
                             const Text("Facility Category",
                                 style: TextStyle(
@@ -255,7 +272,8 @@ class PmsaForm extends StatelessWidget {
                                 "Wholesale Pharmacy - Vet",
                                 "Retail Pharmacy - Human",
                                 "Retail Pharmacy - Vet",
-                                "Drug Shop",
+                                "Drug Shop – Human",
+                                "Drug Shop – Vet",
                                 "External Stores",
                                 "Hospital",
                                 "HCIV",
@@ -480,23 +498,35 @@ class PmsaForm extends StatelessWidget {
                       Center(
                         child: SizedBox(
                           width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: () async {
-                              await controller.createNewActivity(context);
-                            },
-                            icon: const Icon(
-                              Icons.check_circle,
-                              color: Tcolors.white,
-                            ),
-                            label: const Text("Submit"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Tcolors.primary,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                            ),
-                          ),
+                          child: Obx(() => ElevatedButton.icon(
+                                onPressed: controller.isSubmitting.value
+                                    ? null
+                                    : () =>
+                                        controller.createNewActivity(context),
+                                icon: controller.isSubmitting.value
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Tcolors.white,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.check_circle,
+                                        color: Tcolors.white,
+                                      ),
+                                label: Text(controller.isSubmitting.value
+                                    ? "Submitting..."
+                                    : "Submit"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Tcolors.primary,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 24, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                ),
+                              )),
                         ),
                       ),
                       const SizedBox(height: 40),

@@ -80,7 +80,8 @@ class EnforcementController extends GetxController {
     "Wholesale Pharmacy - Vet",
     "Retail Pharmacy - Human",
     "Retail Pharmacy - Vet",
-    "Drug Shop",
+    "Drug Shop – Human",
+    "Drug Shop – Vet",
     "External Stores",
     "Hospital",
     "HCIV",
@@ -206,8 +207,11 @@ class EnforcementController extends GetxController {
             : contactController.text,
         qualifications: selectedFacilityStatus.value == "Closed"
             ? ""
-            : selectedQualification.value,
-        qualificationId: selectedFacilityStatus.value == "Closed"
+            : selectedQualification.value == 'Other'
+                ? qualificationsController.text.trim()
+                : selectedQualification.value,
+        qualificationId: selectedFacilityStatus.value == "Closed" ||
+                selectedQualification.value == 'Other'
             ? null
             : selectedQualificationId.value,
         categoryOfPremises: selectedFacilityStatus.value == "Closed"

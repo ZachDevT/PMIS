@@ -1,6 +1,7 @@
 // widgets/CssForm.dart
 import 'package:flutter/material.dart';
 import 'package:pmis/commons/widgets/inputs/TMultiSelectDropdown.dart';
+import 'package:pmis/commons/widgets/inputs/TSearchableDistrictField.dart';
 import 'package:get/get.dart';
 import 'package:pmis/commons/widgets/icons/circular_icon.dart';
 import 'package:pmis/features/pmis/css/controllers/CssController.dart';
@@ -24,6 +25,13 @@ class CssForm extends StatelessWidget {
     void Function(String?)? onChanged,
     bool enabled = true,
   }) {
+    if (label == 'District') {
+      return TSearchableDistrictField(
+        items: items,
+        selectedItem: selectedItem,
+        prefixIcon: prefixIcon,
+      );
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: InputDecorator(
@@ -235,6 +243,14 @@ class CssForm extends StatelessWidget {
                                           .idForName(name ?? ''),
                               prefixIcon: Icons.school,
                             )),
+                        if (controller.selectedQualification.value == 'Other')
+                          buildTextField(
+                            controller: controller.qualificationsController,
+                            label: 'Specify qualification',
+                            prefixIcon: Icons.school_outlined,
+                            validator: (value) =>
+                                value!.trim().isEmpty ? 'Required' : null,
+                          ),
                         // Compliance Details
                         buildDropdown(
                           label: "Category of Facility",
@@ -243,7 +259,8 @@ class CssForm extends StatelessWidget {
                             "Wholesale Pharmacy - Vet",
                             "Retail Pharmacy - Human",
                             "Retail Pharmacy - Vet",
-                            "Drug Shop",
+                            "Drug Shop – Human",
+                            "Drug Shop – Vet",
                             "External Stores",
                             "Hospital",
                             "HCIV",
@@ -313,7 +330,7 @@ class CssForm extends StatelessWidget {
                             prefixIcon: Icons.warning,
                           ),
                         ],
-                        buildDropdown(
+                        TMultiSelectDropdown(
                           label: "Category of Drugs",
                           items: [
                             "Medical Device",
@@ -322,13 +339,14 @@ class CssForm extends StatelessWidget {
                             "Public Healthcare Products",
                             "Herbal Drugs"
                           ],
-                          selectedItem: controller.selectedCategoryOfDrugs,
+                          selectedItems:
+                              controller.selectedCategoryOfDrugOptions,
                           prefixIcon: Icons.medical_services,
                         ),
-                        buildDropdown(
+                        TMultiSelectDropdown(
                           label: "Class of Drugs",
                           items: ["A", "B", "C"],
-                          selectedItem: controller.selectedClassOfDrugs,
+                          selectedItems: controller.selectedClassOfDrugOptions,
                           prefixIcon: Icons.class_,
                         ),
                         buildDropdown(

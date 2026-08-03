@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pmis/commons/widgets/inputs/TSearchableDistrictField.dart';
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:pmis/commons/widgets/icons/circular_icon.dart';
@@ -293,6 +294,13 @@ class SensitizationMeetingForm extends StatelessWidget {
     String? Function(String?)? validator,
     bool enabled = true,
   }) {
+    if (label == 'District') {
+      return TSearchableDistrictField(
+          items: items,
+          selectedItem: selectedItem,
+          prefixIcon: prefixIcon,
+          validator: validator);
+    }
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Obx(() => DropdownButtonFormField<String>(

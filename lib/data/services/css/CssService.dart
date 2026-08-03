@@ -183,6 +183,10 @@ class CssService {
     apiData['qualificationId'] = data['qualificationId'] ??
         QualificationController.instance
             .idForName(data['qualifications']?.toString() ?? '');
+    apiData['qualificationOther'] = data['qualificationOther'] ??
+        (data['qualifications']?.toString().trim().toLowerCase() == 'other'
+            ? data['qualifications']?.toString().trim() ?? ''
+            : '');
 
     // Category & License
     apiData['categoryOfpremises'] = data['categoryOfpremises'];
@@ -208,6 +212,7 @@ class CssService {
     apiData['unRegisteredDrug'] = data['unRegisteredDrug'];
     apiData['unRegDrugQty'] = data['unRegDrugQty']?.toString() ?? '';
     apiData['action'] = _mapAction(data['action']?.toString());
+    apiData['comments'] = data['comments'] ?? data['comment'] ?? '';
 
     // Notice we DO NOT include `previouslyLicensed`, `licenseExpiryDate`, or `id`.
 

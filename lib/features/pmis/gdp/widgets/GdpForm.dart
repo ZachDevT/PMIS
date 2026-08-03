@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pmis/commons/widgets/inputs/TSearchableDistrictField.dart';
+import 'package:pmis/commons/widgets/inputs/TMultiSelectDropdown.dart';
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:pmis/commons/widgets/icons/circular_icon.dart';
@@ -22,6 +24,13 @@ class GdpForm extends StatelessWidget {
     void Function(String?)? onChanged,
     bool enabled = true,
   }) {
+    if (label == 'District') {
+      return TSearchableDistrictField(
+        items: items,
+        selectedItem: selectedItem,
+        prefixIcon: prefixIcon,
+      );
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: InputDecorator(
@@ -242,6 +251,16 @@ class GdpForm extends StatelessWidget {
                                             .idForName(name ?? ''),
                                     prefixIcon: Icons.school,
                                   )),
+                              if (controller.selectedQualification.value ==
+                                  'Other')
+                                buildTextField(
+                                  controller:
+                                      controller.qualificationsController,
+                                  label: 'Specify qualification',
+                                  prefixIcon: Icons.school_outlined,
+                                  validator: (value) =>
+                                      value!.trim().isEmpty ? 'Required' : null,
+                                ),
                               // SECTION: Facility Category
                               const Text("Facility Category",
                                   style: TextStyle(
@@ -254,7 +273,8 @@ class GdpForm extends StatelessWidget {
                                   "Wholesale Pharmacy - Vet",
                                   "Retail Pharmacy - Human",
                                   "Retail Pharmacy - Vet",
-                                  "Drug Shop",
+                                  "Drug Shop – Human",
+                                  "Drug Shop – Vet",
                                   "External Stores",
                                   "Hospital",
                                   "HCIV",
@@ -346,7 +366,7 @@ class GdpForm extends StatelessWidget {
                                   style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500)),
-                              buildDropdown(
+                              TMultiSelectDropdown(
                                 label: "Category of Drugs",
                                 items: [
                                   "Medical Device",
@@ -355,8 +375,8 @@ class GdpForm extends StatelessWidget {
                                   "Public Healthcare products",
                                   "Herbal drugs"
                                 ],
-                                selectedItem:
-                                    controller.selectedCategoryOfDrugs,
+                                selectedItems:
+                                    controller.selectedCategoryOfDrugOptions,
                                 prefixIcon: Icons.medical_services,
                               ),
                               buildDropdown(

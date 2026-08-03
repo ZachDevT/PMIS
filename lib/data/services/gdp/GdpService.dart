@@ -161,6 +161,10 @@ class GdpService {
     apiData['qualificationId'] = data['qualificationId'] ??
         QualificationController.instance
             .idForName(data['qualifications']?.toString() ?? '');
+    apiData['qualificationOther'] = data['qualificationOther'] ??
+        (data['qualifications']?.toString().trim().toLowerCase() == 'other'
+            ? data['qualifications']?.toString().trim() ?? ''
+            : '');
 
     // Category
     apiData['categoryOfpremises'] = data['categoryOfpremises'] ?? 0;
@@ -187,6 +191,7 @@ class GdpService {
     apiData['facilityType'] = data['facilityType'] ?? 0;
     apiData['certStatus'] = data['certStatus'] ?? 0;
     apiData['recommendedforGDP'] = data['recommendedforGDP'] ?? 0;
+    apiData['comments'] = data['comments'] ?? data['comment'] ?? '';
 
     return apiData;
   }

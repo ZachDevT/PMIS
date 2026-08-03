@@ -64,6 +64,7 @@ class GdpController extends GetxController {
 
   // Section: Category of Drugs
   var selectedCategoryOfDrugs = ''.obs;
+  var selectedCategoryOfDrugOptions = <String>[].obs;
 
   // Section: Additional GDP Details
   var selectedFacilityType = ''.obs;
@@ -251,7 +252,7 @@ class GdpController extends GetxController {
             licenseExpiryDateController.text.isEmpty) {
           emptyFields.add("License Expiry Date");
         }
-        if (selectedCategoryOfDrugs.value.isEmpty) {
+        if (selectedCategoryOfDrugOptions.isEmpty) {
           emptyFields.add("Category of Drugs");
         }
         if (selectedFacilityType.value.isEmpty) {
@@ -294,8 +295,11 @@ class GdpController extends GetxController {
             : contactController.text,
         qualifications: selectedFacilityStatus.value == "Closed"
             ? ""
-            : selectedQualification.value,
-        qualificationId: selectedFacilityStatus.value == "Closed"
+            : selectedQualification.value == 'Other'
+                ? qualificationsController.text.trim()
+                : selectedQualification.value,
+        qualificationId: selectedFacilityStatus.value == "Closed" ||
+                selectedQualification.value == 'Other'
             ? null
             : selectedQualificationId.value,
         categoryOfpremises: selectedFacilityStatus.value == "Closed"
@@ -306,7 +310,9 @@ class GdpController extends GetxController {
             : _getLicenseStatus(selectedLicenseStatus.value),
         categoryStatus: selectedFacilityStatus.value == "Closed"
             ? 0
-            : _getCategoryStatus(selectedCategoryOfDrugs.value),
+            : _getCategoryStatus(selectedCategoryOfDrugOptions.isEmpty
+                ? ''
+                : selectedCategoryOfDrugOptions.first),
         facilityType: selectedFacilityStatus.value == "Closed"
             ? 0
             : _getFacilityType(selectedFacilityType.value),
@@ -393,6 +399,7 @@ class GdpController extends GetxController {
     selectedLicenseStatus.value = '';
     selectedCertificationStatus.value = '';
     selectedCategoryOfDrugs.value = '';
+    selectedCategoryOfDrugOptions.clear();
     selectedFacilityType.value = '';
     recommendedForGpp.value = '';
     licenseNoController.clear();
@@ -444,6 +451,8 @@ class GdpController extends GetxController {
       case "Retail Pharmacy - Vet":
         return 4;
       case "Drug Shop":
+      case "Drug Shop – Human":
+      case "Drug Shop – Vet":
         return 5;
       case "External Stores":
         return 6;

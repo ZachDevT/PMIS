@@ -49,6 +49,8 @@ class CssController extends GetxController {
   var selectedLicensedStatus = ''.obs;
   var selectedCategoryOfDrugs = ''.obs;
   var selectedClassOfDrugs = ''.obs;
+  var selectedCategoryOfDrugOptions = <String>[].obs;
+  var selectedClassOfDrugOptions = <String>[].obs;
   var selectedUnregisteredDrugs = ''.obs;
   var selectedConditionOfPremises = ''.obs;
   var selectedRecordKeeping = ''.obs;
@@ -238,10 +240,10 @@ class CssController extends GetxController {
         if (selectedLicensedStatus.value.isEmpty) {
           emptyFields.add("Licensed Status");
         }
-        if (selectedCategoryOfDrugs.value.isEmpty) {
+        if (selectedCategoryOfDrugOptions.isEmpty) {
           emptyFields.add("Category of Drugs");
         }
-        if (selectedClassOfDrugs.value.isEmpty)
+        if (selectedClassOfDrugOptions.isEmpty)
           emptyFields.add("Class of Drugs");
         if (selectedUnregisteredDrugs.value.isEmpty) {
           emptyFields.add("Unregistered Drugs");
@@ -255,7 +257,7 @@ class CssController extends GetxController {
       }
       // Action Taken is only required when facility is Open
       if (selectedFacilityStatus.value == "Open") {
-        if (selectedActionTaken.value.isEmpty) emptyFields.add("Action Taken");
+        if (selectedActionTaken.isEmpty) emptyFields.add("Action Taken");
       }
 
       if (emptyFields.isNotEmpty) {
@@ -284,8 +286,12 @@ class CssController extends GetxController {
         facilityPersonType: _getPersonType(selectedPersonFound.value),
         personName: nameController.text,
         contact: contactController.text,
-        qualifications: selectedQualification.value,
-        qualificationId: selectedQualificationId.value,
+        qualifications: selectedQualification.value == 'Other'
+            ? qualificationsController.text.trim()
+            : selectedQualification.value,
+        qualificationId: selectedQualification.value == 'Other'
+            ? null
+            : selectedQualificationId.value,
         categoryOfpremises:
             _getCategoryOfPremises(selectedCategoryOfFacility.value),
         otherCategoryPremise: selectedCategoryOfFacility.value == "Others"
@@ -299,11 +305,16 @@ class CssController extends GetxController {
             ? licenseExpiryDateController.text
             : "",
         unlicensed: _getUnlicensedStatus(selectedLicensedStatus.value) ?? 0,
-        categoryStatus: _getCategoryStatus(selectedCategoryOfDrugs.value),
+        categoryStatus: _getCategoryStatus(selectedCategoryOfDrugOptions.isEmpty
+            ? ''
+            : selectedCategoryOfDrugOptions.first),
         premisesCondition:
             _getPremisesCondition(selectedConditionOfPremises.value),
         recordKeeping: _getRecordKeeping(selectedRecordKeeping.value) ?? 0,
-        classofDrugs: _getClassOfDrugs(selectedClassOfDrugs.value) ?? 0,
+        classofDrugs: _getClassOfDrugs(selectedClassOfDrugOptions.isEmpty
+                ? ''
+                : selectedClassOfDrugOptions.first) ??
+            0,
         unRegisteredDrug:
             _getUnregisteredDrugs(selectedUnregisteredDrugs.value) ?? 0,
         unRegDrugQty: selectedUnregisteredDrugs.value == "Present"
@@ -315,6 +326,10 @@ class CssController extends GetxController {
 
       bool online = await NetworkManager.instance.isconnected();
       var activityData = newActivity.toJson();
+      activityData['categoryStatusSelections'] =
+          selectedCategoryOfDrugOptions.toList();
+      activityData['classOfDrugsSelections'] =
+          selectedClassOfDrugOptions.toList();
 
       if (online) {
         try {
@@ -380,6 +395,8 @@ class CssController extends GetxController {
     selectedLicensedStatus.value = '';
     selectedCategoryOfDrugs.value = '';
     selectedClassOfDrugs.value = '';
+    selectedCategoryOfDrugOptions.clear();
+    selectedClassOfDrugOptions.clear();
     selectedUnregisteredDrugs.value = '';
     selectedConditionOfPremises.value = '';
     selectedRecordKeeping.value = '';
@@ -431,6 +448,8 @@ class CssController extends GetxController {
       case "Retail Pharmacy - Vet":
         return 4;
       case "Drug Shop":
+      case "Drug Shop – Human":
+      case "Drug Shop – Vet":
         return 5;
       case "External Stores":
         return 6;

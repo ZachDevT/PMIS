@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:pmis/data/services/pms/PmsService.dart';
@@ -13,6 +15,42 @@ class PmsaRepository {
       (box.read<List>('pmsa_activities') ?? [])
           .map((item) => Map<String, dynamic>.from(item as Map))
           .toList();
+
+  static const _duplicateWindow = Duration(seconds: 30);
+
+  String _fingerprint(Map<String, dynamic> activity) {
+    final copy = Map<String, dynamic>.from(activity)
+      ..remove('id')
+      ..remove('_localId')
+      ..remove('_queuedAt')
+      ..remove('_submissionId');
+    return jsonEncode(_sortForJson(copy));
+  }
+
+  dynamic _sortForJson(dynamic value) {
+    if (value is Map) {
+      final sorted = value.entries.toList()
+        ..sort((a, b) => a.key.toString().compareTo(b.key.toString()));
+      return <String, dynamic>{
+        for (final entry in sorted)
+          entry.key.toString(): _sortForJson(entry.value),
+      };
+    }
+    if (value is List) return value.map(_sortForJson).toList();
+    return value;
+  }
+
+  bool _isRecentDuplicate(List<Map<String, dynamic>> storedActivities,
+      Map<String, dynamic> candidate) {
+    final candidateFingerprint = _fingerprint(candidate);
+    final now = DateTime.now();
+    return storedActivities.any((stored) {
+      final queuedAt = DateTime.tryParse(stored['_queuedAt']?.toString() ?? '');
+      return queuedAt != null &&
+          now.difference(queuedAt).abs() <= _duplicateWindow &&
+          _fingerprint(stored) == candidateFingerprint;
+    });
+  }
 
   List<Map<String, dynamic>> _mergeWithLocal(
       List<Map<String, dynamic>> remoteActivities) {
@@ -77,8 +115,14 @@ class PmsaRepository {
     try {
       final storedActivities = _localActivities();
       final localActivity = Map<String, dynamic>.from(activityData);
+      if (_isRecentDuplicate(storedActivities, localActivity)) {
+        print('Skipped duplicate PMS activity in local sync queue');
+        return;
+      }
       localActivity['_localId'] ??=
           'pmsa-${DateTime.now().microsecondsSinceEpoch}';
+      localActivity['_submissionId'] ??= localActivity['_localId'];
+      localActivity['_queuedAt'] ??= DateTime.now().toIso8601String();
       storedActivities.add(localActivity);
       await box.write('pmsa_activities', storedActivities);
       print('PMS activity saved locally: ${localActivity['_localId']}');

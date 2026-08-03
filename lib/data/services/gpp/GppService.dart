@@ -149,6 +149,10 @@ class GppService {
     apiData['qualificationId'] = data['qualificationId'] ??
         QualificationController.instance
             .idForName(data['qualifications']?.toString() ?? '');
+    apiData['qualificationOther'] = data['qualificationOther'] ??
+        (data['qualifications']?.toString().trim().toLowerCase() == 'other'
+            ? data['qualifications']?.toString().trim() ?? ''
+            : '');
 
     // Category
     apiData['categoryOfpremises'] = data['categoryOfpremises'] ?? 0;
@@ -175,6 +179,7 @@ class GppService {
     apiData['facilityType'] = data['facilityType'] ?? 0;
     apiData['certStatus'] = data['certStatus'] ?? 0;
     apiData['recommendedforGPP'] = data['recommendedforGPP'] ?? 0;
+    apiData['comments'] = data['comments'] ?? data['comment'] ?? '';
 
     return apiData;
   }

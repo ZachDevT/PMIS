@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pmis/commons/widgets/inputs/TSearchableDistrictField.dart';
 import 'package:get/get.dart';
 import 'package:pmis/features/pmis/enforcement/controllers/EnforcementController.dart';
 import 'package:pmis/utils/constants/colors.dart';
@@ -213,6 +214,16 @@ class EnforcementForm extends StatelessWidget {
                                             .idForName(name ?? ''),
                                     prefixIcon: Icons.school,
                                   )),
+                              if (controller.selectedQualification.value ==
+                                  'Other')
+                                _buildTextField(
+                                  controller:
+                                      controller.qualificationsController,
+                                  label: 'Specify qualification',
+                                  prefixIcon: Icons.school_outlined,
+                                  validator: (value) =>
+                                      value!.trim().isEmpty ? 'Required' : null,
+                                ),
                               const SizedBox(
                                   height: Tsizes.spaceBtwSections / 2),
 
@@ -518,6 +529,13 @@ class EnforcementForm extends StatelessWidget {
     void Function(String?)? onChanged,
     bool enabled = true,
   }) {
+    if (label == 'District') {
+      return TSearchableDistrictField(
+          items: items,
+          selectedItem: selectedItem,
+          prefixIcon: prefixIcon,
+          validator: validator);
+    }
     final dark = THelperFunctions.isDarkMode(Get.context!);
 
     return Obx(() => DropdownButtonFormField<String>(

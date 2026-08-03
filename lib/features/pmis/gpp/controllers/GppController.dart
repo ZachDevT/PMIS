@@ -62,6 +62,7 @@ class GppController extends GetxController {
 
   // Section: Category of Drugs
   var selectedCategoryOfDrugs = ''.obs;
+  var selectedCategoryOfDrugOptions = <String>[].obs;
 
   // Section: GPP Details
   var selectedFacilityType = ''.obs;
@@ -224,7 +225,7 @@ class GppController extends GetxController {
             licenseExpiryDateController.text.isEmpty) {
           emptyFields.add("License Expiry Date");
         }
-        if (selectedCategoryOfDrugs.value.isEmpty) {
+        if (selectedCategoryOfDrugOptions.isEmpty) {
           emptyFields.add("Category of Drugs");
         }
         if (selectedFacilityType.value.isEmpty)
@@ -261,12 +262,18 @@ class GppController extends GetxController {
         facilityPersonType: _getPersonType(personFoundController.value),
         personName: nameController.text,
         contact: contactController.text,
-        qualifications: selectedQualification.value,
-        qualificationId: selectedQualificationId.value,
+        qualifications: selectedQualification.value == 'Other'
+            ? QualificationsController.text.trim()
+            : selectedQualification.value,
+        qualificationId: selectedQualification.value == 'Other'
+            ? null
+            : selectedQualificationId.value,
         categoryOfpremises:
             _getCategoryOfPremises(selectedCategoryOfFacility.value),
         licenseStatus: _getLicenseStatus(selectedLicensedStatus.value),
-        categoryStatus: _getCategoryStatus(selectedCategoryOfDrugs.value),
+        categoryStatus: _getCategoryStatus(selectedCategoryOfDrugOptions.isEmpty
+            ? ''
+            : selectedCategoryOfDrugOptions.first),
         facilityType: _getFacilityType(selectedFacilityType.value),
         certStatus: _getCertStatus(selectedCertificationStatus.value),
         recommendedforGPP: _getRecommendedForGpp(recommendedForGpp.value),
@@ -350,6 +357,7 @@ class GppController extends GetxController {
     selectedCategoryOfFacility.value = '';
     selectedLicensedStatus.value = '';
     selectedCategoryOfDrugs.value = '';
+    selectedCategoryOfDrugOptions.clear();
     selectedFacilityType.value = '';
     selectedCertificationStatus.value = '';
     recommendedForGpp.value = '';
@@ -405,6 +413,8 @@ class GppController extends GetxController {
       case "Retail Pharmacy - Vet":
         return 4;
       case "Drug Shop":
+      case "Drug Shop – Human":
+      case "Drug Shop – Vet":
         return 5;
       case "External Stores":
         return 6;

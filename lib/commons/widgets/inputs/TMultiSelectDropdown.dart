@@ -34,23 +34,26 @@ class TMultiSelectDropdown extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Tcolors.grey),
             ),
-            child: MultiSelectDialogField<String>(
-              items: items.map((e) => MultiSelectItem(e, e)).toList(),
-              title: Text("Select $label"),
-              selectedColor: Tcolors.primary,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              buttonIcon: const Icon(Icons.arrow_drop_down),
-              buttonText: Text(
-                "Select $label",
-                style: const TextStyle(color: Colors.black87, fontSize: 16),
-              ),
-              onConfirm: (results) {
-                selectedItems.assignAll(results);
-              },
-              initialValue: selectedItems.toList(),
-            ),
+            child: Obx(() => MultiSelectDialogField<String>(
+                  items: items.map((e) => MultiSelectItem(e, e)).toList(),
+                  title: Text("Select $label"),
+                  selectedColor: Tcolors.primary,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  buttonIcon: const Icon(Icons.arrow_drop_down),
+                  buttonText: Text(
+                    selectedItems.isEmpty
+                        ? "Select $label"
+                        : selectedItems.join(', '),
+                    style:
+                        const TextStyle(color: Colors.black87, fontSize: 16),
+                  ),
+                  onConfirm: (results) {
+                    selectedItems.assignAll(results);
+                  },
+                  initialValue: selectedItems.toList(),
+                )),
           ),
         ],
       ),

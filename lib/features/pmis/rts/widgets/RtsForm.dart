@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pmis/commons/widgets/inputs/TSearchableDistrictField.dart';
 import 'package:get/get.dart';
 import 'package:pmis/features/pmis/rts/controllers/RtsController.dart';
 import 'package:pmis/utils/constants/colors.dart';
@@ -260,6 +261,13 @@ class RtsForm extends StatelessWidget {
     void Function(String?)? onChanged,
     bool enabled = true,
   }) {
+    if (label == 'District') {
+      return TSearchableDistrictField(
+          items: items,
+          selectedItem: selectedItem,
+          prefixIcon: prefixIcon,
+          validator: validator);
+    }
     final dark = THelperFunctions.isDarkMode(Get.context!);
 
     return Obx(() => DropdownButtonFormField<String>(

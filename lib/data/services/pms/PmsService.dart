@@ -183,6 +183,10 @@ class PmsService {
     apiData['qualificationId'] = data['qualificationId'] ??
         QualificationController.instance
             .idForName(data['qualifications']?.toString() ?? '');
+    apiData['qualificationOther'] = data['qualificationOther'] ??
+        (data['qualifications']?.toString().trim().toLowerCase() == 'other'
+            ? data['qualifications']?.toString().trim() ?? ''
+            : '');
 
     apiData['categoryOfpremises'] = _asInt(data['categoryOfpremises']) ??
         _getCategoryOfPremises(data['categoryOfFacility']?.toString() ?? '');
@@ -246,6 +250,7 @@ class PmsService {
         data['complaint_Product'] ?? data['productComplaintInvestigated'] ?? '';
     apiData['other_Activity'] =
         data['other_Activity'] ?? data['specifyActivity'] ?? '';
+    apiData['comments'] = data['comments'] ?? data['comment'] ?? '';
 
     return apiData;
   }
@@ -321,6 +326,10 @@ class PmsService {
             headers: {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
+              // The API can use this to make a retry idempotent. Older API
+              // deployments safely ignore the header.
+              if (pmsData['_submissionId']?.toString().isNotEmpty ?? false)
+                'Idempotency-Key': pmsData['_submissionId'].toString(),
             },
             body: jsonEncode(apiData),
           )

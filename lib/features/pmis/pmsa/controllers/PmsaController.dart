@@ -32,6 +32,7 @@ class PmsaController extends GetxController {
   var activities = <PmsModel>[].obs;
   var filteredActivities = <PmsModel>[].obs;
   final repository = Get.find<PmsaRepository>();
+  final isSubmitting = false.obs;
 
   // Search and filter variables
   var searchQuery = ''.obs;
@@ -236,6 +237,8 @@ class PmsaController extends GetxController {
 
   /// Validate and create a new PMSA activity.
   Future<void> createNewActivity(BuildContext context) async {
+    if (isSubmitting.value) return;
+    isSubmitting.value = true;
     try {
       if (!formKey.currentState!.validate()) {
         Loaders.errorSnackbar(
@@ -356,8 +359,12 @@ class PmsaController extends GetxController {
         facilityPersonType: _getPersonType(personFoundAtFacility.value),
         personName: nameController.text,
         contact: contactController.text,
-        qualifications: selectedQualification.value,
-        qualificationId: selectedQualificationId.value,
+        qualifications: selectedQualification.value == 'Other'
+            ? qualificationsController.text.trim()
+            : selectedQualification.value,
+        qualificationId: selectedQualification.value == 'Other'
+            ? null
+            : selectedQualificationId.value,
         categoryOfpremises:
             _getCategoryOfPremises(selectedCategoryOfFacility.value),
         otherCategoryPremise:
@@ -389,6 +396,8 @@ class PmsaController extends GetxController {
       // Check connectivity status.
       bool online = await NetworkManager.instance.isconnected();
       var activityData = newActivity.toJson();
+      activityData['_submissionId'] =
+          'pmsa-${DateTime.now().microsecondsSinceEpoch}';
 
       if (online) {
         try {
@@ -420,6 +429,8 @@ class PmsaController extends GetxController {
       }
     } catch (e) {
       Loaders.errorSnackbar(title: "Error", message: e.toString());
+    } finally {
+      isSubmitting.value = false;
     }
   }
 
@@ -511,6 +522,8 @@ class PmsaController extends GetxController {
       case "Retail Pharmacy - Vet":
         return 4;
       case "Drug Shop":
+      case "Drug Shop – Human":
+      case "Drug Shop – Vet":
         return 5;
       case "External Stores":
         return 6;
